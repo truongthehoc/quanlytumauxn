@@ -149,38 +149,67 @@ let schedulerInterval = null;
 function startAutoBackupScheduler() {
   if (schedulerInterval) clearInterval(schedulerInterval);
 
-  // Check every 5 minutes if an auto-backup is due
+  // Check every 1 minute if an auto-backup is due
   const checkAndRunAutoBackup = async () => {
     try {
       const pool = getPool();
       const [cfgRows] = await pool.query(
-        `SELECT config_key, config_value FROM system_config WHERE config_key IN ('auto_backup_enabled', 'auto_backup_interval_hours', 'auto_backup_max_files')`
+        `SELECT config_key, config_value FROM system_config WHERE config_key IN ('auto_backup_enabled', 'auto_backup_time', 'auto_backup_interval_hours', 'auto_backup_max_files')`
       );
       const cfg = {};
       for (const r of cfgRows) cfg[r.config_key] = r.config_value;
 
       if (cfg.auto_backup_enabled !== 'true') return;
 
+      const targetTime = cfg.auto_backup_time || '23:00';
+      const [tHourStr, tMinStr] = (targetTime || '23:00').split(':');
+      const targetHour = parseInt(tHourStr, 10) || 0;
+      const targetMin = parseInt(tMinStr, 10) || 0;
+      const targetTotalMinutes = targetHour * 60 + targetMin;
+
       const intervalHours = Math.max(1, parseFloat(cfg.auto_backup_interval_hours || '24') || 24);
+      const maxFiles = Math.max(1, parseInt(cfg.auto_backup_max_files || '3', 10) || 3);
+
       const [lastAuto] = await pool.query(
         `SELECT created_at FROM backups WHERE backup_type = 'AUTO' ORDER BY created_at DESC LIMIT 1`
       );
 
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
       let shouldRun = false;
+      let runReason = '';
+
       if (lastAuto.length === 0) {
-        shouldRun = true;
-      } else {
-        const lastTime = new Date(lastAuto[0].created_at).getTime();
-        const diffHours = (Date.now() - lastTime) / (1000 * 60 * 60);
-        if (diffHours >= intervalHours) {
+        // Chưa từng có bản sao lưu tự động -> Chạy nếu đã đến hoặc qua khung giờ hẹn hôm nay
+        if (currentMinutes >= targetTotalMinutes) {
           shouldRun = true;
+          runReason = `Sao lưu tự động theo lịch (${targetTime} hàng ngày)`;
+        }
+      } else {
+        const lastDate = new Date(lastAuto[0].created_at);
+        const lastDateStr = `${lastDate.getFullYear()}-${pad(lastDate.getMonth() + 1)}-${pad(lastDate.getDate())}`;
+        const diffHours = (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60);
+
+        // Trường hợp 1: Hôm nay chưa chạy bản tự động nào VÀ hiện tại đã đến hoặc qua khung giờ hẹn
+        if (lastDateStr !== todayStr && currentMinutes >= targetTotalMinutes) {
+          shouldRun = true;
+          runReason = `Sao lưu tự động định kỳ hàng ngày lúc ${targetTime}`;
+        }
+        // Trường hợp 2: Khoảng cách từ lần sao lưu tự động trước đó đã vượt quá intervalHours
+        else if (diffHours >= intervalHours) {
+          shouldRun = true;
+          runReason = `Sao lưu tự động bù chu kỳ ${intervalHours} giờ`;
         }
       }
 
       if (shouldRun) {
+        console.log(`[AutoBackup] Bắt đầu tự động sao lưu: ${runReason}`);
         await createBackup({
           backupType: 'AUTO',
-          note: `Sao lưu tự động định kỳ (${intervalHours} giờ/lần - Giữ tối đa ${cfg.auto_backup_max_files || 3} bản)`,
+          note: `${runReason} (Lưu tối đa ${maxFiles} bản)`,
           createdBy: 'Hệ thống (Auto)',
         });
       }
@@ -191,7 +220,7 @@ function startAutoBackupScheduler() {
 
   // Run initial check after 5 seconds
   setTimeout(checkAndRunAutoBackup, 5000);
-  schedulerInterval = setInterval(checkAndRunAutoBackup, 5 * 60 * 1000);
+  schedulerInterval = setInterval(checkAndRunAutoBackup, 60 * 1000);
 }
 
 module.exports = {

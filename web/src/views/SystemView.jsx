@@ -749,39 +749,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
       {/* TAB 2: THÔNG TIN HỆ THỐNG (Tên phần mềm, phiên bản, người phát triển) */}
       {tab === 'INFO' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#190072] to-[#C5299B] text-white rounded-2xl p-6 shadow-lg flex flex-col justify-between">
-            <div>
-              <span className="px-3 py-1 rounded-full bg-white/15 text-xs font-normal ">
-                Thông tin bản quyền & Hệ thống
-              </span>
-              <h2 className="text-2xl font-normal mt-4">
-                {configForm.app_name || 'Hệ thống Quản lý Tủ máu Xét nghiệm'}
-              </h2>
-              <p className="text-sm text-red-100/90 mt-2 leading-relaxed">
-                {configForm.app_description}
-              </p>
-
-              <div className="mt-6 space-y-3 bg-black/25 p-4 rounded-xl border border-white/10 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-red-200">Phiên bản:</span>
-                  <span className="font-normal">v{configForm.app_version || '2.0.0'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-200">Người phát triển:</span>
-                  <span className="font-normal">{configForm.app_developer}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-200">Cơ sở dữ liệu:</span>
-                  <span className="font-normal">MySQL (blood_bank)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-red-200">Đơn vị sử dụng:</span>
-                  <span className="font-normal">{configForm.unit_name}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          {/* Cột trái: Cập nhật Thông tin Phần mềm */}
           <form
             onSubmit={handleSaveConfig}
             className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
@@ -800,7 +768,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   onChange={(e) =>
                     setConfigForm({ ...configForm, app_name: e.target.value })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
                   required
                 />
               </div>
@@ -814,7 +782,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   onChange={(e) =>
                     setConfigForm({ ...configForm, app_short_name: e.target.value })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
                   required
                 />
               </div>
@@ -830,7 +798,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   onChange={(e) =>
                     setConfigForm({ ...configForm, app_version: e.target.value })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-normal bg-yellow-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
                   required
                 />
               </div>
@@ -844,13 +812,13 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   onChange={(e) =>
                     setConfigForm({ ...configForm, app_developer: e.target.value })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
                   required
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-normal  text-slate-600 mb-1">
+              <label className="block text-xs font-normal text-slate-600 mb-1">
                 Mô tả hệ thống
               </label>
               <textarea
@@ -859,19 +827,54 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 onChange={(e) =>
                   setConfigForm({ ...configForm, app_description: e.target.value })
                 }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
               />
             </div>
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-normal"
+                disabled={savingConfig}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-normal disabled:opacity-50 transition"
               >
                 <Save className="w-4 h-4" />
-                Lưu thông tin phần mềm
+                {savingConfig ? 'Đang lưu...' : 'Lưu thông tin phần mềm'}
               </button>
             </div>
           </form>
+
+          {/* Cột phải: Thông tin bản quyền & Hệ thống */}
+          <div className="lg:col-span-5 bg-gradient-to-br from-[#190072] to-[#C5299B] text-white rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+            <div>
+              <span className="px-3 py-1 rounded-full bg-white/15 text-xs font-normal">
+                Thông tin bản quyền & Hệ thống
+              </span>
+              <h2 className="text-2xl font-normal mt-4">
+                {configForm.app_name || 'Hệ thống Quản lý Tủ máu Xét nghiệm'}
+              </h2>
+              <p className="text-sm text-red-100/90 mt-2 leading-relaxed">
+                {configForm.app_description}
+              </p>
+
+              <div className="mt-6 space-y-3 bg-black/25 p-4 rounded-xl border border-white/10 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-red-200">Phiên bản:</span>
+                  <span className="font-normal">v{configForm.app_version || '2.0.1'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-200">Người phát triển:</span>
+                  <span className="font-normal">{configForm.app_developer}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-200">Cơ sở dữ liệu:</span>
+                  <span className="font-normal">MySQL (blood_bank)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-200">Đơn vị sử dụng:</span>
+                  <span className="font-normal">{configForm.unit_name || 'BỆNH VIỆN THUẬN MỸ TDM'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1158,80 +1161,149 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
       {tab === 'BACKUP' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Cấu hình tự động sao lưu (Giữ tối đa 3 phiên bản) */}
+            {/* Cấu hình tự động sao lưu */}
             <form
               onSubmit={handleSaveConfig}
               className="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
             >
-              <h3 className="section-title text-sm font-bold text-[#190072] border-b border-slate-200 pb-3">
-                Cài đặt Tự động Sao lưu Hệ thống
-              </h3>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={configForm.auto_backup_enabled === 'true'}
-                  onChange={(e) =>
-                    setConfigForm({
-                      ...configForm,
-                      auto_backup_enabled: e.target.checked ? 'true' : 'false',
-                    })
-                  }
-                  className="w-4 h-4 rounded text-[#C5299B]"
-                />
-                <span className="text-sm font-normal text-slate-800">
-                  Bật tự động sao lưu cơ sở dữ liệu theo định kỳ
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div>
+                  <h3 className="section-title text-sm font-bold text-[#190072]">
+                    Cài đặt Tự động Sao lưu Hệ thống
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Tự động kết xuất CSDL định kỳ và luân phiên dọn dẹp các bản sao lưu cũ
+                  </p>
+                </div>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${
+                  configForm.auto_backup_enabled === 'true'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-slate-100 text-slate-500 border border-slate-200'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    configForm.auto_backup_enabled === 'true' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                  }`} />
+                  {configForm.auto_backup_enabled === 'true' ? 'Đang kích hoạt' : 'Đang tạm dừng'}
                 </span>
-              </label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-normal  text-slate-600 mb-1">
-                    Chu kỳ sao lưu (Giờ / lần)
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={720}
-                    value={configForm.auto_backup_interval_hours || '24'}
-                    onChange={(e) =>
-                      setConfigForm({
-                        ...configForm,
-                        auto_backup_interval_hours: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-normal"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-normal  text-slate-600 mb-1">
-                    Số phiên bản tự động giữ tối đa
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={configForm.auto_backup_max_files || '3'}
-                    onChange={(e) =>
-                      setConfigForm({
-                        ...configForm,
-                        auto_backup_max_files: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-normal"
-                  />
-                  <span className="text-[11px] text-slate-500">
-                    Mặc định: Giữ tối đa 3 bản tự động mới nhất
-                  </span>
-                </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={configForm.auto_backup_enabled === 'true'}
+                    onChange={(e) =>
+                      setConfigForm({
+                        ...configForm,
+                        auto_backup_enabled: e.target.checked ? 'true' : 'false',
+                      })
+                    }
+                    className="w-4 h-4 rounded text-[#C5299B] focus:ring-[#C5299B]"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-slate-800">
+                      Bật tự động sao lưu cơ sở dữ liệu định kỳ
+                    </span>
+                    <p className="text-[11px] text-slate-500">
+                      Kích hoạt tiến trình sao lưu chạy ngầm tự động theo thời gian đã cài đặt
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Khung cấu hình thời gian & thông số */}
+              <div className={`space-y-3.5 transition-all ${configForm.auto_backup_enabled === 'true' ? 'opacity-100' : 'opacity-40 pointer-events-none select-none'}`}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  {/* Cột 1: Thời gian tự động sao lưu */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-[#C5299B]" />
+                      Thời gian sao lưu
+                    </label>
+                    <input
+                      type="time"
+                      value={configForm.auto_backup_time || '23:00'}
+                      onChange={(e) =>
+                        setConfigForm({
+                          ...configForm,
+                          auto_backup_time: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 bg-amber-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                      required={configForm.auto_backup_enabled === 'true'}
+                    />
+                    <span className="text-[11px] text-slate-500 block mt-1">
+                      Mỗi ngày (VD: 23:00)
+                    </span>
+                  </div>
+
+                  {/* Cột 2: Chu kỳ sao lưu dự phòng */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Chu kỳ (Giờ / lần)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={720}
+                      value={configForm.auto_backup_interval_hours || '24'}
+                      onChange={(e) =>
+                        setConfigForm({
+                          ...configForm,
+                          auto_backup_interval_hours: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    />
+                    <span className="text-[11px] text-slate-500 block mt-1">
+                      Mặc định: 24 giờ
+                    </span>
+                  </div>
+
+                  {/* Cột 3: Số phiên bản tự động giữ tối đa */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Số bản giữ tối đa
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={configForm.auto_backup_max_files || '3'}
+                      onChange={(e) =>
+                        setConfigForm({
+                          ...configForm,
+                          auto_backup_max_files: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    />
+                    <span className="text-[11px] text-slate-500 block mt-1">
+                      Mặc định: 3 bản
+                    </span>
+                  </div>
+                </div>
+
+                {configForm.auto_backup_enabled === 'true' && (
+                  <div className="p-3 bg-purple-50/70 rounded-xl border border-purple-100 flex items-start gap-2.5 text-xs text-purple-900">
+                    <Clock className="w-4 h-4 text-[#C5299B] shrink-0 mt-0.5" />
+                    <div>
+                      <span>
+                        Hệ thống sẽ tự động thực hiện sao lưu CSDL lúc <strong>{configForm.auto_backup_time || '23:00'}</strong> mỗi ngày. Tự động luân phiên dọn dẹp và giữ lại tối đa <strong>{configForm.auto_backup_max_files || 3} bản</strong> mới nhất.
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-2">
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-normal"
+                  disabled={savingConfig}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-normal disabled:opacity-50 transition"
                 >
                   <Save className="w-4 h-4" />
-                  Lưu cài đặt tự động sao lưu
+                  {savingConfig ? 'Đang lưu...' : 'Lưu cài đặt tự động sao lưu'}
                 </button>
               </div>
             </form>
