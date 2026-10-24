@@ -70,6 +70,74 @@ router.get('/all', authenticate, async (req, res) => {
   }
 });
 
+// Cấu hình các mốc cảnh báo Hạn sử dụng (HSD)
+router.get('/expiry-milestones', authenticate, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      `SELECT config_key, config_value FROM system_config WHERE config_key IN ('expiry_warning_milestones', 'expiry_warning_days')`
+    );
+    const msRow = rows.find((r) => r.config_key === 'expiry_warning_milestones');
+    const daysRow = rows.find((r) => r.config_key === 'expiry_warning_days');
+    res.json({
+      expiry_warning_milestones: msRow?.config_value || '',
+      expiry_warning_days: daysRow?.config_value || '7',
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/expiry-milestones', authenticate, async (req, res) => {
+  try {
+    const user = req.user;
+    const canManage =
+      user.role_code === 'ADMIN' ||
+      (Array.isArray(user.permissions) &&
+        (user.permissions.includes('categories.manage') || user.permissions.includes('system.config')));
+
+    if (!canManage) {
+      return res.status(403).json({ error: 'Bạn không có quyền cập nhật cấu hình cảnh báo' });
+    }
+
+    const { milestones } = req.body;
+    if (!milestones || !Array.isArray(milestones)) {
+      return res.status(400).json({ error: 'Dữ liệu mốc cảnh báo không hợp lệ' });
+    }
+
+    const warningList = milestones.filter(
+      (m) => !m.isExpired && !m.isSafe && Number(m.days) > 0
+    );
+    const computedWarningDays = warningList.length
+      ? Math.max(...warningList.map((m) => Number(m.days)))
+      : 7;
+
+    const pool = getPool();
+    const strMilestones = JSON.stringify(milestones);
+    const strDays = String(computedWarningDays);
+
+    await pool.query(
+      `INSERT INTO system_config (config_key, config_value) VALUES ('expiry_warning_milestones', ?)
+       ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
+      [strMilestones]
+    );
+
+    await pool.query(
+      `INSERT INTO system_config (config_key, config_value) VALUES ('expiry_warning_days', ?)
+       ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
+      [strDays]
+    );
+
+    res.json({
+      message: 'Cập nhật cấu hình cảnh báo HSD thành công',
+      expiry_warning_days: strDays,
+      expiry_warning_milestones: strMilestones,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ==================== 1. ĐƠN VỊ ĐỐI TÁC (PARTNERS) ====================
 router.get('/partners', authenticate, async (req, res) => {
   try {

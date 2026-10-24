@@ -219,6 +219,13 @@ export default function App() {
           desc: 'Quản lý đơn vị tính chế phẩm máu',
           icon: Scale,
         },
+        {
+          key: 'cat:ALERTS',
+          subKey: 'ALERTS',
+          label: 'Cấu hình cảnh báo',
+          desc: 'Cấu hình các mốc cảnh báo Hạn sử dụng (HSD) & Màu sắc',
+          icon: AlertTriangle,
+        },
       ]
     : [];
 
@@ -227,7 +234,7 @@ export default function App() {
       key: 'sys:CONFIG',
       subKey: 'CONFIG',
       label: 'Cấu hình hệ thống',
-      desc: 'Tên đơn vị, Tên khoa, Logo và cảnh báo hạn sử dụng',
+      desc: 'Tên đơn vị, Tên khoa, Địa chỉ, SĐT và Logo',
       icon: Settings,
       show: hasPermission('system.config'),
     },

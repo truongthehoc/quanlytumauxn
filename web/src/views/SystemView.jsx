@@ -23,11 +23,6 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
 import ToggleSwitch from '../components/ToggleSwitch';
-import {
-  DEFAULT_EXPIRY_MILESTONES,
-  parseExpiryMilestones,
-  COLOR_PRESETS,
-} from '../utils/expiryHelper';
 
 export default function SystemView({ activeSubTab = 'CONFIG' }) {
   const { systemConfig, refreshSystemInfo, hasPermission } = useAuth();
@@ -92,72 +87,9 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
   const [backupsPage, setBackupsPage] = useState(1);
   const [backupsPageSize, setBackupsPageSize] = useState(10);
 
-  // Expiry Warning Milestones state
-  const [milestones, setMilestones] = useState(() =>
-    parseExpiryMilestones(systemConfig.expiry_warning_milestones)
-  );
-
   useEffect(() => {
     setConfigForm((prev) => ({ ...prev, ...systemConfig }));
-    if (systemConfig.expiry_warning_milestones) {
-      setMilestones(parseExpiryMilestones(systemConfig.expiry_warning_milestones));
-    }
   }, [systemConfig]);
-
-  const handleAddMilestone = () => {
-    const warningList = milestones.filter((m) => !m.isExpired && !m.isSafe);
-    const maxDays = warningList.length
-      ? Math.max(...warningList.map((m) => Number(m.days)))
-      : 7;
-    const newDays = maxDays + 7;
-    const newM = {
-      id: 'm_' + Date.now(),
-      days: newDays,
-      label: `Cảnh báo (<= ${newDays} ngày)`,
-      textColor: '#d97706',
-      bgColor: '#fef3c7',
-      borderColor: '#fde68a',
-    };
-    const safeIdx = milestones.findIndex((m) => m.isSafe);
-    if (safeIdx >= 0) {
-      const updated = [...milestones];
-      updated.splice(safeIdx, 0, newM);
-      setMilestones(updated);
-    } else {
-      setMilestones([...milestones, newM]);
-    }
-  };
-
-  const handleUpdateMilestone = (idx, field, value) => {
-    setMilestones((prev) =>
-      prev.map((m, i) => (i === idx ? { ...m, [field]: value } : m))
-    );
-  };
-
-  const handleApplyPresetColor = (idx, preset) => {
-    setMilestones((prev) =>
-      prev.map((m, i) =>
-        i === idx
-          ? {
-              ...m,
-              textColor: preset.textColor,
-              bgColor: preset.bgColor,
-              borderColor: preset.borderColor,
-            }
-          : m
-      )
-    );
-  };
-
-  const handleRemoveMilestone = (idx) => {
-    setMilestones((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleResetMilestones = () => {
-    if (window.confirm('Khôi phục các mốc cảnh báo hạn sử dụng về mặc định?')) {
-      setMilestones(DEFAULT_EXPIRY_MILESTONES);
-    }
-  };
 
   const loadSystemData = useCallback(async () => {
     try {
@@ -292,18 +224,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
     e.preventDefault();
     try {
       setSavingConfig(true);
-      const warningMilestones = milestones.filter(
-        (m) => !m.isExpired && !m.isSafe && Number(m.days) > 0
-      );
-      const computedWarningDays = warningMilestones.length
-        ? Math.max(...warningMilestones.map((m) => Number(m.days)))
-        : 7;
-
-      await api.put('/system/config', {
-        ...configForm,
-        expiry_warning_days: String(computedWarningDays),
-        expiry_warning_milestones: JSON.stringify(milestones),
-      });
+      await api.put('/system/config', configForm);
       await refreshSystemInfo();
       showNotice('Đã lưu cấu hình hệ thống & logo thành công!');
     } catch (err) {
@@ -721,197 +642,6 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
             </div>
           </div>
 
-          {/* Cấu hình các mốc cảnh báo Hạn sử dụng (HSD) & Màu sắc */}
-          <div className="pt-5 border-t border-slate-200 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h4 className="section-title text-sm font-bold text-[#190072] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#C5299B]" />
-                  Cấu hình các mốc cảnh báo Hạn sử dụng (HSD) & Màu sắc
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Tùy chỉnh số ngày còn lại của từng mốc, tên nhãn và màu sắc nhận diện hiển thị trên toàn hệ thống.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleResetMilestones}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs transition"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  Mặc định
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAddMilestone}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-normal shadow-sm transition"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Thêm mốc cảnh báo
-                </button>
-              </div>
-            </div>
-
-            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] table-fixed text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
-                      <th className="py-2.5 px-3 text-left w-[22%]">Mốc thời gian / Điều kiện</th>
-                      <th className="py-2.5 px-3 text-left w-[24%]">Tên nhãn cảnh báo</th>
-                      <th className="py-2.5 px-3 text-left w-[24%]">Chọn màu nhanh</th>
-                      <th className="py-2.5 px-3 text-center w-[13%]">Mã màu (Chữ / Nền)</th>
-                      <th className="py-2.5 px-3 text-center w-[12%]">Xem trước</th>
-                      <th className="py-2.5 px-2 text-center w-[5%]"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {milestones.map((m, idx) => (
-                      <tr key={m.id || idx} className="hover:bg-slate-50/70">
-                        {/* 1. Điều kiện mốc ngày */}
-                        <td className="py-3 px-3">
-                          {m.isExpired ? (
-                            <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
-                              Quá hạn (&lt; 0 ngày)
-                            </span>
-                          ) : m.isSafe ? (
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                              Còn hạn an toàn (Mặc định)
-                            </span>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-xs text-slate-700">
-                              <span>Còn &le;</span>
-                              <input
-                                type="number"
-                                min={1}
-                                max={365}
-                                value={m.days}
-                                onChange={(e) =>
-                                  handleUpdateMilestone(idx, 'days', parseInt(e.target.value, 10) || 1)
-                                }
-                                className="w-16 px-2 py-1 rounded-lg border border-slate-300 text-center text-xs font-bold bg-white outline-none"
-                              />
-                              <span>ngày</span>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* 2. Tên nhãn */}
-                        <td className="py-3 px-3">
-                          <input
-                            type="text"
-                            value={m.label || ''}
-                            onChange={(e) => handleUpdateMilestone(idx, 'label', e.target.value)}
-                            placeholder="Nhập tên nhãn..."
-                            className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white outline-none"
-                          />
-                        </td>
-
-                        {/* 3. Chọn màu nhanh (Presets) */}
-                        <td className="py-3 px-3">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {COLOR_PRESETS.map((p) => {
-                              const isActive = m.textColor === p.textColor && m.bgColor === p.bgColor;
-                              return (
-                                <button
-                                  key={p.name}
-                                  type="button"
-                                  onClick={() => handleApplyPresetColor(idx, p)}
-                                  title={p.name}
-                                  style={{ backgroundColor: p.textColor }}
-                                  className={`w-5 h-5 rounded-full transition transform hover:scale-110 shrink-0 ${
-                                    isActive ? 'ring-2 ring-offset-1 ring-slate-700 scale-110' : 'opacity-85'
-                                  }`}
-                                />
-                              );
-                            })}
-                          </div>
-                        </td>
-
-                        {/* 4. Tùy biến mã màu */}
-                        <td className="py-3 px-3 text-center">
-                          <div className="inline-flex items-center gap-2">
-                            <label className="flex items-center gap-1 text-[11px] text-slate-500 cursor-pointer" title="Màu chữ">
-                              <span>Chữ:</span>
-                              <input
-                                type="color"
-                                value={m.textColor || '#000000'}
-                                onChange={(e) => handleUpdateMilestone(idx, 'textColor', e.target.value)}
-                                className="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0"
-                              />
-                            </label>
-                            <label className="flex items-center gap-1 text-[11px] text-slate-500 cursor-pointer" title="Màu nền">
-                              <span>Nền:</span>
-                              <input
-                                type="color"
-                                value={m.bgColor || '#ffffff'}
-                                onChange={(e) => {
-                                  handleUpdateMilestone(idx, 'bgColor', e.target.value);
-                                  handleUpdateMilestone(idx, 'borderColor', e.target.value);
-                                }}
-                                className="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0"
-                              />
-                            </label>
-                          </div>
-                        </td>
-
-                        {/* 5. Xem trước (Preview) */}
-                        <td className="py-3 px-3 text-center">
-                          <span
-                            style={{
-                              backgroundColor: m.bgColor,
-                              color: m.textColor,
-                              borderColor: m.borderColor || m.bgColor,
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border shadow-2xs"
-                          >
-                            {m.isExpired ? (
-                              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                            ) : m.isSafe ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                            ) : (
-                              <Clock className="w-3.5 h-3.5 shrink-0" />
-                            )}
-                            <span>{m.isExpired ? 'Quá hạn 1 ngày' : `Còn ${m.days === 99999 ? 45 : m.days} ngày`}</span>
-                          </span>
-                        </td>
-
-                        {/* 6. Nút xóa (chỉ cho các mốc cảnh báo thêm) */}
-                        <td className="py-3 px-2 text-center">
-                          {!m.isExpired && !m.isSafe && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveMilestone(idx)}
-                              title="Xóa mốc này"
-                              className="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={savingConfig || logoOptimizing}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-bold shadow transition active:scale-95 disabled:opacity-60"
-            >
-              {savingConfig ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              <span>Lưu cấu hình hệ thống</span>
-            </button>
-          </div>
         </form>
       )}
 
