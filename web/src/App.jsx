@@ -28,9 +28,11 @@ import {
   ShieldAlert,
   ClipboardCheck,
   AlertTriangle,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import LoginView from './views/LoginView';
+import DashboardView from './views/DashboardView';
 import InventoryView from './views/InventoryView';
 import ImportView from './views/ImportView';
 import ExportView from './views/ExportView';
@@ -45,7 +47,7 @@ import GlobalSearch from './components/GlobalSearch';
 export default function App() {
   const { user, loading, systemConfig, logout, hasPermission, pendingSummary } = useAuth();
   const [activePage, setActivePage] = useState(() => {
-    return localStorage.getItem('bloodbank_active_page') || 'inventory';
+    return localStorage.getItem('bloodbank_active_page') || 'dashboard';
   });
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem('bloodbank_sidebar_collapsed') === 'true';
@@ -138,6 +140,13 @@ export default function App() {
   const canApproveAny = canApproveImport || canApproveExport;
 
   const mainNavItems = [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      desc: 'Bảng điều khiển & thống kê nhanh',
+      icon: LayoutDashboard,
+      show: true,
+    },
     {
       key: 'inventory',
       label: 'Kho chế phẩm',
@@ -746,6 +755,9 @@ export default function App() {
         {/* Scrollable Full-Width Page Content */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full">
           <div className="w-full">
+            {activePage === 'dashboard' && (
+              <DashboardView onNavigate={handleSelectMainPage} />
+            )}
             {activePage === 'inventory' && (
               <InventoryView
                 onNavigate={handleSelectMainPage}

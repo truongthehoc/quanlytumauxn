@@ -11,6 +11,7 @@ const transactionRoutes = require('./routes/transactions');
 const reportRoutes = require('./routes/reports');
 const auditRoutes = require('./routes/audits');
 const systemRoutes = require('./routes/system');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 5005;
@@ -30,6 +31,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/audits', auditRoutes);
 app.use('/api/system', systemRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 async function startServer() {
   try {
