@@ -30,7 +30,12 @@ import {
   AlertTriangle,
   LayoutDashboard,
   ScrollText,
+  KeyRound,
+  Eye,
+  EyeOff,
+  CheckCircle2,
 } from 'lucide-react';
+import api from './api';
 import { useAuth } from './context/AuthContext';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
@@ -63,6 +68,57 @@ export default function App() {
   }); // null | 'categories' | 'system'
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [changePwdOpen, setChangePwdOpen] = useState(false);
+  const [pwdForm, setPwdForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showPwd, setShowPwd] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwdError('');
+    setPwdSuccess('');
+
+    if (!pwdForm.currentPassword) {
+      setPwdError('Vui lòng nhập mật khẩu hiện tại');
+      return;
+    }
+    if (!pwdForm.newPassword || pwdForm.newPassword.length < 4) {
+      setPwdError('Mật khẩu mới phải có ít nhất 4 ký tự');
+      return;
+    }
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      setPwdError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    try {
+      setPwdLoading(true);
+      await api.post('/auth/change-password', {
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword,
+      });
+      setPwdSuccess('Đổi mật khẩu thành công!');
+      setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setTimeout(() => {
+        setChangePwdOpen(false);
+        setPwdSuccess('');
+      }, 1500);
+    } catch (err) {
+      setPwdError(err.response?.data?.error || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.');
+    } finally {
+      setPwdLoading(false);
+    }
+  };
   const [now, setNow] = useState(new Date());
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
@@ -761,7 +817,23 @@ export default function App() {
                       {user.role_name}
                     </div>
                   </div>
-                  <div className="p-1.5">
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        setPwdError('');
+                        setPwdSuccess('');
+                        setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                        setShowPwd({ current: false, new: false, confirm: false });
+                        setChangePwdOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                    >
+                      <KeyRound className="w-4 h-4 text-[#C5299B]" />
+                      <span>Thay đổi mật khẩu</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -825,6 +897,136 @@ export default function App() {
           </div>
         </footer>
       </div>
+
+      {/* Modal Thay đổi mật khẩu người dùng */}
+      {changePwdOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-[#190072]/5 to-[#C5299B]/5 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#C5299B]/10 flex items-center justify-center text-[#C5299B]">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#190072]">Thay đổi Mật khẩu</h3>
+                  <p className="text-[11px] text-slate-500">Tài khoản: {user.username} ({user.full_name})</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChangePwdOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+              {pwdError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                  <span>{pwdError}</span>
+                </div>
+              )}
+
+              {pwdSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{pwdSuccess}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Mật khẩu hiện tại <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwd.current ? 'text' : 'password'}
+                    value={pwdForm.currentPassword}
+                    onChange={(e) => setPwdForm({ ...pwdForm, currentPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    placeholder="Nhập mật khẩu đang dùng..."
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd({ ...showPwd, current: !showPwd.current })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPwd.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Mật khẩu mới <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwd.new ? 'text' : 'password'}
+                    value={pwdForm.newPassword}
+                    onChange={(e) => setPwdForm({ ...pwdForm, newPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    placeholder="Ít nhất 4 ký tự..."
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd({ ...showPwd, new: !showPwd.new })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPwd.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Xác nhận mật khẩu mới <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPwd.confirm ? 'text' : 'password'}
+                    value={pwdForm.confirmPassword}
+                    onChange={(e) => setPwdForm({ ...pwdForm, confirmPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    placeholder="Nhập lại mật khẩu mới..."
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd({ ...showPwd, confirm: !showPwd.confirm })}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPwd.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setChangePwdOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={pwdLoading}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition"
+                >
+                  {pwdLoading ? 'Đang lưu...' : 'Cập nhật mật khẩu'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

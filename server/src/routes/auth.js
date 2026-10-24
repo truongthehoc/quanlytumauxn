@@ -150,13 +150,41 @@ router.post('/change-password', authenticate, async (req, res) => {
     const [rows] = await pool.query('SELECT password_hash FROM users WHERE id = ?', [
       req.user.id,
     ]);
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Không tìm thấy thông tin tài khoản người dùng' });
+    }
+
     const valid = await bcrypt.compare(currentPassword, rows[0].password_hash);
     if (!valid) {
+      await logActivity({
+        req,
+        userId: req.user.id,
+        username: req.user.username,
+        fullName: req.user.full_name,
+        actionType: 'USER_CHANGE_PASSWORD_FAILED',
+        actionCategory: 'AUTH',
+        actionName: 'Đổi mật khẩu thất bại',
+        description: `Người dùng "${req.user.username}" đổi mật khẩu không thành công (sai mật khẩu hiện tại)`,
+        status: 'FAILED',
+      });
       return res.status(400).json({ error: 'Mật khẩu hiện tại không đúng' });
     }
 
     const hash = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.user.id]);
+
+    await logActivity({
+      req,
+      userId: req.user.id,
+      username: req.user.username,
+      fullName: req.user.full_name,
+      actionType: 'USER_CHANGE_PASSWORD',
+      actionCategory: 'AUTH',
+      actionName: 'Đổi mật khẩu tài khoản',
+      description: `Người dùng "${req.user.full_name}" (${req.user.username}) đã đổi mật khẩu thành công`,
+      status: 'SUCCESS',
+    });
+
     res.json({ message: 'Đổi mật khẩu thành công' });
   } catch (err) {
     res.status(500).json({ error: err.message });
