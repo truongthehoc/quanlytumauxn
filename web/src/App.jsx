@@ -857,8 +857,10 @@ export default function App() {
               {userDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl py-2 z-50">
                   <div className="px-4 py-2.5 border-b border-slate-100">
-                    <div className="text-xs font-semibold text-slate-900">{user.username}</div>
-                    <div className="text-[11px] text-[#C5299B] mt-0.5">
+                    <div className="text-xs font-semibold text-slate-900 leading-snug">
+                      {user.full_name || user.username} <span className="font-normal text-slate-500">({user.username})</span>
+                    </div>
+                    <div className="text-[11px] text-[#C5299B] mt-0.5 font-medium">
                       {user.role_name}
                     </div>
                   </div>
