@@ -582,80 +582,91 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-normal text-slate-600 mb-1">
-                Tên đơn vị (Bệnh viện / Trung tâm Y tế) <span className="text-rose-600">*</span>
-              </label>
-              <input
-                type="text"
-                value={configForm.unit_name || ''}
-                onChange={(e) =>
-                  setConfigForm({ ...configForm, unit_name: e.target.value })
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50"
-                required
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Cột trái: Thông tin đơn vị */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tên đơn vị (Bệnh viện / Trung tâm Y tế) <span className="text-rose-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={configForm.unit_name || ''}
+                    onChange={(e) =>
+                      setConfigForm({ ...configForm, unit_name: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    required
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tên khoa / Bộ phận <span className="text-rose-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={configForm.department_name || ''}
+                    onChange={(e) =>
+                      setConfigForm({ ...configForm, department_name: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                    required
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-normal text-slate-600 mb-1">
+                    Địa chỉ đơn vị
+                  </label>
+                  <input
+                    type="text"
+                    value={configForm.address || ''}
+                    onChange={(e) =>
+                      setConfigForm({ ...configForm, address: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-normal text-slate-600 mb-1">
+                    Số điện thoại liên hệ
+                  </label>
+                  <input
+                    type="text"
+                    value={configForm.phone || ''}
+                    onChange={(e) =>
+                      setConfigForm({ ...configForm, phone: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C5299B]/30"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-normal text-slate-600 mb-1">
-                Tên khoa / Bộ phận <span className="text-rose-600">*</span>
-              </label>
-              <input
-                type="text"
-                value={configForm.department_name || ''}
-                onChange={(e) =>
-                  setConfigForm({ ...configForm, department_name: e.target.value })
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-normal bg-yellow-50"
-                required
-              />
-            </div>
+            {/* Cột phải: Khung riêng cho Logo Đơn vị */}
+            <div className="lg:col-span-5 bg-slate-50/70 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Image className="w-4 h-4 text-[#C5299B]" />
+                    <span className="text-xs font-bold text-slate-800">Khung Logo Đơn vị</span>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                    Tối ưu siêu nhẹ ~20KB
+                  </span>
+                </div>
 
-            <div>
-              <label className="block text-xs font-normal text-slate-600 mb-1">
-                Địa chỉ đơn vị
-              </label>
-              <input
-                type="text"
-                value={configForm.address || ''}
-                onChange={(e) =>
-                  setConfigForm({ ...configForm, address: e.target.value })
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-normal text-slate-600 mb-1">
-                Số điện thoại liên hệ
-              </label>
-              <input
-                type="text"
-                value={configForm.phone || ''}
-                onChange={(e) =>
-                  setConfigForm({ ...configForm, phone: e.target.value })
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
-              />
-            </div>
-
-            {/* Khung Tải & Tối ưu hóa Logo */}
-            <div className="md:col-span-2 p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-2">
-              <label className="block text-xs font-semibold text-slate-700">
-                Logo Đơn vị (Tự động nén tối ưu dung lượng siêu nhẹ ~20KB - tải trang tức thì)
-              </label>
-
-              <div className="flex flex-wrap items-center gap-4">
-                {/* Logo Preview */}
-                <div className="shrink-0">
+                {/* Vùng hiển thị Logo Preview */}
+                <div className="flex flex-col items-center justify-center py-4">
                   {configForm.logo_url ? (
                     <div className="relative group">
                       <img
                         src={configForm.logo_url}
                         alt="Logo Đơn vị"
-                        className="w-16 h-16 rounded-2xl border-2 border-[#C5299B]/30 object-contain bg-white p-1.5 shadow-xs"
+                        className="w-28 h-28 rounded-2xl border-2 border-[#C5299B]/30 object-contain bg-white p-2 shadow-sm"
                       />
                       <button
                         type="button"
@@ -663,82 +674,77 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                           setConfigForm({ ...configForm, logo_url: '' });
                           setLogoStats(null);
                         }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-xs transition"
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow transition"
                         title="Xóa logo này"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-white">
-                      <Image className="w-6 h-6 text-slate-400" />
+                    <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-white">
+                      <Image className="w-9 h-9 text-slate-300 mb-1" />
+                      <span className="text-[11px] text-slate-400 font-medium">Chưa có logo</span>
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Upload Buttons & Status */}
-                <div className="flex-1 min-w-[220px] space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <label
-                      className={`cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                        logoOptimizing
-                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                          : 'bg-[#C5299B] hover:bg-[#a82083] text-white shadow-xs'
-                      }`}
-                    >
-                      {logoOptimizing ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Đang tối ưu ảnh...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>
-                            {configForm.logo_url ? 'Thay đổi ảnh Logo...' : 'Chọn file ảnh Logo...'}
-                          </span>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={logoOptimizing}
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {configForm.logo_url && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setConfigForm({ ...configForm, logo_url: '' });
-                          setLogoStats(null);
-                        }}
-                        className="px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition border border-rose-200"
-                      >
-                        Xóa logo
-                      </button>
+              {/* Tác vụ Upload & Thông tin */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-center gap-2">
+                  <label
+                    className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition ${
+                      logoOptimizing
+                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                        : 'bg-[#C5299B] hover:bg-[#a82083] text-white shadow-xs'
+                    }`}
+                  >
+                    {logoOptimizing ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Đang tối ưu ảnh...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{configForm.logo_url ? 'Thay đổi ảnh Logo...' : 'Chọn file ảnh Logo...'}</span>
+                      </>
                     )}
-                  </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={logoOptimizing}
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                  </label>
 
-                  {logoStats ? (
-                    <div className="text-[11px] text-emerald-700 font-medium flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>
-                        Đã tự động tối ưu hóa: <strong>{logoStats.optimizedSizeKb} KB</strong> ({logoStats.width}×{logoStats.height}px) — Giảm từ {logoStats.originalSizeKb} KB (tiết kiệm {Math.round((1 - logoStats.optimizedSizeKb / logoStats.originalSizeKb) * 100)}%)
-                      </span>
-                    </div>
-                  ) : configForm.logo_url ? (
-                    <div className="text-[11px] text-slate-500">
-                      Logo đang được hiển thị trên thanh menu bên trái, màn hình đăng nhập và phiếu in.
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-slate-400">
-                      Hỗ trợ mọi định dạng ảnh (PNG, JPG, WEBP, SVG). Ảnh sẽ được tự động căn chỉnh và nén kích thước để toàn bộ hệ thống tải mượt nhất.
-                    </div>
+                  {configForm.logo_url && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfigForm({ ...configForm, logo_url: '' });
+                        setLogoStats(null);
+                      }}
+                      className="px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition border border-rose-200"
+                    >
+                      Xóa logo
+                    </button>
                   )}
                 </div>
+
+                {logoStats ? (
+                  <div className="text-[11px] text-emerald-700 font-medium flex items-center justify-center gap-1.5 text-center bg-emerald-50 py-1.5 px-2.5 rounded-lg border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>
+                      Đã tối ưu: <strong>{logoStats.optimizedSizeKb} KB</strong> ({logoStats.width}×{logoStats.height}px) — Giảm {Math.round((1 - logoStats.optimizedSizeKb / logoStats.originalSizeKb) * 100)}%
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                    Tự động đồng bộ làm Favicon trình duyệt, hiển thị trên sidebar, màn hình đăng nhập và các mẫu phiếu in.
+                  </p>
+                )}
               </div>
             </div>
           </div>
