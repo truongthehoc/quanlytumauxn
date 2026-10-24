@@ -106,6 +106,29 @@ export function AuthProvider({ children }) {
     return () => clearInterval(interval);
   }, [user, fetchPendingSummary]);
 
+  // Đồng bộ Logo làm Favicon và tiêu đề trang trình duyệt trong thời gian thực
+  useEffect(() => {
+    if (systemConfig.app_name) {
+      document.title = `${systemConfig.app_name} - ${systemConfig.unit_name || 'BloodBank Lab'}`;
+    }
+
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+
+    if (systemConfig.logo_url && systemConfig.logo_url.trim()) {
+      link.href = systemConfig.logo_url;
+      link.type = 'image/png';
+    } else {
+      const defaultSvgFavicon = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23C5299B"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+      link.href = defaultSvgFavicon;
+      link.type = 'image/svg+xml';
+    }
+  }, [systemConfig.logo_url, systemConfig.app_name, systemConfig.unit_name]);
+
   const login = async (username, password) => {
     const res = await api.post('/auth/login', { username, password });
     localStorage.setItem('blood_bank_token', res.data.token);
