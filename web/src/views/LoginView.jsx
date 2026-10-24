@@ -60,21 +60,8 @@ export default function LoginView() {
         {/* Cột trái: Thông tin Bệnh viện & Các chức năng đặc biệt */}
         <div className="md:col-span-6 bg-[#190072] text-white p-8 flex flex-col justify-between relative">
           <div>
-            {/* Đơn vị & Khoa */}
-            <div className="flex items-center gap-3 mb-6">
-              {systemConfig.logo_url ? (
-                <div className="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm shrink-0 overflow-hidden">
-                  <img
-                    src={systemConfig.logo_url}
-                    alt="Logo"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-sm shrink-0">
-                  <Droplet className="w-6 h-6 text-[#C5299B] fill-[#C5299B]" />
-                </div>
-              )}
+            {/* Đơn vị & Khoa (trái) + Logo không khung (phải) */}
+            <div className="flex items-center justify-between gap-3 mb-6">
               <div className="min-w-0">
                 <p className="text-xs font-medium tracking-wider text-slate-300 uppercase truncate">
                   {systemConfig.unit_name || 'BỆNH VIỆN ĐA KHOA'}
@@ -83,6 +70,15 @@ export default function LoginView() {
                   {systemConfig.department_name || 'KHOA XÉT NGHIỆM - TỦ MÁU'}
                 </h2>
               </div>
+              {systemConfig.logo_url ? (
+                <img
+                  src={systemConfig.logo_url}
+                  alt="Logo"
+                  className="w-12 h-12 object-contain shrink-0"
+                />
+              ) : (
+                <Droplet className="w-8 h-8 text-[#C5299B] fill-[#C5299B] shrink-0" />
+              )}
             </div>
 
             {/* Tên phần mềm & Mô tả */}
