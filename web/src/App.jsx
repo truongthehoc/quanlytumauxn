@@ -473,7 +473,7 @@ export default function App() {
 
           {/* Group 1: Nghiệp vụ (Danh mục lớn gom toàn bộ nghiệp vụ) */}
           {bloodOpsNavItems.length > 0 && (
-            <div className="pt-1.5 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => handleClickParentGroup('operations', bloodOpsNavItems)}
@@ -565,7 +565,7 @@ export default function App() {
 
           {/* Group 2: Quản lý Danh mục */}
           {categoryChildren.length > 0 && (
-            <div>
+            <div className="pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => handleClickParentGroup('categories', categoryChildren)}
@@ -615,7 +615,7 @@ export default function App() {
 
           {/* Group 3: Quản trị Hệ thống */}
           {systemChildren.length > 0 && (
-            <div>
+            <div className="pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => handleClickParentGroup('system', systemChildren)}
