@@ -310,6 +310,42 @@ router.put('/users/:id', authenticate, requirePermission('system.users'), async 
   }
 });
 
+router.put('/users/:id/password', authenticate, requirePermission('system.users'), async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.trim().length < 4) {
+      return res.status(400).json({ error: 'Mật khẩu mới phải có ít nhất 4 ký tự' });
+    }
+
+    const pool = getPool();
+    const [userRows] = await pool.query('SELECT id, username, full_name FROM users WHERE id = ?', [req.params.id]);
+    if (!userRows.length) {
+      return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+    }
+
+    const targetUser = userRows[0];
+    const hash = await bcrypt.hash(password.trim(), 10);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.params.id]);
+
+    await logActivity({
+      req,
+      userId: req.user.id,
+      username: req.user.username,
+      fullName: req.user.full_name,
+      actionType: 'USER_RESET_PASSWORD',
+      actionCategory: 'SYSTEM',
+      actionName: 'Đặt lại mật khẩu người dùng',
+      description: `Đặt lại mật khẩu cho tài khoản "${targetUser.username}" (${targetUser.full_name})`,
+      status: 'SUCCESS',
+      metadata: { target_user_id: targetUser.id, target_username: targetUser.username },
+    });
+
+    res.json({ message: `Đã đổi mật khẩu cho tài khoản "${targetUser.username}" thành công` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.delete('/users/:id', authenticate, requirePermission('system.users'), async (req, res) => {
   try {
     const targetId = Number(req.params.id);
