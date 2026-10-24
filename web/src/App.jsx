@@ -672,10 +672,10 @@ export default function App() {
         >
           {!collapsed && (
             <div className="space-y-0.5 min-w-0">
-              <div className="text-xs font-normal text-[#C5299B] truncate">
+              <div className="text-xs font-semibold text-[#190072] truncate">
                 {systemConfig.unit_name || 'Bệnh viện Đa khoa'}
               </div>
-              <div className="text-xs font-normal text-[#190072] truncate">
+              <div className="text-[11px] font-medium text-slate-500 truncate">
                 {systemConfig.department_name || 'Khoa Xét nghiệm'}
               </div>
               {systemConfig.phone && (

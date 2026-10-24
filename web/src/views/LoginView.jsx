@@ -59,14 +59,14 @@ export default function LoginView() {
         {/* Cột trái: Thông tin Bệnh viện & Các chức năng đặc biệt */}
         <div className="md:col-span-6 bg-[#190072] text-white p-8 flex flex-col justify-between relative">
           <div>
-            {/* Đơn vị & Khoa */}
+            {/* Đơn vị & Khoa: Tên đơn vị luôn lớn hơn tên khoa */}
             <div className="mb-6">
-              <p className="text-xs font-medium tracking-wider text-slate-300 uppercase truncate">
+              <h2 className="text-base font-bold tracking-tight text-white uppercase truncate">
                 {systemConfig.unit_name || 'BỆNH VIỆN ĐA KHOA'}
-              </p>
-              <h2 className="text-sm font-semibold tracking-tight text-white truncate mt-0.5">
-                {systemConfig.department_name || 'KHOA XÉT NGHIỆM - TỦ MÁU'}
               </h2>
+              <p className="text-xs font-medium tracking-wider text-slate-300 uppercase truncate mt-0.5">
+                {systemConfig.department_name || 'KHOA XÉT NGHIỆM - TỦ MÁU'}
+              </p>
             </div>
 
             {/* Tên phần mềm & Mô tả */}
