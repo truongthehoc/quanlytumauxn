@@ -34,6 +34,7 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
+  Activity,
 } from 'lucide-react';
 import api from './api';
 import { useAuth } from './context/AuthContext';
@@ -64,8 +65,9 @@ export default function App() {
     const saved = localStorage.getItem('bloodbank_active_page') || 'inventory';
     if (saved.startsWith('cat:')) return 'categories';
     if (saved.startsWith('sys:')) return 'system';
+    if (saved !== 'dashboard') return 'operations';
     return null;
-  }); // null | 'categories' | 'system'
+  }); // null | 'operations' | 'categories' | 'system'
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [changePwdOpen, setChangePwdOpen] = useState(false);
@@ -129,6 +131,8 @@ export default function App() {
       setOpenGroup('categories');
     } else if (activePage.startsWith('sys:')) {
       setOpenGroup('system');
+    } else if (activePage !== 'dashboard') {
+      setOpenGroup('operations');
     }
   }, [activePage]);
 
@@ -374,11 +378,11 @@ export default function App() {
     if (collapsed) {
       setCollapsed(false);
       setOpenGroup(groupKey);
-      if (
-        childrenList.length > 0 &&
-        !activePage.startsWith(groupKey === 'categories' ? 'cat:' : 'sys:')
-      ) {
-        setActivePage(childrenList[0].key);
+      if (childrenList.length > 0) {
+        const isChildActive = childrenList.some((c) => c.key === activePage);
+        if (!isChildActive) {
+          setActivePage(childrenList[0].key);
+        }
       }
       return;
     }
@@ -386,15 +390,16 @@ export default function App() {
       setOpenGroup(null);
     } else {
       setOpenGroup(groupKey);
-      if (
-        childrenList.length > 0 &&
-        !activePage.startsWith(groupKey === 'categories' ? 'cat:' : 'sys:')
-      ) {
-        setActivePage(childrenList[0].key);
+      if (childrenList.length > 0) {
+        const isChildActive = childrenList.some((c) => c.key === activePage);
+        if (!isChildActive) {
+          setActivePage(childrenList[0].key);
+        }
       }
     }
   };
 
+  const isOperationsActive = bloodOpsNavItems.some((item) => item.key === activePage);
   const isCategoryActive = activePage.startsWith('cat:');
   const isSystemActive = activePage.startsWith('sys:');
 
@@ -466,58 +471,101 @@ export default function App() {
             </button>
           </div>
 
-          {/* Group 1: Nghiệp vụ tủ máu */}
-          <div className="pt-2 border-t border-slate-100">
-            {!collapsed && (
-              <div className="px-3 mb-1.5 text-[11px] font-normal text-slate-400">
-                Nghiệp vụ tủ máu
-              </div>
-            )}
-            <div className="space-y-1">
-              {bloodOpsNavItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activePage === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => handleSelectMainPage(item.key)}
-                    title={collapsed ? `${item.label}${item.badge ? ` (${item.badge} phiếu chờ duyệt)` : ''}` : ''}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal transition relative ${
-                      isActive
-                        ? 'bg-[#C5299B] text-white shadow-sm shadow-[#C5299B]/25'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                    } ${collapsed ? 'justify-center' : 'justify-between'}`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Icon className="w-5 h-5 shrink-0" />
-                      {!collapsed && <span className="truncate text-left">{item.label}</span>}
-                    </div>
-                    {item.badge ? (
+          {/* Group 1: Nghiệp vụ (Danh mục lớn gom toàn bộ nghiệp vụ) */}
+          {bloodOpsNavItems.length > 0 && (
+            <div className="pt-1.5 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => handleClickParentGroup('operations', bloodOpsNavItems)}
+                title={
+                  collapsed
+                    ? `Nghiệp vụ${
+                        canApproveAny && pendingSummary?.totalPending > 0
+                          ? ` (${pendingSummary.totalPending} phiếu chờ duyệt)`
+                          : ''
+                      }`
+                    : ''
+                }
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-normal transition relative ${
+                  isOperationsActive
+                    ? 'bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                } ${collapsed ? 'justify-center' : ''}`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Activity className="w-5 h-5 shrink-0" />
+                  {!collapsed && <span className="truncate">Nghiệp vụ</span>}
+                </div>
+                {!collapsed && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {canApproveAny && pendingSummary?.totalPending > 0 && openGroup !== 'operations' && (
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                          isActive
-                            ? 'bg-white text-[#C5299B]'
-                            : 'bg-amber-500 text-white animate-pulse'
-                        } ${collapsed ? 'absolute top-1.5 right-1.5 px-1.5 py-0 text-[10px]' : ''}`}
-                        title={`${item.badge} phiếu chờ duyệt hủy`}
+                        className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-white animate-pulse"
+                        title={`${pendingSummary.totalPending} phiếu chờ duyệt`}
                       >
-                        {item.badge}
+                        {pendingSummary.totalPending}
                       </span>
-                    ) : null}
-                  </button>
-                );
-              })}
+                    )}
+                    {openGroup === 'operations' ? (
+                      <ChevronDown className="w-4 h-4 text-[#C5299B] shrink-0" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                    )}
+                  </div>
+                )}
+                {collapsed && canApproveAny && pendingSummary?.totalPending > 0 && (
+                  <span
+                    className="absolute top-1.5 right-1.5 px-1.5 py-0 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse"
+                    title={`${pendingSummary.totalPending} phiếu chờ duyệt`}
+                  >
+                    {pendingSummary.totalPending}
+                  </span>
+                )}
+              </button>
+
+              {!collapsed && openGroup === 'operations' && (
+                <div className="mt-1 pl-4 space-y-1">
+                  {bloodOpsNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activePage === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        onClick={() => handleSelectSubPage('operations', item.key)}
+                        title={item.label}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-normal transition ${
+                          isActive
+                            ? 'bg-[#C5299B] text-white shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Icon className="w-5 h-5 shrink-0" />
+                          <span className="truncate text-left">{item.label}</span>
+                        </div>
+                        {item.badge ? (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                              isActive
+                                ? 'bg-white text-[#C5299B]'
+                                : 'bg-amber-500 text-white animate-pulse'
+                            }`}
+                            title={`${item.badge} phiếu chờ duyệt hủy`}
+                          >
+                            {item.badge}
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Group 2: Quản lý Danh mục */}
           {categoryChildren.length > 0 && (
             <div>
-              {!collapsed && (
-                <div className="px-3 mb-1.5 text-[11px] font-normal text-slate-400">
-                  Danh mục & hệ thống
-                </div>
-              )}
               <button
                 type="button"
                 onClick={() => handleClickParentGroup('categories', categoryChildren)}
