@@ -27,6 +27,7 @@ import {
   Bell,
   ShieldAlert,
   ClipboardCheck,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import LoginView from './views/LoginView';
