@@ -52,10 +52,19 @@ async function initDatabase() {
       email VARCHAR(100) DEFAULT '',
       role_id INT NOT NULL,
       is_active TINYINT(1) DEFAULT 1,
+      last_login DATETIME NULL DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `);
+
+  const [userCols] = await pool.query(`
+    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'last_login'
+  `);
+  if (userCols.length === 0) {
+    await pool.query(`ALTER TABLE users ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER is_active`);
+  }
 
   // 3. Cấu hình & Thông tin hệ thống (system_config)
   await pool.query(`

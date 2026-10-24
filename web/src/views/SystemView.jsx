@@ -25,12 +25,13 @@ import Pagination from '../components/Pagination';
 import ToggleSwitch from '../components/ToggleSwitch';
 
 export default function SystemView({ activeSubTab = 'CONFIG' }) {
-  const { systemConfig, refreshSystemInfo, hasPermission } = useAuth();
+  const { user, systemConfig, refreshSystemInfo, hasPermission } = useAuth();
   const [tab, setTab] = useState(activeSubTab);
   const [configForm, setConfigForm] = useState({ ...systemConfig });
   const [savingConfig, setSavingConfig] = useState(false);
   const [logoOptimizing, setLogoOptimizing] = useState(false);
   const [logoStats, setLogoStats] = useState(null);
+  const [togglingUserId, setTogglingUserId] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -280,11 +281,50 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
     }
   };
 
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('Xác nhận xóa người dùng này?')) return;
+  const handleToggleUserStatus = async (userItem) => {
+    if (user && user.id === userItem.id && userItem.is_active) {
+      showNotice('Không thể ngưng hoạt động tài khoản đang đăng nhập!', true);
+      return;
+    }
+    if (userItem.username === 'admin' && userItem.is_active) {
+      showNotice('Không thể ngưng hoạt động tài khoản Quản trị viên hệ thống (Admin)!', true);
+      return;
+    }
+    const newStatus = userItem.is_active ? 0 : 1;
+    const actionText = newStatus ? 'kích hoạt' : 'ngưng hoạt động';
+    if (!window.confirm(`Bạn có chắc muốn ${actionText} tài khoản "${userItem.username}"?`)) {
+      return;
+    }
+    setTogglingUserId(userItem.id);
     try {
-      await api.delete(`/system/users/${id}`);
-      showNotice('Đã xóa tài khoản người dùng');
+      const res = await api.put(`/system/users/${userItem.id}/status`, { is_active: newStatus });
+      showNotice(res.data?.message || `Đã ${actionText} tài khoản`);
+      await loadSystemData();
+    } catch (err) {
+      showNotice(err.response?.data?.error || 'Lỗi cập nhật trạng thái người dùng', true);
+    } finally {
+      setTogglingUserId(null);
+    }
+  };
+
+  const handleDeleteUser = async (userItem) => {
+    if (!userItem.can_delete) {
+      showNotice(
+        userItem.delete_prevent_reason ||
+          'Không thể xóa tài khoản đã có lịch sử đăng nhập hoặc thao tác trên hệ thống!',
+        true
+      );
+      return;
+    }
+    if (
+      !window.confirm(
+        `Xác nhận xóa tài khoản "${userItem.username}"? Hành động này không thể hoàn tác.`
+      )
+    )
+      return;
+    try {
+      await api.delete(`/system/users/${userItem.id}`);
+      showNotice('Đã xóa tài khoản người dùng thành công');
       loadSystemData();
     } catch (err) {
       showNotice(err.response?.data?.error || 'Không thể xóa người dùng', true);
@@ -829,26 +869,74 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                     </td>
                     <td className="py-3 px-4 text-center">
                       {u.is_active ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-normal">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                           Hoạt động
                         </span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-600 text-xs font-normal">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                           Đã khóa
                         </span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <div className="inline-flex gap-1.5">
+                      <div className="inline-flex items-center gap-2">
+                        {/* Nút gạt kích hoạt / ngưng hoạt động tài khoản */}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={Boolean(u.is_active)}
+                          disabled={
+                            togglingUserId === u.id ||
+                            (user && user.id === u.id) ||
+                            u.username === 'admin'
+                          }
+                          title={
+                            user && user.id === u.id
+                              ? 'Không thể ngưng hoạt động tài khoản đang đăng nhập'
+                              : u.username === 'admin'
+                              ? 'Không thể ngưng hoạt động tài khoản Quản trị viên hệ thống (Admin)'
+                              : u.is_active
+                              ? 'Gạt để ngưng hoạt động tài khoản này'
+                              : 'Gạt để kích hoạt lại tài khoản này'
+                          }
+                          onClick={() => handleToggleUserStatus(u)}
+                          className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors duration-200 ease-in-out focus:outline-none select-none ${
+                            (user && user.id === u.id) || u.username === 'admin'
+                              ? 'opacity-40 cursor-not-allowed'
+                              : 'cursor-pointer hover:opacity-90'
+                          } ${u.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                        >
+                          <span
+                            className={`inline-block w-4 h-4 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                              u.is_active ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+
                         <button
                           onClick={() => openEditUser(u)}
-                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          title="Sửa thông tin tài khoản"
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
+
                         <button
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600"
+                          onClick={() => handleDeleteUser(u)}
+                          disabled={!u.can_delete}
+                          title={
+                            !u.can_delete
+                              ? u.delete_prevent_reason ||
+                                'Tài khoản đã có lịch sử đăng nhập hoặc thao tác trên hệ thống, không thể xóa'
+                              : 'Xóa tài khoản'
+                          }
+                          className={`p-1.5 rounded-lg transition ${
+                            !u.can_delete
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                          }`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -59,6 +59,13 @@ router.post('/login', async (req, res) => {
       permissions = [];
     }
 
+    // Cập nhật thời điểm đăng nhập gần nhất
+    try {
+      await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    } catch (errLastLogin) {
+      console.error('Không thể cập nhật last_login:', errLastLogin);
+    }
+
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, {
       expiresIn: '7d',
     });

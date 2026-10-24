@@ -156,13 +156,36 @@ router.get('/users', authenticate, requirePermission('system.users'), async (req
   try {
     const pool = getPool();
     const [rows] = await pool.query(
-      `SELECT u.id, u.username, u.full_name, u.phone, u.email, u.role_id, u.is_active, u.created_at,
-              r.code AS role_code, r.name AS role_name
+      `SELECT u.id, u.username, u.full_name, u.phone, u.email, u.role_id, u.is_active, u.created_at, u.last_login,
+              r.code AS role_code, r.name AS role_name,
+              (SELECT COUNT(*) FROM transactions WHERE created_by = u.id OR cancel_requested_by = u.id OR cancel_approved_by = u.id) AS tx_count,
+              (SELECT COUNT(*) FROM inventory_audits WHERE created_by = u.id OR completed_by = u.id) AS audit_count
        FROM users u
        JOIN roles r ON u.role_id = r.id
        ORDER BY u.id ASC`
     );
-    res.json(rows);
+
+    const mapped = rows.map((u) => {
+      const hasLogin = Boolean(u.last_login) || u.username === 'admin';
+      const hasOps = Number(u.tx_count) > 0 || Number(u.audit_count) > 0;
+      const hasHistory = hasLogin || hasOps;
+      let deletePreventReason = '';
+      if (u.username === 'admin') {
+        deletePreventReason = 'Tài khoản Quản trị viên hệ thống (Admin), không thể xóa';
+      } else if (hasOps) {
+        deletePreventReason = 'Tài khoản đã phát sinh dữ liệu giao dịch hoặc kiểm kê, không thể xóa';
+      } else if (hasLogin) {
+        deletePreventReason = 'Tài khoản đã có lịch sử đăng nhập hệ thống, không thể xóa';
+      }
+      return {
+        ...u,
+        has_history: hasHistory,
+        can_delete: !hasHistory && u.username !== 'admin',
+        delete_prevent_reason: deletePreventReason,
+      };
+    });
+
+    res.json(mapped);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -198,6 +221,39 @@ router.post('/users', authenticate, requirePermission('system.users'), async (re
   }
 });
 
+router.put('/users/:id/status', authenticate, requirePermission('system.users'), async (req, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const { is_active } = req.body;
+    const newStatus = is_active ? 1 : 0;
+
+    const pool = getPool();
+    const [[targetUser]] = await pool.query('SELECT * FROM users WHERE id = ?', [targetId]);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Không tìm thấy tài khoản người dùng' });
+    }
+
+    if (req.user.id === targetId && newStatus === 0) {
+      return res.status(400).json({ error: 'Không thể ngưng hoạt động tài khoản đang đăng nhập' });
+    }
+
+    if (targetUser.username === 'admin' && newStatus === 0) {
+      return res.status(400).json({ error: 'Không thể ngưng hoạt động tài khoản Quản trị viên hệ thống (Admin)' });
+    }
+
+    await pool.query('UPDATE users SET is_active = ? WHERE id = ?', [newStatus, targetId]);
+
+    res.json({
+      message: newStatus
+        ? `Đã kích hoạt tài khoản "${targetUser.username}"`
+        : `Đã ngưng hoạt động tài khoản "${targetUser.username}"`,
+      is_active: newStatus,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.put('/users/:id', authenticate, requirePermission('system.users'), async (req, res) => {
   try {
     const { full_name, phone, email, role_id, is_active, password } = req.body;
@@ -223,23 +279,50 @@ router.put('/users/:id', authenticate, requirePermission('system.users'), async 
 
 router.delete('/users/:id', authenticate, requirePermission('system.users'), async (req, res) => {
   try {
-    if (Number(req.params.id) === req.user.id) {
+    const targetId = Number(req.params.id);
+    if (targetId === req.user.id) {
       return res.status(400).json({ error: 'Không thể tự xóa tài khoản đang đăng nhập' });
     }
     const pool = getPool();
+    const [[targetUser]] = await pool.query('SELECT * FROM users WHERE id = ?', [targetId]);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+    }
+
+    if (targetUser.username === 'admin') {
+      return res.status(400).json({ error: 'Không thể xóa tài khoản Quản trị viên hệ thống (Admin)' });
+    }
+
+    if (targetUser.last_login) {
+      return res.status(400).json({
+        error: 'Không thể xóa tài khoản đã có lịch sử đăng nhập hệ thống! Hãy sử dụng nút gạt ngưng kích hoạt tài khoản.',
+      });
+    }
+
     const [[txCheck]] = await pool.query(
-      'SELECT COUNT(*) AS cnt FROM transactions WHERE created_by = ?',
-      [req.params.id]
+      'SELECT COUNT(*) AS cnt FROM transactions WHERE created_by = ? OR cancel_requested_by = ? OR cancel_approved_by = ?',
+      [targetId, targetId, targetId]
     );
     if (txCheck.cnt > 0) {
       return res.status(400).json({
         error: 'Không thể xóa người dùng đã có dữ liệu giao dịch liên quan!',
       });
     }
-    await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
-    res.json({ message: 'Đã xóa tài khoản người dùng' });
+
+    const [[auditCheck]] = await pool.query(
+      'SELECT COUNT(*) AS cnt FROM inventory_audits WHERE created_by = ? OR completed_by = ?',
+      [targetId, targetId]
+    );
+    if (auditCheck.cnt > 0) {
+      return res.status(400).json({
+        error: 'Không thể xóa người dùng đã tham gia vào các kỳ kiểm kê!',
+      });
+    }
+
+    await pool.query('DELETE FROM users WHERE id = ?', [targetId]);
+    res.json({ message: 'Đã xóa tài khoản người dùng thành công' });
   } catch (err) {
-    res.status(400).json({ error: 'Không thể xóa người dùng đã có dữ liệu giao dịch' });
+    res.status(400).json({ error: 'Không thể xóa người dùng đã có dữ liệu liên quan' });
   }
 });
 
