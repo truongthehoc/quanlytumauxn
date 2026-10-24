@@ -63,14 +63,16 @@ export default function LoginView() {
             {/* Đơn vị & Khoa */}
             <div className="flex items-center gap-3 mb-6">
               {systemConfig.logo_url ? (
-                <img
-                  src={systemConfig.logo_url}
-                  alt="Logo"
-                  className="w-13 h-13 rounded-xl bg-white p-1.5 object-contain shadow-sm shrink-0"
-                />
+                <div className="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm shrink-0 overflow-hidden">
+                  <img
+                    src={systemConfig.logo_url}
+                    alt="Logo"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               ) : (
-                <div className="w-13 h-13 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-sm shrink-0">
-                  <Droplet className="w-7 h-7 text-[#C5299B] fill-[#C5299B]" />
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-sm shrink-0">
+                  <Droplet className="w-6 h-6 text-[#C5299B] fill-[#C5299B]" />
                 </div>
               )}
               <div className="min-w-0">
