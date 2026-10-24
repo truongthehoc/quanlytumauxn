@@ -140,14 +140,15 @@ export default function App() {
   const canApproveExport = hasPermission('export.cancel_approve');
   const canApproveAny = canApproveImport || canApproveExport;
 
-  const mainNavItems = [
-    {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      desc: 'Bảng điều khiển & thống kê nhanh',
-      icon: LayoutDashboard,
-      show: true,
-    },
+  const dashboardItem = {
+    key: 'dashboard',
+    label: 'Tổng quan',
+    desc: 'Bảng điều khiển & thống kê nhanh',
+    icon: LayoutDashboard,
+    show: true,
+  };
+
+  const bloodOpsNavItems = [
     {
       key: 'inventory',
       label: 'Kho chế phẩm',
@@ -199,6 +200,8 @@ export default function App() {
       show: hasPermission('reports.view'),
     },
   ].filter((item) => item.show);
+
+  const mainNavItems = [dashboardItem, ...bloodOpsNavItems];
 
   const categoryChildren = hasPermission('categories.view')
     ? [
@@ -390,16 +393,32 @@ export default function App() {
         </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
-          {/* Group 1: Nghiệp vụ tủ máu */}
+        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-3.5">
+          {/* Mục riêng trên cùng sidebar: Tổng quan */}
           <div>
+            <button
+              onClick={() => handleSelectMainPage(dashboardItem.key)}
+              title={collapsed ? dashboardItem.label : ''}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal transition relative ${
+                activePage === dashboardItem.key
+                  ? 'bg-[#C5299B] text-white shadow-sm shadow-[#C5299B]/25 font-semibold'
+                  : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium'
+              } ${collapsed ? 'justify-center' : 'justify-start'}`}
+            >
+              <LayoutDashboard className="w-5 h-5 shrink-0" />
+              {!collapsed && <span className="truncate text-left">{dashboardItem.label}</span>}
+            </button>
+          </div>
+
+          {/* Group 1: Nghiệp vụ tủ máu */}
+          <div className="pt-2 border-t border-slate-100">
             {!collapsed && (
               <div className="px-3 mb-1.5 text-[11px] font-normal text-slate-400">
                 Nghiệp vụ tủ máu
               </div>
             )}
             <div className="space-y-1">
-              {mainNavItems.map((item) => {
+              {bloodOpsNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activePage === item.key;
                 return (
