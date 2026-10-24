@@ -12,7 +12,6 @@ import {
   Bell,
   Activity,
   Shield,
-  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -60,25 +59,14 @@ export default function LoginView() {
         {/* Cột trái: Thông tin Bệnh viện & Các chức năng đặc biệt */}
         <div className="md:col-span-6 bg-[#190072] text-white p-8 flex flex-col justify-between relative">
           <div>
-            {/* Đơn vị & Khoa (trái) + Logo không khung (phải) */}
-            <div className="flex items-center justify-between gap-3 mb-6">
-              <div className="min-w-0">
-                <p className="text-xs font-medium tracking-wider text-slate-300 uppercase truncate">
-                  {systemConfig.unit_name || 'BỆNH VIỆN ĐA KHOA'}
-                </p>
-                <h2 className="text-sm font-semibold tracking-tight text-white truncate">
-                  {systemConfig.department_name || 'KHOA XÉT NGHIỆM - TỦ MÁU'}
-                </h2>
-              </div>
-              {systemConfig.logo_url ? (
-                <img
-                  src={systemConfig.logo_url}
-                  alt="Logo"
-                  className="w-12 h-12 object-contain shrink-0"
-                />
-              ) : (
-                <Droplet className="w-8 h-8 text-[#C5299B] fill-[#C5299B] shrink-0" />
-              )}
+            {/* Đơn vị & Khoa */}
+            <div className="mb-6">
+              <p className="text-xs font-medium tracking-wider text-slate-300 uppercase truncate">
+                {systemConfig.unit_name || 'BỆNH VIỆN ĐA KHOA'}
+              </p>
+              <h2 className="text-sm font-semibold tracking-tight text-white truncate mt-0.5">
+                {systemConfig.department_name || 'KHOA XÉT NGHIỆM - TỦ MÁU'}
+              </h2>
             </div>
 
             {/* Tên phần mềm & Mô tả */}
@@ -145,17 +133,27 @@ export default function LoginView() {
         {/* Cột phải: Form Đăng nhập */}
         <div className="md:col-span-6 p-8 md:p-10 flex flex-col justify-between bg-white">
           <div>
-            {/* Góc phải trên: Badge Xác thực hệ thống */}
-            <div className="flex items-center justify-end mb-4">
+            {/* Header vùng bên phải: Logo bên trái & Xác thực hệ thống bên phải */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              {systemConfig.logo_url ? (
+                <img
+                  src={systemConfig.logo_url}
+                  alt="Logo"
+                  className="w-12 h-12 object-contain"
+                />
+              ) : (
+                <Droplet className="w-8 h-8 text-[#C5299B] fill-[#C5299B]" />
+              )}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8]">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Xác thực hệ thống
               </span>
             </div>
 
-            <div className="mb-6">
+            {/* Tiêu đề Đăng nhập được hạ thấp xuống cân đối với form */}
+            <div className="mt-6 mb-6">
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Đăng nhập hệ thống</h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1.5">
                 Sử dụng tài khoản được phân quyền để truy cập
               </p>
             </div>
