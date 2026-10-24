@@ -18,7 +18,7 @@ import SearchableSelect from '../components/SearchableSelect';
 import Pagination from '../components/Pagination';
 import { getExpiryBadgeInfo } from '../utils/expiryHelper';
 
-export default function InventoryView({ onNavigate }) {
+export default function InventoryView({ onNavigate, initialSearch = '' }) {
   const { hasPermission, systemConfig } = useAuth();
   const [data, setData] = useState({
     warningDays: 7,
@@ -40,9 +40,15 @@ export default function InventoryView({ onNavigate }) {
   const [selectedBloodType, setSelectedBloodType] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedGroup, setSelectedGroup] = useState('ALL');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch || '');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    if (initialSearch !== undefined && initialSearch !== null) {
+      setSearch(initialSearch);
+    }
+  }, [initialSearch]);
 
   useEffect(() => {
     setCurrentPage(1);

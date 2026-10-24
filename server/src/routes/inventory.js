@@ -156,6 +156,77 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
+// Global Search toàn hệ thống (túi máu, phiếu giao dịch, kỳ kiểm kê)
+router.get('/global-search', authenticate, async (req, res) => {
+  try {
+    const pool = getPool();
+    const q = req.query.q ? req.query.q.trim() : '';
+    if (!q || q.length < 1) {
+      return res.json({ lots: [], transactions: [], audits: [] });
+    }
+
+    const searchLike = `%${q}%`;
+
+    // 1. Search inventory lots (túi máu trong kho)
+    const [lots] = await pool.query(
+      `SELECT 
+        il.id, il.blood_code, il.blood_group, il.rh_factor, il.expiry_date, il.quantity,
+        bp.name as product_name, v.name as volume_name, v.volume_ml, u.name as unit_name,
+        DATEDIFF(il.expiry_date, CURDATE()) as days_remaining
+      FROM inventory_lots il
+      JOIN blood_products bp ON il.blood_product_id = bp.id
+      JOIN volumes v ON il.volume_id = v.id
+      JOIN units u ON il.unit_id = u.id
+      WHERE il.blood_code LIKE ?
+         OR bp.name LIKE ?
+         OR CONCAT(il.blood_group, il.rh_factor) LIKE ?
+      ORDER BY il.quantity DESC, il.expiry_date ASC
+      LIMIT 6`,
+      [searchLike, searchLike, searchLike]
+    );
+
+    // 2. Search transactions (phiếu nhập, xuất, mượn)
+    const [transactions] = await pool.query(
+      `SELECT 
+        t.id, t.code, t.tx_type, t.tx_date, t.department_info, t.person_name, t.status,
+        u.full_name as creator_name,
+        p.name as partner_name,
+        (SELECT COUNT(*) FROM transaction_items ti WHERE ti.transaction_id = t.id) as item_count,
+        (SELECT COALESCE(SUM(ti.quantity), 0) FROM transaction_items ti WHERE ti.transaction_id = t.id) as total_qty
+      FROM transactions t
+      LEFT JOIN partners p ON t.partner_id = p.id
+      LEFT JOIN users u ON t.created_by = u.id
+      WHERE t.code LIKE ?
+         OR t.department_info LIKE ?
+         OR t.person_name LIKE ?
+         OR p.name LIKE ?
+         OR u.full_name LIKE ?
+      ORDER BY t.id DESC
+      LIMIT 6`,
+      [searchLike, searchLike, searchLike, searchLike, searchLike]
+    );
+
+    // 3. Search inventory audits (kỳ kiểm kê)
+    const [audits] = await pool.query(
+      `SELECT id, code, name, audit_date, status, total_system_qty, total_actual_qty, total_diff_qty
+      FROM inventory_audits
+      WHERE code LIKE ? OR name LIKE ?
+      ORDER BY id DESC
+      LIMIT 5`,
+      [searchLike, searchLike]
+    );
+
+    res.json({
+      lots,
+      transactions,
+      audits,
+    });
+  } catch (err) {
+    console.error('Lỗi global search:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Adjust or delete an expired/damaged lot quantity
 router.post('/adjust', authenticate, requirePermission('inventory.adjust'), async (req, res) => {
   try {

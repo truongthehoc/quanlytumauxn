@@ -39,6 +39,7 @@ import ReportsView from './views/ReportsView';
 import CategoriesView from './views/CategoriesView';
 import SystemView from './views/SystemView';
 import CancellationApprovalView from './views/CancellationApprovalView';
+import GlobalSearch from './components/GlobalSearch';
 
 export default function App() {
   const { user, loading, systemConfig, logout, hasPermission, pendingSummary } = useAuth();
@@ -49,6 +50,7 @@ export default function App() {
     return localStorage.getItem('bloodbank_sidebar_collapsed') === 'true';
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [inventorySearch, setInventorySearch] = useState('');
   const [openGroup, setOpenGroup] = useState(() => {
     const saved = localStorage.getItem('bloodbank_active_page') || 'inventory';
     if (saved.startsWith('cat:')) return 'categories';
@@ -270,6 +272,11 @@ export default function App() {
     setActivePage(key);
     setOpenGroup(null);
     setMobileOpen(false);
+  };
+
+  const handleGlobalSearchLot = (bloodCode) => {
+    setInventorySearch(bloodCode);
+    handleSelectMainPage('inventory');
   };
 
   const handleSelectSubPage = (groupKey, key) => {
@@ -549,22 +556,28 @@ export default function App() {
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
         {/* Top Bar with Account Dropdown on Right */}
         <header className="no-print h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 shadow-xs">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
+            <div className="hidden sm:block">
               <h2 className="section-title text-base sm:text-lg font-bold text-[#190072] tracking-tight">
                 {currentNav?.label}
               </h2>
-              <p className="text-xs text-slate-500 hidden sm:block">
+              <p className="text-xs text-slate-500 hidden md:block">
                 {currentNav?.desc}
               </p>
             </div>
           </div>
+
+          {/* Trường tìm kiếm toàn hệ thống trên Header */}
+          <GlobalSearch
+            onNavigate={handleSelectMainPage}
+            onSearchLot={handleGlobalSearchLot}
+          />
 
           {/* Right Header: Notification Bell (left) | Account Dropdown (right) */}
           <div className="flex items-center gap-2 sm:gap-3">
@@ -725,7 +738,12 @@ export default function App() {
         {/* Scrollable Full-Width Page Content */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full">
           <div className="w-full">
-            {activePage === 'inventory' && <InventoryView onNavigate={handleSelectMainPage} />}
+            {activePage === 'inventory' && (
+              <InventoryView
+                onNavigate={handleSelectMainPage}
+                initialSearch={inventorySearch}
+              />
+            )}
             {activePage === 'import' && <ImportView onNavigate={handleSelectMainPage} />}
             {activePage === 'export' && <ExportView onNavigate={handleSelectMainPage} />}
             {activePage === 'cancellation_approval' && <CancellationApprovalView onNavigate={handleSelectMainPage} />}
