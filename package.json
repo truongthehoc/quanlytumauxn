@@ -1,0 +1,13 @@
+{
+  "name": "blood-bank-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Phần mềm Quản lý Tủ máu Khoa Xét nghiệm",
+  "scripts": {
+    "start": "start.bat",
+    "stop": "stop.bat",
+    "dev:server": "npm.cmd --prefix server run dev",
+    "dev:web": "npm.cmd --prefix web run dev",
+    "build:web": "npm.cmd --prefix web run build"
+  }
+}

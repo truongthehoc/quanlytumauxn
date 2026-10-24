@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    font-family: 'Mulish', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  th,
+  strong,
+  b,
+  label,
+  button,
+  input,
+  select,
+  textarea {
+    font-weight: 400;
+  }
+
+  .modal-title,
+  .section-title,
+  thead th {
+    font-weight: 700 !important;
+    color: #190072 !important;
+  }
+
+  .stat-number {
+    font-weight: 700 !important;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #fdf2fa;
+  }
+
+  tbody tr:hover {
+    background-color: #fce4f3 !important;
+    transition: background-color 0.12s ease-in-out;
+  }
+
+  tbody tr.cursor-pointer:hover {
+    background-color: #f8cce8 !important;
+  }
+
+  input:required:not(:disabled),
+  select:required:not(:disabled),
+  textarea:required:not(:disabled) {
+    background-color: #fefce8 !important;
+  }
+}
+
+/* Hiệu ứng viền hồng (#C5299B) toàn dự án khi focus bất kỳ trường nhập liệu nào */
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="hidden"]):not(.searchable-select-input):focus,
+select:focus,
+textarea:focus,
+.searchable-select-trigger:focus,
+.searchable-select-trigger:focus-within,
+.searchable-select-trigger[data-open="true"] {
+  border-color: #C5299B !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(197, 41, 155, 0.25) !important;
+}
+
+/* Loại bỏ viền và shadow cho ô tìm kiếm nhúng bên trong SearchableSelect (tránh 2 vạch đứng) */
+.searchable-select-trigger input,
+.searchable-select-trigger input:focus,
+input.searchable-select-input,
+input.searchable-select-input:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Trường hợp báo lỗi (vượt quá tồn kho, lỗi validate) giữ viền đỏ cảnh báo */
+input.border-rose-500:focus,
+input.border-red-500:focus {
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.25) !important;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-area,
+  #printable-area * {
+    visibility: visible;
+  }
+  #printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    box-shadow: none !important;
+    background: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
