@@ -1,6 +1,7 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { authenticate, requirePermission } = require('../middleware/auth');
+const { logActivity } = require('../logger');
 
 const router = express.Router();
 
@@ -312,6 +313,16 @@ router.post('/', authenticate, requirePermission('audit.create'), async (req, re
 
     await conn.commit();
 
+    await logActivity({
+      req,
+      actionType: 'AUDIT_CREATE',
+      actionCategory: 'AUDIT',
+      actionName: `Khởi tạo kỳ kiểm kê ${code}`,
+      description: `Khởi tạo kỳ kiểm kê "${name}" (${code}) với ${lots.length} túi máu cần kiểm đếm`,
+      status: 'SUCCESS',
+      metadata: { audit_id: auditId, code, name, total_items: lots.length },
+    });
+
     const [createdRows] = await conn.query(`SELECT * FROM inventory_audits WHERE id = ?`, [auditId]);
     conn.release();
 
@@ -606,6 +617,16 @@ router.post('/:id/complete', authenticate, requirePermission('audit.close'), asy
 
     await conn.commit();
     conn.release();
+
+    await logActivity({
+      req,
+      actionType: 'AUDIT_COMPLETE',
+      actionCategory: 'AUDIT',
+      actionName: `Chốt kỳ kiểm kê ${audit.code}`,
+      description: `Đã chốt kỳ kiểm kê "${audit.name}" (${audit.code}) ${balancedFlag ? 'và CÂN BẰNG tồn kho' : ''}`,
+      status: 'SUCCESS',
+      metadata: { audit_id: auditId, code: audit.code, is_balanced: balancedFlag },
+    });
 
     const pool = getPool();
     await recalculateAuditSummary(pool, auditId);

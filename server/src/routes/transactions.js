@@ -1,6 +1,7 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { authenticate, requirePermission } = require('../middleware/auth');
+const { logActivity } = require('../logger');
 
 const router = express.Router();
 
@@ -336,6 +337,17 @@ router.post('/import', authenticate, requirePermission('import.create'), async (
     }
 
     await conn.commit();
+
+    await logActivity({
+      req,
+      actionType: 'IMPORT',
+      actionCategory: 'TRANSACTION',
+      actionName: `Tạo phiếu nhập máu ${code}`,
+      description: `Nhập ${items.length} túi máu vào kho theo phiếu ${code}`,
+      status: 'SUCCESS',
+      metadata: { tx_id: txId, code, count: items.length },
+    });
+
     res.json({ id: txId, code, message: 'Nhập chế phẩm máu vào kho thành công' });
   } catch (err) {
     await conn.rollback();
@@ -418,6 +430,17 @@ router.post('/export', authenticate, requirePermission('export.create'), async (
     }
 
     await conn.commit();
+
+    await logActivity({
+      req,
+      actionType: 'EXPORT',
+      actionCategory: 'TRANSACTION',
+      actionName: `Tạo phiếu xuất máu ${code}`,
+      description: `Xuất ${items.length} túi máu cho "${person_name || 'khoa phòng'}" (${department_info || ''}) theo phiếu ${code}`,
+      status: 'SUCCESS',
+      metadata: { tx_id: txId, code, count: items.length, person: person_name, department: department_info },
+    });
+
     res.json({ id: txId, code, message: 'Xuất chế phẩm máu thành công' });
   } catch (err) {
     await conn.rollback();
@@ -862,6 +885,16 @@ router.post('/:id/cancel-request', authenticate, async (req, res) => {
       [reason.trim(), req.user.id, id]
     );
 
+    await logActivity({
+      req,
+      actionType: 'CANCEL_REQUEST',
+      actionCategory: 'TRANSACTION',
+      actionName: `Yêu cầu hủy phiếu ${tx.code}`,
+      description: `Gửi yêu cầu hủy phiếu ${tx.code}. Lý do: "${reason.trim()}"`,
+      status: 'WARNING',
+      metadata: { tx_id: tx.id, code: tx.code, reason: reason.trim() },
+    });
+
     res.json({ message: 'Đã gửi yêu cầu hủy phiếu thành công. Đang chờ cấp quản lý phê duyệt.', status: 'PENDING_CANCEL' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1007,6 +1040,17 @@ router.post('/:id/cancel-approve', authenticate, async (req, res) => {
     );
 
     await conn.commit();
+
+    await logActivity({
+      req,
+      actionType: 'CANCEL_APPROVE',
+      actionCategory: 'TRANSACTION',
+      actionName: `Phê duyệt hủy phiếu ${tx.code}`,
+      description: `Đã phê duyệt hủy phiếu ${tx.code} và hoàn nguyên tồn kho`,
+      status: 'SUCCESS',
+      metadata: { tx_id: tx.id, code: tx.code },
+    });
+
     res.json({ message: 'Duyệt hủy phiếu thành công. Toàn bộ tồn kho đã được hoàn nguyên chính xác!', status: 'CANCELLED' });
   } catch (err) {
     await conn.rollback();

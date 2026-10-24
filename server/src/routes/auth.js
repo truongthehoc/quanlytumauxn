@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getPool } = require('../db');
 const { JWT_SECRET, authenticate } = require('../middleware/auth');
+const { logActivity } = require('../logger');
 
 const router = express.Router();
 
@@ -39,16 +40,47 @@ router.post('/login', async (req, res) => {
     );
 
     if (!rows.length) {
+      await logActivity({
+        req,
+        username: username ? String(username).trim() : 'Unknown',
+        actionType: 'LOGIN_FAILED',
+        actionCategory: 'AUTH',
+        actionName: 'Đăng nhập thất bại',
+        description: `Đăng nhập không thành công (Tên đăng nhập không tồn tại: "${username}")`,
+        status: 'FAILED',
+      });
       return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
     }
 
     const user = rows[0];
     if (!user.is_active) {
+      await logActivity({
+        req,
+        userId: user.id,
+        username: user.username,
+        fullName: user.full_name,
+        actionType: 'LOGIN_BLOCKED',
+        actionCategory: 'AUTH',
+        actionName: 'Đăng nhập bị từ chối',
+        description: `Tài khoản "${user.username}" đang bị ngưng hoạt động / khóa`,
+        status: 'WARNING',
+      });
       return res.status(403).json({ error: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.' });
     }
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
+      await logActivity({
+        req,
+        userId: user.id,
+        username: user.username,
+        fullName: user.full_name,
+        actionType: 'LOGIN_FAILED',
+        actionCategory: 'AUTH',
+        actionName: 'Đăng nhập sai mật khẩu',
+        description: `Người dùng "${user.username}" nhập sai mật khẩu`,
+        status: 'FAILED',
+      });
       return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
     }
 
@@ -65,6 +97,18 @@ router.post('/login', async (req, res) => {
     } catch (errLastLogin) {
       console.error('Không thể cập nhật last_login:', errLastLogin);
     }
+
+    await logActivity({
+      req,
+      userId: user.id,
+      username: user.username,
+      fullName: user.full_name,
+      actionType: 'LOGIN',
+      actionCategory: 'AUTH',
+      actionName: 'Đăng nhập hệ thống',
+      description: `Người dùng "${user.full_name}" (${user.username}) đăng nhập thành công`,
+      status: 'SUCCESS',
+    });
 
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, {
       expiresIn: '7d',

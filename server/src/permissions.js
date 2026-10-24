@@ -86,6 +86,7 @@ const PERMISSION_MODULES = [
       { key: 'system.users', label: 'Quản lý Người dùng' },
       { key: 'system.roles', label: 'Quản lý Nhóm quyền & Phân quyền chi tiết' },
       { key: 'system.backup', label: 'Sao lưu & Khôi phục dữ liệu hệ thống' },
+      { key: 'system.logs', label: 'Xem nhật ký hoạt động & lịch sử thao tác hệ thống' },
     ],
   },
 ];

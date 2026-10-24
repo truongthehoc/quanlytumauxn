@@ -298,6 +298,30 @@ async function initDatabase() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `);
 
+  // 14. Nhật ký lịch sử thao tác hệ thống (activity_logs)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NULL,
+      username VARCHAR(50) NOT NULL DEFAULT '',
+      full_name VARCHAR(100) NOT NULL DEFAULT '',
+      action_type VARCHAR(50) NOT NULL,
+      action_category VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
+      action_name VARCHAR(200) NOT NULL,
+      description TEXT NULL,
+      ip_address VARCHAR(45) DEFAULT '',
+      user_agent VARCHAR(255) DEFAULT '',
+      status ENUM('SUCCESS', 'FAILED', 'WARNING') NOT NULL DEFAULT 'SUCCESS',
+      metadata JSON NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_log_user_id (user_id),
+      INDEX idx_log_action_type (action_type),
+      INDEX idx_log_action_category (action_category),
+      INDEX idx_log_created_at (created_at),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `);
+
   await seedInitialData(pool);
 }
 

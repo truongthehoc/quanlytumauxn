@@ -18,6 +18,14 @@ import {
   Clock,
   AlertTriangle,
   RefreshCw,
+  ScrollText,
+  Search,
+  Filter,
+  Calendar,
+  Activity,
+  Eye,
+  FileText,
+  Check,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -87,6 +95,59 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
   const [usersPageSize, setUsersPageSize] = useState(10);
   const [backupsPage, setBackupsPage] = useState(1);
   const [backupsPageSize, setBackupsPageSize] = useState(10);
+
+  // Activity Logs state
+  const [logs, setLogs] = useState([]);
+  const [logsTotal, setLogsTotal] = useState(0);
+  const [logsStats, setLogsStats] = useState({
+    total_logs: 0,
+    today_logs: 0,
+    auth_count: 0,
+    tx_count: 0,
+    audit_count: 0,
+    category_count: 0,
+    system_count: 0,
+  });
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsPageSize, setLogsPageSize] = useState(15);
+  const [logsCategory, setLogsCategory] = useState('ALL');
+  const [logsStatus, setLogsStatus] = useState('ALL');
+  const [logsSearch, setLogsSearch] = useState('');
+  const [logsFromDate, setLogsFromDate] = useState('');
+  const [logsToDate, setLogsToDate] = useState('');
+  const [selectedLogDetail, setSelectedLogDetail] = useState(null);
+
+  const fetchLogs = useCallback(async () => {
+    setLogsLoading(true);
+    try {
+      const params = {
+        page: logsPage,
+        pageSize: logsPageSize,
+        category: logsCategory,
+        status: logsStatus,
+        search: logsSearch,
+        from_date: logsFromDate,
+        to_date: logsToDate,
+      };
+      const res = await api.get('/system/logs', { params });
+      if (res.data) {
+        setLogs(res.data.logs || []);
+        setLogsTotal(res.data.total || 0);
+        if (res.data.stats) setLogsStats(res.data.stats);
+      }
+    } catch (err) {
+      console.error('Lỗi tải nhật ký hoạt động:', err);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [logsPage, logsPageSize, logsCategory, logsStatus, logsSearch, logsFromDate, logsToDate]);
+
+  useEffect(() => {
+    if (tab === 'LOGS') {
+      fetchLogs();
+    }
+  }, [tab, fetchLogs]);
 
   useEffect(() => {
     setConfigForm((prev) => ({ ...prev, ...systemConfig }));
@@ -1301,6 +1362,453 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               onPageChange={setBackupsPage}
               onPageSizeChange={setBackupsPageSize}
             />
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: NHẬT KÝ HOẠT ĐỘNG (LỊCH SỬ THAO TÁC HỆ THỐNG) */}
+      {tab === 'LOGS' && (
+        <div className="space-y-4">
+          {/* Top Quick Category KPI Filter Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {/* Tất cả */}
+            <div
+              onClick={() => {
+                setLogsCategory('ALL');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'ALL'
+                  ? 'border-[#C5299B] bg-[#fdf2fa] ring-2 ring-[#C5299B]/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-slate-500 uppercase">Tất cả nhật ký</div>
+              <div className="text-2xl font-extrabold text-[#190072] mt-1">{logsStats.total_logs}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Hôm nay: {logsStats.today_logs}</div>
+            </div>
+
+            {/* Đăng nhập / Xác thực */}
+            <div
+              onClick={() => {
+                setLogsCategory('AUTH');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'AUTH'
+                  ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-emerald-700 uppercase">Xác thực / Đăng nhập</div>
+              <div className="text-2xl font-extrabold text-emerald-700 mt-1">{logsStats.auth_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Login, Logout</div>
+            </div>
+
+            {/* Giao dịch máu */}
+            <div
+              onClick={() => {
+                setLogsCategory('TRANSACTION');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'TRANSACTION'
+                  ? 'border-blue-500 bg-blue-50/70 ring-2 ring-blue-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-blue-700 uppercase">Giao dịch máu</div>
+              <div className="text-2xl font-extrabold text-blue-700 mt-1">{logsStats.tx_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Xuất, Nhập, Mượn, Hủy</div>
+            </div>
+
+            {/* Kiểm kê */}
+            <div
+              onClick={() => {
+                setLogsCategory('AUDIT');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'AUDIT'
+                  ? 'border-purple-500 bg-purple-50/70 ring-2 ring-purple-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-purple-700 uppercase">Kiểm kê quỹ máu</div>
+              <div className="text-2xl font-extrabold text-purple-700 mt-1">{logsStats.audit_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Tạo kỳ, Chốt, Cân bằng</div>
+            </div>
+
+            {/* Danh mục */}
+            <div
+              onClick={() => {
+                setLogsCategory('CATEGORY');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'CATEGORY'
+                  ? 'border-pink-500 bg-pink-50/70 ring-2 ring-pink-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-pink-700 uppercase">Quản lý Danh mục</div>
+              <div className="text-2xl font-extrabold text-pink-700 mt-1">{logsStats.category_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Đối tác, Khoa, Cảnh báo</div>
+            </div>
+
+            {/* Hệ thống */}
+            <div
+              onClick={() => {
+                setLogsCategory('SYSTEM');
+                setLogsPage(1);
+              }}
+              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+                logsCategory === 'SYSTEM'
+                  ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/20'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
+              }`}
+            >
+              <div className="text-[11px] font-semibold text-amber-700 uppercase">Cấu hình & Quản trị</div>
+              <div className="text-2xl font-extrabold text-amber-700 mt-1">{logsStats.system_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">User, Role, Backup, Config</div>
+            </div>
+          </div>
+
+          {/* Main Card with Filter Bar & Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Filter Toolbar */}
+            <div className="p-4 border-b border-slate-200 bg-slate-50/60 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center">
+                    <ScrollText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="section-title text-sm font-bold text-[#190072]">
+                      Nhật ký Hoạt động & Lịch sử Thao tác ({logsTotal})
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Ghi nhận đầy đủ nhật ký đăng nhập, giao dịch, kiểm kê và quản trị hệ thống
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={fetchLogs}
+                    disabled={logsLoading}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-white text-slate-700 text-xs font-normal transition"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${logsLoading ? 'animate-spin' : ''}`} />
+                    <span>Làm mới</span>
+                  </button>
+
+                  {(logsCategory !== 'ALL' || logsStatus !== 'ALL' || logsSearch || logsFromDate || logsToDate) && (
+                    <button
+                      onClick={() => {
+                        setLogsCategory('ALL');
+                        setLogsStatus('ALL');
+                        setLogsSearch('');
+                        setLogsFromDate('');
+                        setLogsToDate('');
+                        setLogsPage(1);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-normal transition"
+                    >
+                      Xóa lọc
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filter controls row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1">
+                {/* Search */}
+                <div className="lg:col-span-4 relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={logsSearch}
+                    onChange={(e) => {
+                      setLogsSearch(e.target.value);
+                      setLogsPage(1);
+                    }}
+                    placeholder="Tìm theo thao tác, nội dung, user, IP..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#C5299B]"
+                  />
+                </div>
+
+                {/* Category dropdown */}
+                <div className="lg:col-span-3">
+                  <select
+                    value={logsCategory}
+                    onChange={(e) => {
+                      setLogsCategory(e.target.value);
+                      setLogsPage(1);
+                    }}
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs bg-white text-slate-700 focus:outline-none"
+                  >
+                    <option value="ALL">Tất cả phân loại</option>
+                    <option value="AUTH">Xác thực / Đăng nhập (AUTH)</option>
+                    <option value="TRANSACTION">Giao dịch máu (TRANSACTION)</option>
+                    <option value="AUDIT">Kiểm kê quỹ máu (AUDIT)</option>
+                    <option value="CATEGORY">Quản lý danh mục (CATEGORY)</option>
+                    <option value="SYSTEM">Cấu hình & Quản trị (SYSTEM)</option>
+                  </select>
+                </div>
+
+                {/* Status dropdown */}
+                <div className="lg:col-span-2">
+                  <select
+                    value={logsStatus}
+                    onChange={(e) => {
+                      setLogsStatus(e.target.value);
+                      setLogsPage(1);
+                    }}
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs bg-white text-slate-700 focus:outline-none"
+                  >
+                    <option value="ALL">Tất cả trạng thái</option>
+                    <option value="SUCCESS">Thành công (SUCCESS)</option>
+                    <option value="FAILED">Thất bại (FAILED)</option>
+                    <option value="WARNING">Cảnh báo (WARNING)</option>
+                  </select>
+                </div>
+
+                {/* Date range */}
+                <div className="lg:col-span-3 flex items-center gap-1.5">
+                  <input
+                    type="date"
+                    value={logsFromDate}
+                    onChange={(e) => {
+                      setLogsFromDate(e.target.value);
+                      setLogsPage(1);
+                    }}
+                    title="Từ ngày"
+                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 text-[11px] bg-white text-slate-700"
+                  />
+                  <span className="text-slate-400 text-xs">-</span>
+                  <input
+                    type="date"
+                    value={logsToDate}
+                    onChange={(e) => {
+                      setLogsToDate(e.target.value);
+                      setLogsPage(1);
+                    }}
+                    title="Đến ngày"
+                    className="w-full px-2 py-1.5 rounded-xl border border-slate-300 text-[11px] bg-white text-slate-700"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <th className="py-3 px-4 text-left w-36">Thời gian</th>
+                    <th className="py-3 px-4 text-left w-48">Người thực hiện</th>
+                    <th className="py-3 px-4 text-center w-32">Phân loại</th>
+                    <th className="py-3 px-4 text-left">Thao tác & Mô tả chi tiết</th>
+                    <th className="py-3 px-4 text-center w-32">Địa chỉ IP</th>
+                    <th className="py-3 px-4 text-center w-28">Trạng thái</th>
+                    <th className="py-3 px-3 text-center w-16">Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {logsLoading ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C5299B]" />
+                        Đang tải nhật ký hoạt động...
+                      </td>
+                    </tr>
+                  ) : logs.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                        Không có bản ghi nhật ký nào phù hợp với bộ lọc tìm kiếm.
+                      </td>
+                    </tr>
+                  ) : (
+                    logs.map((log) => {
+                      const catConfig = {
+                        AUTH: { label: 'Xác thực', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                        TRANSACTION: { label: 'Giao dịch', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+                        AUDIT: { label: 'Kiểm kê', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+                        CATEGORY: { label: 'Danh mục', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+                        SYSTEM: { label: 'Hệ thống', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+                      }[log.action_category] || { label: log.action_category, color: 'bg-slate-100 text-slate-700 border-slate-200' };
+
+                      const statusConfig = {
+                        SUCCESS: { label: 'Thành công', color: 'bg-emerald-100 text-emerald-800' },
+                        FAILED: { label: 'Thất bại', color: 'bg-rose-100 text-rose-800' },
+                        WARNING: { label: 'Cảnh báo', color: 'bg-amber-100 text-amber-800' },
+                      }[log.status] || { label: log.status, color: 'bg-slate-100 text-slate-700' };
+
+                      const dt = new Date(log.created_at);
+                      const timeStr = dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                      const dateStr = dt.toLocaleDateString('vi-VN');
+
+                      return (
+                        <tr key={log.id} className="hover:bg-slate-50/80 transition text-xs">
+                          {/* 1. Thời gian */}
+                          <td className="py-3 px-4">
+                            <div className="font-mono font-semibold text-slate-800">{timeStr}</div>
+                            <div className="text-[11px] text-slate-400">{dateStr}</div>
+                          </td>
+
+                          {/* 2. Người thực hiện */}
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center font-bold text-xs shrink-0">
+                                {(log.username || 'S')[0].toUpperCase()}
+                              </div>
+                              <div className="truncate">
+                                <div className="font-semibold text-slate-900 truncate">
+                                  {log.full_name || log.username || 'Hệ thống'}
+                                </div>
+                                <div className="font-mono text-[11px] text-slate-400">
+                                  @{log.username || 'system'}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* 3. Phân loại */}
+                          <td className="py-3 px-4 text-center">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-lg border text-[11px] font-medium ${catConfig.color}`}>
+                              {catConfig.label}
+                            </span>
+                          </td>
+
+                          {/* 4. Thao tác & Mô tả */}
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-slate-900 leading-snug">
+                              {log.action_name}
+                            </div>
+                            {log.description && (
+                              <div className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                                {log.description}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* 5. Địa chỉ IP */}
+                          <td className="py-3 px-4 text-center">
+                            <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                              {log.ip_address || '---'}
+                            </span>
+                          </td>
+
+                          {/* 6. Trạng thái */}
+                          <td className="py-3 px-4 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium ${statusConfig.color}`}>
+                              {statusConfig.label}
+                            </span>
+                          </td>
+
+                          {/* 7. Xem chi tiết metadata */}
+                          <td className="py-3 px-3 text-center">
+                            {log.metadata ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedLogDetail(log)}
+                                title="Xem chi tiết dữ liệu (JSON)"
+                                className="p-1 rounded-lg text-slate-400 hover:text-[#C5299B] hover:bg-[#fdf2fa] transition"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <span className="text-slate-300 text-xs">---</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              totalItems={logsTotal}
+              page={logsPage}
+              pageSize={logsPageSize}
+              onPageChange={setLogsPage}
+              onPageSizeChange={setLogsPageSize}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal Inspector Chi tiết Metadata Log */}
+      {selectedLogDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#C5299B]" />
+                <h3 className="text-base font-bold text-[#190072]">
+                  Chi tiết Dữ liệu Nhật ký #{selectedLogDetail.id}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLogDetail(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div>
+                  <span className="text-slate-400">Thao tác:</span>{' '}
+                  <strong className="text-slate-800">{selectedLogDetail.action_name}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400">Phân loại:</span>{' '}
+                  <strong className="text-slate-800">{selectedLogDetail.action_category}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400">Người thực hiện:</span>{' '}
+                  <strong className="text-slate-800">{selectedLogDetail.full_name} (@{selectedLogDetail.username})</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400">Thời gian:</span>{' '}
+                  <strong className="text-slate-800 font-mono">{new Date(selectedLogDetail.created_at).toLocaleString('vi-VN')}</strong>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Dữ liệu kỹ thuật kèm theo (Metadata JSON):
+                </label>
+                <pre className="p-3 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-60">
+                  {typeof selectedLogDetail.metadata === 'string'
+                    ? selectedLogDetail.metadata
+                    : JSON.stringify(selectedLogDetail.metadata, null, 2)}
+                </pre>
+              </div>
+
+              {selectedLogDetail.user_agent && (
+                <div className="text-[11px] text-slate-400 break-all">
+                  User Agent: {selectedLogDetail.user_agent}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedLogDetail(null)}
+                className="px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-medium"
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

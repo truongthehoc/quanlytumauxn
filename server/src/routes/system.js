@@ -12,6 +12,7 @@ const {
   enforceBackupRetention,
   restoreFromPayload,
 } = require('../backupManager');
+const { logActivity } = require('../logger');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -212,6 +213,15 @@ router.post('/users', authenticate, requirePermission('system.users'), async (re
         is_active !== undefined ? (is_active ? 1 : 0) : 1,
       ]
     );
+    await logActivity({
+      req,
+      actionType: 'USER_CREATE',
+      actionCategory: 'SYSTEM',
+      actionName: `Tạo tài khoản người dùng "${username.trim()}"`,
+      description: `Tạo mới tài khoản "${username.trim()}" cho nhân sự "${full_name.trim()}"`,
+      status: 'SUCCESS',
+      metadata: { user_id: result.insertId, username: username.trim(), full_name: full_name.trim() },
+    });
     res.json({ id: result.insertId, message: 'Tạo tài khoản người dùng thành công' });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
@@ -243,6 +253,18 @@ router.put('/users/:id/status', authenticate, requirePermission('system.users'),
 
     await pool.query('UPDATE users SET is_active = ? WHERE id = ?', [newStatus, targetId]);
 
+    await logActivity({
+      req,
+      actionType: 'USER_STATUS',
+      actionCategory: 'SYSTEM',
+      actionName: newStatus
+        ? `Kích hoạt tài khoản "${targetUser.username}"`
+        : `Ngưng hoạt động tài khoản "${targetUser.username}"`,
+      description: `Đổi trạng thái tài khoản "${targetUser.username}" thành ${newStatus ? 'Hoạt động' : 'Đã khóa'}`,
+      status: 'SUCCESS',
+      metadata: { target_id: targetId, username: targetUser.username, is_active: newStatus },
+    });
+
     res.json({
       message: newStatus
         ? `Đã kích hoạt tài khoản "${targetUser.username}"`
@@ -271,6 +293,17 @@ router.put('/users/:id', authenticate, requirePermission('system.users'), async 
         [full_name.trim(), phone || '', email || '', Number(role_id), is_active ? 1 : 0, req.params.id]
       );
     }
+
+    await logActivity({
+      req,
+      actionType: 'USER_UPDATE',
+      actionCategory: 'SYSTEM',
+      actionName: `Cập nhật người dùng ID ${req.params.id}`,
+      description: `Cập nhật thông tin tài khoản nhân sự: "${full_name.trim()}"`,
+      status: 'SUCCESS',
+      metadata: { user_id: req.params.id, full_name: full_name.trim() },
+    });
+
     res.json({ message: 'Cập nhật thông tin người dùng thành công' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -320,6 +353,17 @@ router.delete('/users/:id', authenticate, requirePermission('system.users'), asy
     }
 
     await pool.query('DELETE FROM users WHERE id = ?', [targetId]);
+
+    await logActivity({
+      req,
+      actionType: 'USER_DELETE',
+      actionCategory: 'SYSTEM',
+      actionName: `Xóa tài khoản người dùng "${targetUser.username}"`,
+      description: `Đã xóa tài khoản "${targetUser.username}" (${targetUser.full_name})`,
+      status: 'SUCCESS',
+      metadata: { target_id: targetId, username: targetUser.username },
+    });
+
     res.json({ message: 'Đã xóa tài khoản người dùng thành công' });
   } catch (err) {
     res.status(400).json({ error: 'Không thể xóa người dùng đã có dữ liệu liên quan' });
@@ -427,6 +471,116 @@ router.delete('/backups/:id', authenticate, requirePermission('system.backup'), 
       await pool.query('DELETE FROM backups WHERE id = ?', [req.params.id]);
     }
     res.json({ message: 'Đã xóa bản sao lưu' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==================== 5. NHẬT KÝ HOẠT ĐỘNG (ACTIVITY LOGS) ====================
+router.get('/logs', authenticate, async (req, res) => {
+  try {
+    const user = req.user;
+    const canViewLogs =
+      user.role_code === 'ADMIN' ||
+      (Array.isArray(user.permissions) &&
+        (user.permissions.includes('system.logs') || user.permissions.includes('system.config')));
+
+    if (!canViewLogs) {
+      return res.status(403).json({ error: 'Bạn không có quyền xem nhật ký hoạt động hệ thống' });
+    }
+
+    const {
+      category,
+      status,
+      user_id,
+      from_date,
+      to_date,
+      search,
+      page = 1,
+      pageSize = 20,
+    } = req.query;
+
+    const pool = getPool();
+    const where = [];
+    const params = [];
+
+    if (category && category !== 'ALL') {
+      where.push('l.action_category = ?');
+      params.push(category);
+    }
+
+    if (status && status !== 'ALL') {
+      where.push('l.status = ?');
+      params.push(status);
+    }
+
+    if (user_id) {
+      where.push('l.user_id = ?');
+      params.push(Number(user_id));
+    }
+
+    if (from_date) {
+      where.push('DATE(l.created_at) >= ?');
+      params.push(from_date);
+    }
+
+    if (to_date) {
+      where.push('DATE(l.created_at) <= ?');
+      params.push(to_date);
+    }
+
+    if (search && search.trim().length > 0) {
+      const q = `%${search.trim()}%`;
+      where.push('(l.action_name LIKE ? OR l.description LIKE ? OR l.username LIKE ? OR l.full_name LIKE ? OR l.ip_address LIKE ?)');
+      params.push(q, q, q, q, q);
+    }
+
+    const whereClause = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
+
+    // Count
+    const [[countRow]] = await pool.query(
+      `SELECT COUNT(*) AS total FROM activity_logs l ${whereClause}`,
+      params
+    );
+    const total = Number(countRow.total || 0);
+
+    // Pagination
+    const limit = Math.max(1, Math.min(100, parseInt(pageSize, 10) || 20));
+    const offset = Math.max(0, (parseInt(page, 10) || 1) - 1) * limit;
+
+    const [rows] = await pool.query(
+      `SELECT l.* FROM activity_logs l ${whereClause} ORDER BY l.id DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+
+    // Stats
+    const [[statsRow]] = await pool.query(`
+      SELECT 
+        COUNT(*) AS total_logs,
+        COALESCE(SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END), 0) AS today_logs,
+        COALESCE(SUM(CASE WHEN action_category = 'AUTH' THEN 1 ELSE 0 END), 0) AS auth_count,
+        COALESCE(SUM(CASE WHEN action_category = 'TRANSACTION' THEN 1 ELSE 0 END), 0) AS tx_count,
+        COALESCE(SUM(CASE WHEN action_category = 'AUDIT' THEN 1 ELSE 0 END), 0) AS audit_count,
+        COALESCE(SUM(CASE WHEN action_category = 'CATEGORY' THEN 1 ELSE 0 END), 0) AS category_count,
+        COALESCE(SUM(CASE WHEN action_category = 'SYSTEM' THEN 1 ELSE 0 END), 0) AS system_count
+      FROM activity_logs
+    `);
+
+    res.json({
+      logs: rows,
+      total,
+      page: parseInt(page, 10) || 1,
+      pageSize: limit,
+      stats: {
+        total_logs: Number(statsRow?.total_logs || 0),
+        today_logs: Number(statsRow?.today_logs || 0),
+        auth_count: Number(statsRow?.auth_count || 0),
+        tx_count: Number(statsRow?.tx_count || 0),
+        audit_count: Number(statsRow?.audit_count || 0),
+        category_count: Number(statsRow?.category_count || 0),
+        system_count: Number(statsRow?.system_count || 0),
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

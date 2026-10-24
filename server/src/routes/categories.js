@@ -1,6 +1,7 @@
 const express = require('express');
 const { getPool } = require('../db');
 const { authenticate, requirePermission } = require('../middleware/auth');
+const { logActivity } = require('../logger');
 
 const router = express.Router();
 
@@ -127,6 +128,16 @@ router.put('/expiry-milestones', authenticate, async (req, res) => {
        ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
       [strDays]
     );
+
+    await logActivity({
+      req,
+      actionType: 'CONFIG_EXPIRY',
+      actionCategory: 'CATEGORY',
+      actionName: 'Cập nhật cấu hình cảnh báo HSD',
+      description: `Cập nhật các mốc cảnh báo hạn dùng (Mốc cảnh báo tối đa: ${strDays} ngày)`,
+      status: 'SUCCESS',
+      metadata: { expiry_warning_days: strDays, count: milestones.length },
+    });
 
     res.json({
       message: 'Cập nhật cấu hình cảnh báo HSD thành công',

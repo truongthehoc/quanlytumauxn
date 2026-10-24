@@ -29,6 +29,7 @@ import {
   ClipboardCheck,
   AlertTriangle,
   LayoutDashboard,
+  ScrollText,
 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import LoginView from './views/LoginView';
@@ -279,6 +280,14 @@ export default function App() {
       desc: 'Sao lưu tự động (giữ tối đa 3 bản), sao lưu thủ công và khôi phục dữ liệu',
       icon: DatabaseBackup,
       show: hasPermission('system.backup'),
+    },
+    {
+      key: 'sys:LOGS',
+      subKey: 'LOGS',
+      label: 'Nhật ký hoạt động',
+      desc: 'Ghi và phân loại lịch sử thao tác của người dùng',
+      icon: ScrollText,
+      show: hasPermission('system.logs') || hasPermission('system.config'),
     },
   ].filter((item) => item.show);
 
