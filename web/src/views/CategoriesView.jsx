@@ -825,24 +825,6 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
                 </table>
               </div>
             </div>
-
-            {canManage && (
-              <div className="flex justify-end pt-2">
-                <button
-                  type="button"
-                  disabled={savingMilestones}
-                  onClick={handleSaveMilestones}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-bold shadow transition active:scale-95 disabled:opacity-60"
-                >
-                  {savingMilestones ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  <span>Lưu cấu hình cảnh báo</span>
-                </button>
-              </div>
-            )}
           </div>
         )}
 
