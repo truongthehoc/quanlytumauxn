@@ -44,10 +44,16 @@ router.put('/config', authenticate, requirePermission('system.config'), async (r
       );
     }
 
-    await enforceBackupRetention();
+    try {
+      await enforceBackupRetention();
+    } catch (bErr) {
+      console.warn('Backup retention check warning:', bErr.message);
+    }
+
     res.json({ message: 'Lưu cấu hình hệ thống thành công' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Lỗi lưu cấu hình:', err);
+    res.status(500).json({ error: 'Lỗi lưu cấu hình: ' + err.message });
   }
 });
 

@@ -17,6 +17,7 @@ import {
   X,
   Clock,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +33,9 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
   const { systemConfig, refreshSystemInfo, hasPermission } = useAuth();
   const [tab, setTab] = useState(activeSubTab);
   const [configForm, setConfigForm] = useState({ ...systemConfig });
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [logoOptimizing, setLogoOptimizing] = useState(false);
+  const [logoStats, setLogoStats] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -204,20 +208,90 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
     }
   };
 
-  // Logo file upload -> Base64 Data URL
-  const handleLogoUpload = (e) => {
+  // Tự động tối ưu hóa và nén ảnh logo (Resize max 256x256, nén WebP/PNG chất lượng cao ~15-30KB)
+  const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setConfigForm((prev) => ({ ...prev, logo_url: reader.result }));
-    };
-    reader.readAsDataURL(file);
+
+    if (!file.type.startsWith('image/')) {
+      showNotice('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, SVG)', true);
+      return;
+    }
+
+    try {
+      setLogoOptimizing(true);
+      const originalSizeKb = (file.size / 1024).toFixed(1);
+
+      // Tạo đối tượng Image và Canvas để nén & resize tự động
+      const img = new window.Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const maxDim = 256; // Kích thước tối đa chuẩn cho logo header & in phiếu
+        let { width, height } = img;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Nén định dạng WebP hoặc PNG để giữ độ trong suốt và dung lượng siêu nhẹ
+        let mime = 'image/webp';
+        let quality = 0.88;
+        if (file.type === 'image/png' || file.type === 'image/gif') {
+          mime = 'image/png';
+        }
+
+        const optimizedDataUrl = canvas.toDataURL(mime, quality);
+        const optimizedSizeKb = ((optimizedDataUrl.length * 0.75) / 1024).toFixed(1);
+
+        setConfigForm((prev) => ({ ...prev, logo_url: optimizedDataUrl }));
+        setLogoStats({
+          originalSizeKb,
+          optimizedSizeKb,
+          width,
+          height,
+        });
+        setLogoOptimizing(false);
+        showNotice(
+          `Đã tối ưu hóa logo thành công: ${originalSizeKb} KB ➔ ${optimizedSizeKb} KB (${width}×${height}px)`
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        setLogoOptimizing(false);
+        showNotice('Không thể xử lý file ảnh này. Vui lòng thử lại với file ảnh khác!', true);
+      };
+
+      img.src = objectUrl;
+    } catch (err) {
+      setLogoOptimizing(false);
+      console.error('Lỗi tối ưu ảnh logo:', err);
+      showNotice('Lỗi khi xử lý ảnh logo: ' + err.message, true);
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const handleSaveConfig = async (e) => {
     e.preventDefault();
     try {
+      setSavingConfig(true);
       const warningMilestones = milestones.filter(
         (m) => !m.isExpired && !m.isSafe && Number(m.days) > 0
       );
@@ -231,9 +305,11 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
         expiry_warning_milestones: JSON.stringify(milestones),
       });
       await refreshSystemInfo();
-      showNotice('Đã lưu cấu hình hệ thống & mốc cảnh báo HSD thành công!');
+      showNotice('Đã lưu cấu hình hệ thống & logo thành công!');
     } catch (err) {
       showNotice(err.response?.data?.error || 'Lỗi lưu cấu hình', true);
+    } finally {
+      setSavingConfig(false);
     }
   };
 
@@ -459,13 +535,29 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
           onSubmit={handleSaveConfig}
           className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5 w-full"
         >
-          <div className="border-b border-slate-200 pb-3">
-            <h3 className="section-title text-base font-bold text-[#190072]">
-              Cấu hình Hệ thống Đơn vị & Khoa Xét nghiệm
-            </h3>
-            <p className="text-xs text-slate-500">
-              Thông tin này hiển thị trên thanh tiêu đề phần mềm, màn hình đăng nhập và tất cả các mẫu phiếu in.
-            </p>
+          <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="section-title text-base font-bold text-[#190072]">
+                Cấu hình Hệ thống Đơn vị & Khoa Xét nghiệm
+              </h3>
+              <p className="text-xs text-slate-500">
+                Thông tin này hiển thị trên thanh tiêu đề phần mềm, màn hình đăng nhập và tất cả các mẫu phiếu in.
+              </p>
+            </div>
+
+            {/* Nút Lưu cấu hình đưa lên góc trên bên phải */}
+            <button
+              type="submit"
+              disabled={savingConfig || logoOptimizing}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition shrink-0 active:scale-95 disabled:opacity-60"
+            >
+              {savingConfig ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>Lưu cấu hình hệ thống</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -500,7 +592,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
             </div>
 
             <div>
-              <label className="block text-xs font-normal  text-slate-600 mb-1">
+              <label className="block text-xs font-normal text-slate-600 mb-1">
                 Địa chỉ đơn vị
               </label>
               <input
@@ -514,7 +606,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
             </div>
 
             <div>
-              <label className="block text-xs font-normal  text-slate-600 mb-1">
+              <label className="block text-xs font-normal text-slate-600 mb-1">
                 Số điện thoại liên hệ
               </label>
               <input
@@ -527,40 +619,104 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-normal  text-slate-600 mb-1">
-                Logo Đơn vị (Tải ảnh lên hoặc dán URL)
+            {/* Khung Tải & Tối ưu hóa Logo */}
+            <div className="md:col-span-2 p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-2">
+              <label className="block text-xs font-semibold text-slate-700">
+                Logo Đơn vị (Tự động nén tối ưu dung lượng siêu nhẹ ~20KB - tải trang tức thì)
               </label>
-              <div className="flex items-center gap-3">
-                {configForm.logo_url ? (
-                  <img
-                    src={configForm.logo_url}
-                    alt="Logo"
-                    className="w-12 h-12 rounded-xl border border-slate-300 object-contain bg-slate-50 p-1"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
-                    <Image className="w-5 h-5" />
+
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Logo Preview */}
+                <div className="shrink-0">
+                  {configForm.logo_url ? (
+                    <div className="relative group">
+                      <img
+                        src={configForm.logo_url}
+                        alt="Logo Đơn vị"
+                        className="w-16 h-16 rounded-2xl border-2 border-[#C5299B]/30 object-contain bg-white p-1.5 shadow-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfigForm({ ...configForm, logo_url: '' });
+                          setLogoStats(null);
+                        }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-xs transition"
+                        title="Xóa logo này"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 bg-white">
+                      <Image className="w-6 h-6 text-slate-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Buttons & Status */}
+                <div className="flex-1 min-w-[220px] space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <label
+                      className={`cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                        logoOptimizing
+                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                          : 'bg-[#C5299B] hover:bg-[#a82083] text-white shadow-xs'
+                      }`}
+                    >
+                      {logoOptimizing ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Đang tối ưu ảnh...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>
+                            {configForm.logo_url ? 'Thay đổi ảnh Logo...' : 'Chọn file ảnh Logo...'}
+                          </span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={logoOptimizing}
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {configForm.logo_url && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfigForm({ ...configForm, logo_url: '' });
+                          setLogoStats(null);
+                        }}
+                        className="px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition border border-rose-200"
+                      >
+                        Xóa logo
+                      </button>
+                    )}
                   </div>
-                )}
-                <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-normal text-slate-700">
-                  Chọn file ảnh Logo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                  />
-                </label>
-                {configForm.logo_url && (
-                  <button
-                    type="button"
-                    onClick={() => setConfigForm({ ...configForm, logo_url: '' })}
-                    className="text-xs text-rose-600 font-normal hover:underline"
-                  >
-                    Xóa logo
-                  </button>
-                )}
+
+                  {logoStats ? (
+                    <div className="text-[11px] text-emerald-700 font-medium flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>
+                        Đã tự động tối ưu hóa: <strong>{logoStats.optimizedSizeKb} KB</strong> ({logoStats.width}×{logoStats.height}px) — Giảm từ {logoStats.originalSizeKb} KB (tiết kiệm {Math.round((1 - logoStats.optimizedSizeKb / logoStats.originalSizeKb) * 100)}%)
+                      </span>
+                    </div>
+                  ) : configForm.logo_url ? (
+                    <div className="text-[11px] text-slate-500">
+                      Logo đang được hiển thị trên thanh menu bên trái, màn hình đăng nhập và phiếu in.
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-slate-400">
+                      Hỗ trợ mọi định dạng ảnh (PNG, JPG, WEBP, SVG). Ảnh sẽ được tự động căn chỉnh và nén kích thước để toàn bộ hệ thống tải mượt nhất.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -745,10 +901,15 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-normal shadow"
+              disabled={savingConfig || logoOptimizing}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-sm font-bold shadow transition active:scale-95 disabled:opacity-60"
             >
-              <Save className="w-4 h-4" />
-              Lưu cấu hình hệ thống
+              {savingConfig ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>Lưu cấu hình hệ thống</span>
             </button>
           </div>
         </form>
