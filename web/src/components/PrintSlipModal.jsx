@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, X, Droplet } from 'lucide-react';
+import { Printer, X, Droplet, RotateCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const TX_TITLES = {
@@ -20,6 +20,7 @@ export default function PrintSlipModal({
   onRequestCancel,
   onApproveCancel,
   onRejectCancel,
+  onReImport,
   canCancelRequest = false,
   canApproveCancel = false,
 }) {
@@ -100,6 +101,20 @@ export default function PrintSlipModal({
                   Từ chối
                 </button>
               </>
+            )}
+
+            {transaction.status === 'CANCELLED' && onReImport && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose?.();
+                  onReImport(transaction);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#190072] hover:bg-[#2a08a8] text-white text-xs font-semibold transition shadow-sm"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Nhập lại phiếu này
+              </button>
             )}
 
             {(!transaction.status || transaction.status === 'COMPLETED') && canCancelRequest && (

@@ -21,6 +21,8 @@ import {
   AlertTriangle,
   Send,
   Droplet,
+  Camera,
+  Barcode,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +31,7 @@ import DateInput from '../components/DateInput';
 import QuickAddPartnerModal from '../components/QuickAddPartnerModal';
 import SearchableSelect from '../components/SearchableSelect';
 import Pagination from '../components/Pagination';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 
 const STATUS_BADGES = {
   PENDING: {
@@ -119,6 +122,8 @@ export default function BorrowLendView() {
   const [lendDraftQty, setLendDraftQty] = useState(1);
   const [lendDraftNote, setLendDraftNote] = useState('');
   const [lendSuggestionsOpen, setLendSuggestionsOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerTarget, setScannerTarget] = useState('lend'); // 'lend' | 'borrow' | 'search'
   // Final list of items to lend
   const [lendList, setLendList] = useState([]);
 
@@ -281,6 +286,36 @@ export default function BorrowLendView() {
       } else {
         setFormError(`Không tìm thấy túi máu có mã "${clean}" trong kho lưu trữ hoặc túi đã hết tồn!`);
       }
+    }
+  };
+
+  const handleScanResult = (code) => {
+    const clean = code.trim().toUpperCase();
+    if (!clean) return;
+
+    if (scannerTarget === 'lend') {
+      setLendDraftBloodCode(clean);
+      const matched = lots.find((l) => l.blood_code && l.blood_code.toUpperCase() === clean);
+      if (matched) {
+        setLendDraftLotId(matched.id);
+        const inList = lendList.find((it) => Number(it.lot_id) === Number(matched.id))?.quantity || 0;
+        const remain = Math.max(0, Number(matched.quantity) - Number(inList));
+        if (remain <= 0) {
+          setFormError(`Túi máu "${clean}" (${matched.product_name}) đã đạt tối đa tồn kho trong danh sách cho mượn!`);
+          return;
+        }
+        addLendItemToList(matched, Number(lendDraftQty) || 1, lendDraftNote);
+        setLendDraftBloodCode('');
+        setLendDraftLotId('');
+        setLendDraftQty(1);
+        setMessage(`Đã quét & thêm túi máu [${clean}] vào danh sách cho mượn.`);
+      } else {
+        setFormError(`Không tìm thấy túi máu có mã "${clean}" trong kho lưu trữ!`);
+      }
+    } else if (scannerTarget === 'borrow') {
+      setBorrowDraftBloodCode(clean);
+    } else if (scannerTarget === 'search') {
+      setSearchQuery(clean);
     }
   };
 
@@ -1384,14 +1419,27 @@ export default function BorrowLendView() {
                       <div className="flex items-end gap-2 flex-nowrap">
                         {/* 1. Mã túi máu (BẮT BUỘC, TỰ ĐỘNG GỢI Ý & LỌC REALTIME) */}
                         <div className="w-[220px] shrink-0 relative z-30" ref={lendSuggestionsRef}>
-                          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                            <span>Mã túi máu <span className="text-rose-500 font-bold">*</span></span>
-                            {matchingLendLots.length > 0 && lendDraftBloodCode.trim() && (
-                              <span className="text-[10px] text-indigo-700 font-normal">
-                                {matchingLendLots.length} khớp
-                              </span>
-                            )}
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                              <span>Mã túi máu <span className="text-rose-500 font-bold">*</span></span>
+                              {matchingLendLots.length > 0 && lendDraftBloodCode.trim() && (
+                                <span className="text-[10px] text-indigo-700 font-normal">
+                                  {matchingLendLots.length} khớp
+                                </span>
+                              )}
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannerTarget('lend');
+                                setScannerOpen(true);
+                              }}
+                              className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                            >
+                              <Camera className="w-3 h-3" />
+                              <span>Camera</span>
+                            </button>
+                          </div>
                           <div className="relative">
                             <input
                               ref={lendBloodCodeInputRef}
@@ -1404,23 +1452,36 @@ export default function BorrowLendView() {
                               onChange={(e) => handleLendBloodCodeChange(e.target.value)}
                               onKeyDown={handleLendBloodCodeKeyDown}
                               placeholder="Nhập/quét mã túi máu"
-                              className="w-full pl-3 pr-8 py-2 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
+                              className="w-full pl-3 pr-14 py-2 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
                             />
-                            {lendDraftBloodCode && (
+                            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setLendDraftBloodCode('');
-                                  setLendDraftLotId('');
-                                  setLendSuggestionsOpen(false);
-                                  lendBloodCodeInputRef.current?.focus();
+                                  setScannerTarget('lend');
+                                  setScannerOpen(true);
                                 }}
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                title="Xóa mã"
+                                className="p-1 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                                title="Quét mã túi máu bằng camera"
                               >
-                                <X className="w-3.5 h-3.5" />
+                                <Camera className="w-3.5 h-3.5" />
                               </button>
-                            )}
+                              {lendDraftBloodCode && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLendDraftBloodCode('');
+                                    setLendDraftLotId('');
+                                    setLendSuggestionsOpen(false);
+                                    lendBloodCodeInputRef.current?.focus();
+                                  }}
+                                  className="text-slate-400 hover:text-slate-600 p-0.5"
+                                  title="Xóa mã"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* DROPDOWN GỢI Ý TÚI MÁU KHỚP MÃ REALTIME - CÁC CỘT THẲNG HÀNG DỄ SO SÁNH */}
@@ -1817,23 +1878,49 @@ export default function BorrowLendView() {
                       <div className="flex items-end gap-2">
                         {/* 1. Mã túi máu */}
                         <div className="w-[180px] shrink-0">
-                          <label className="block text-xs font-semibold text-slate-700 mb-1">
-                            Mã túi máu
-                          </label>
-                          <input
-                            ref={borrowBloodCodeInputRef}
-                            type="text"
-                            value={borrowDraftBloodCode}
-                            onChange={(e) => setBorrowDraftBloodCode(e.target.value.toUpperCase())}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleAddBorrowClick();
-                              }
-                            }}
-                            placeholder="Nhập/quét mã túi máu"
-                            className="w-full px-3 py-2 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
-                          />
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-xs font-semibold text-slate-700">
+                              Mã túi máu
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannerTarget('borrow');
+                                setScannerOpen(true);
+                              }}
+                              className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                            >
+                              <Camera className="w-3 h-3" />
+                              <span>Camera</span>
+                            </button>
+                          </div>
+                          <div className="relative">
+                            <input
+                              ref={borrowBloodCodeInputRef}
+                              type="text"
+                              value={borrowDraftBloodCode}
+                              onChange={(e) => setBorrowDraftBloodCode(e.target.value.toUpperCase())}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleAddBorrowClick();
+                                }
+                              }}
+                              placeholder="Nhập/quét mã túi máu"
+                              className="w-full pl-3 pr-8 py-2 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannerTarget('borrow');
+                                setScannerOpen(true);
+                              }}
+                              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                              title="Quét mã túi máu bằng camera"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
                         {/* 2. Loại chế phẩm */}
@@ -2226,6 +2313,22 @@ export default function BorrowLendView() {
       {printTx && (
         <PrintSlipModal transaction={printTx} onClose={() => setPrintTx(null)} />
       )}
+
+      {/* Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title={
+          scannerTarget === 'lend'
+            ? 'Quét mã túi máu cho mượn'
+            : scannerTarget === 'borrow'
+            ? 'Quét mã túi máu mượn về'
+            : 'Quét tìm kiếm phiếu'
+        }
+        description="Quét mã vạch trên nhãn túi máu để tự động nhận diện"
+        continuous={scannerTarget === 'lend'}
+        onScan={handleScanResult}
+      />
     </div>
   );
 }

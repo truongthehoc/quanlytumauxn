@@ -10,11 +10,14 @@ import {
   PackagePlus,
   Repeat,
   X,
+  Camera,
+  Barcode,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import SearchableSelect from '../components/SearchableSelect';
 import Pagination from '../components/Pagination';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import { getExpiryBadgeInfo } from '../utils/expiryHelper';
 
 export default function InventoryView({ onNavigate, initialSearch = '' }) {
@@ -42,6 +45,7 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
   const [search, setSearch] = useState(initialSearch || '');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   useEffect(() => {
     if (initialSearch !== undefined && initialSearch !== null) {
@@ -298,20 +302,28 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
 
       {/* Lots Table & Filter Bar */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
+        <div className="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2 flex-1">
+            <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm mã, tên chế phẩm, thể tích..."
-                className="pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] outline-none w-64"
+                className="w-full pl-9 pr-10 py-2 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setScannerOpen(true)}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                title="Quét mã vạch túi máu bằng Camera"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="w-52">
+            <div className="w-full sm:w-52">
               <SearchableSelect
                 value={selectedGroup}
                 onChange={(val) => setSelectedGroup(val)}
@@ -323,7 +335,7 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
               />
             </div>
 
-            <div className="w-56">
+            <div className="w-full sm:w-52">
               <SearchableSelect
                 value={selectedBloodType}
                 onChange={(val) => setSelectedBloodType(val)}
@@ -340,7 +352,7 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
               />
             </div>
 
-            <div className="w-48">
+            <div className="w-full sm:w-48">
               <SearchableSelect
                 value={selectedStatus}
                 onChange={(val) => setSelectedStatus(val)}
@@ -358,10 +370,10 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
             <button
               onClick={fetchInventory}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600"
+              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition"
               title="Làm mới"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -372,7 +384,8 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-normal shadow-sm transition"
               >
                 <PackagePlus className="w-4 h-4" />
-                Nhập máu vào kho
+                <span className="hidden sm:inline">Nhập máu</span>
+                <span className="sm:hidden">Nhập</span>
               </button>
             )}
             {hasPermission('export.create') && (
@@ -381,13 +394,91 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-normal shadow-sm transition"
               >
                 <ArrowUpRight className="w-4 h-4" />
-                Bấm Xuất máu
+                <span className="hidden sm:inline">Xuất máu</span>
+                <span className="sm:hidden">Xuất</span>
               </button>
             )}
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Giao diện Thẻ danh sách cho Điện thoại di động (Mobile Card View) */}
+        <div className="block md:hidden divide-y divide-slate-100">
+          {filteredLots.length === 0 ? (
+            <div className="py-10 text-center text-slate-400 text-sm px-4">
+              Không có lô chế phẩm máu nào khớp với bộ lọc hiện tại.
+            </div>
+          ) : (
+            filteredLots
+              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              .map((lot) => {
+                const badge = getExpiryBadgeInfo(
+                  lot.days_remaining,
+                  systemConfig?.expiry_warning_milestones
+                );
+                return (
+                  <div key={lot.id} className="p-4 space-y-2 hover:bg-slate-50/80 transition">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Barcode className="w-3.5 h-3.5 text-[#C5299B] shrink-0" />
+                          <span className="font-mono text-xs font-bold text-[#C5299B] truncate">
+                            {lot.blood_code || lot.product_code}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-semibold text-slate-900 mt-0.5 line-clamp-1">
+                          {lot.product_name}
+                        </h4>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-base font-bold text-[#190072]">
+                          {lot.quantity}
+                        </span>
+                        <span className="text-xs text-slate-500 ml-1">{lot.unit_name}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold ${
+                          lot.rh_factor === '-'
+                            ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                            : 'bg-[#fce7f6] text-[#190072] border border-[#f5c6e8]'
+                        }`}
+                      >
+                        {lot.blood_group} ({lot.rh_factor === '+' ? 'Rh+' : 'Rh-'})
+                      </span>
+
+                      <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                        {lot.volume_name}
+                      </span>
+
+                      <span
+                        style={{
+                          backgroundColor: badge.bgColor,
+                          color: badge.textColor,
+                          borderColor: badge.borderColor,
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border"
+                      >
+                        {badge.icon === 'alert' && <AlertTriangle className="w-3 h-3 shrink-0" />}
+                        {badge.icon === 'clock' && <Clock className="w-3 h-3 shrink-0" />}
+                        {badge.icon === 'check' && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                        <span>{badge.text}</span>
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1">
+                      <span>Lấy: {formatDate(lot.collection_date)}</span>
+                      <span>HSD: <strong>{formatDate(lot.expiry_date)}</strong></span>
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </div>
+
+        {/* Giao diện Bảng dữ liệu cho Máy tính & Tablet (Desktop Table View) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs ">
@@ -503,6 +594,17 @@ export default function InventoryView({ onNavigate, initialSearch = '' }) {
           onPageSizeChange={setPageSize}
         />
       </div>
+
+      {/* Barcode Scanner Modal cho Kho Chế Phẩm */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title="Quét mã vạch tra cứu túi máu"
+        description="Quét mã trên túi máu để lọc và xem thông tin chi tiết"
+        onScan={(scannedCode) => {
+          setSearch(scannedCode);
+        }}
+      />
     </div>
   );
 }

@@ -17,12 +17,15 @@ import {
   XCircle,
   Bell,
   ShieldAlert,
+  Camera,
+  Barcode,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import PrintSlipModal from '../components/PrintSlipModal';
 import SearchableSelect from '../components/SearchableSelect';
 import Pagination from '../components/Pagination';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import {
   CancelRequestModal,
   CancelApproveModal,
@@ -69,6 +72,8 @@ export default function ExportView({ onNavigate }) {
   const [draftLotId, setDraftLotId] = useState('');
   const [draftQty, setDraftQty] = useState(1);
   const [draftNote, setDraftNote] = useState('');
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerHistoryOpen, setScannerHistoryOpen] = useState(false);
   const bloodCodeInputRef = useRef(null);
   const lotSelectRef = useRef(null);
   const qtyInputRef = useRef(null);
@@ -385,6 +390,34 @@ export default function ExportView({ onNavigate }) {
     }
   };
 
+  const handleScanExportBag = (scannedCode) => {
+    const clean = scannedCode.trim().toUpperCase();
+    if (!clean) return;
+
+    const matched = lots.find(
+      (l) => (l.blood_code && l.blood_code.toUpperCase() === clean) ||
+             (l.product_code && l.product_code.toUpperCase() === clean)
+    );
+
+    if (matched) {
+      const inList = exportList.find((item) => Number(item.lot_id) === Number(matched.id))?.quantity || 0;
+      const remain = Math.max(0, Number(matched.quantity) - Number(inList));
+      if (remain <= 0) {
+        setError(`Túi máu "${clean}" (${matched.product_name}) đã đạt giới hạn tồn khả dụng trong danh sách xuất!`);
+        return;
+      }
+      addLotToExportList(matched, 1, draftNote);
+      setDraftBloodCode('');
+      setDraftLotId('');
+      setDraftQty(1);
+      setMessage(`Đã quét & thêm túi máu [${clean}] - ${matched.product_name} (${matched.blood_group}${matched.rh_factor}) vào danh sách xuất.`);
+      setError('');
+    } else {
+      setDraftBloodCode(clean);
+      setError(`Không tìm thấy túi máu có mã "${clean}" còn tồn khả dụng trong kho!`);
+    }
+  };
+
   const handleDraftLotChange = (val) => {
     setDraftLotId(val);
     const nextLot = lots.find((l) => Number(l.id) === Number(val));
@@ -680,19 +713,39 @@ export default function ExportView({ onNavigate }) {
               {/* Hàng 1: Mã máu, Loại chế phẩm, Nhóm ABO, Hệ Rh, Thể tích */}
               <div className="flex flex-wrap items-end gap-2.5">
                 {/* 1. Mã máu (Túi) */}
-                <div className="w-full sm:w-[150px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Mã máu (Túi/Bịch)
-                  </label>
-                  <input
-                    ref={bloodCodeInputRef}
-                    type="text"
-                    value={draftBloodCode}
-                    onChange={(e) => handleBloodCodeChange(e.target.value)}
-                    onKeyDown={handleBloodCodeKeyDown}
-                    placeholder="Nhập/quét mã..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
-                  />
+                <div className="w-full sm:w-[170px]">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs text-slate-600">
+                      Mã máu (Túi/Bịch)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setScannerOpen(true)}
+                      className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                    >
+                      <Camera className="w-3 h-3" />
+                      <span>Camera</span>
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      ref={bloodCodeInputRef}
+                      type="text"
+                      value={draftBloodCode}
+                      onChange={(e) => handleBloodCodeChange(e.target.value)}
+                      onKeyDown={handleBloodCodeKeyDown}
+                      placeholder="Nhập/quét mã..."
+                      className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setScannerOpen(true)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                      title="Bật camera quét mã túi máu"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* 2. Loại chế phẩm máu trong kho (FEFO) */}
@@ -1020,9 +1073,17 @@ export default function ExportView({ onNavigate }) {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Tìm mã phiếu, người nhận, khoa/phòng..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:border-[#C5299B] outline-none transition"
+                placeholder="Tìm mã phiếu, người nhận, khoa..."
+                className="w-full pl-9 pr-9 py-1.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:border-[#C5299B] outline-none transition"
               />
+              <button
+                type="button"
+                onClick={() => setScannerHistoryOpen(true)}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-[#C5299B] hover:bg-slate-200/50 rounded-lg active:scale-95 transition"
+                title="Quét mã vạch tìm kiếm phiếu"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
@@ -1395,6 +1456,29 @@ export default function ExportView({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* Barcode Scanner cho Xuất Máu (Hỗ trợ quét liên tục nhiều túi máu) */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title="Quét mã vạch xuất túi máu"
+        description="Quét mã túi máu để tự động tìm và thêm vào danh sách xuất"
+        continuous={true}
+        onScan={handleScanExportBag}
+      />
+
+      {/* Barcode Scanner cho Tìm kiếm lịch sử phiếu xuất */}
+      <BarcodeScannerModal
+        isOpen={scannerHistoryOpen}
+        onClose={() => setScannerHistoryOpen(false)}
+        title="Quét tìm kiếm phiếu xuất"
+        description="Quét mã túi máu hoặc số phiếu để tra cứu lịch sử xuất"
+        continuous={false}
+        onScan={(scannedCode) => {
+          setSearchQuery(scannedCode);
+          setCurrentPage(1);
+        }}
+      />
     </div>
   );
 }

@@ -35,6 +35,9 @@ import {
   EyeOff,
   CheckCircle2,
   Activity,
+  Camera,
+  Barcode,
+  Search,
 } from 'lucide-react';
 import api from './api';
 import { useAuth } from './context/AuthContext';
@@ -50,6 +53,7 @@ import CategoriesView from './views/CategoriesView';
 import SystemView from './views/SystemView';
 import CancellationApprovalView from './views/CancellationApprovalView';
 import GlobalSearch from './components/GlobalSearch';
+import BarcodeScannerModal from './components/BarcodeScannerModal';
 
 export default function App() {
   const { user, loading, systemConfig, logout, hasPermission, pendingSummary } = useAuth();
@@ -60,6 +64,8 @@ export default function App() {
     return localStorage.getItem('bloodbank_sidebar_collapsed') === 'true';
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileScannerOpen, setMobileScannerOpen] = useState(false);
+  const [scannerMode, setScannerMode] = useState('search'); // 'search' | 'export' | 'import' | 'audit'
   const [inventorySearch, setInventorySearch] = useState('');
   const [openGroup, setOpenGroup] = useState(() => {
     const saved = localStorage.getItem('bloodbank_active_page') || 'inventory';
@@ -366,6 +372,24 @@ export default function App() {
   const handleGlobalSearchLot = (bloodCode) => {
     setInventorySearch(bloodCode);
     handleSelectMainPage('inventory');
+  };
+
+  const handleGlobalScanResult = (code) => {
+    const clean = code.trim();
+    if (!clean) return;
+
+    if (scannerMode === 'search') {
+      handleGlobalSearchLot(clean);
+    } else if (scannerMode === 'export') {
+      handleSelectMainPage('export');
+    } else if (scannerMode === 'import') {
+      handleSelectMainPage('import');
+    } else if (scannerMode === 'audit') {
+      handleSelectMainPage('audit');
+    } else {
+      handleGlobalSearchLot(clean);
+    }
+    setMobileScannerOpen(false);
   };
 
   const handleSelectSubPage = (groupKey, key) => {
@@ -900,7 +924,7 @@ export default function App() {
         </header>
 
         {/* Scrollable Full-Width Page Content */}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full">
+        <main className="flex-1 p-3 sm:p-6 overflow-y-auto w-full pb-20 lg:pb-6">
           <div className="w-full">
             {activePage === 'dashboard' && (
               <DashboardView onNavigate={handleSelectMainPage} />
@@ -924,8 +948,91 @@ export default function App() {
           </div>
         </main>
 
-        {/* Footer */}
-        <footer className="no-print bg-white border-t border-slate-200 py-2 px-6 text-xs text-slate-500 shrink-0">
+        {/* Mobile Bottom Navigation Bar - Thanh điều hướng tối ưu cho ngón tay khi dùng điện thoại */}
+        <nav className="no-print lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg px-2 py-1.5 flex items-center justify-around">
+          {/* 1. Tổng quan */}
+          <button
+            type="button"
+            onClick={() => handleSelectMainPage('dashboard')}
+            className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition ${
+              activePage === 'dashboard'
+                ? 'text-[#C5299B] font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Tổng quan</span>
+          </button>
+
+          {/* 2. Kho máu */}
+          <button
+            type="button"
+            onClick={() => handleSelectMainPage('inventory')}
+            className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition ${
+              activePage === 'inventory'
+                ? 'text-[#C5299B] font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Droplet className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Kho máu</span>
+          </button>
+
+          {/* 3. Nút Quét Mã Vạch Lớn Trung Tâm (Hero Action Button) */}
+          <div className="flex flex-col items-center justify-center px-1 -mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (activePage === 'export') setScannerMode('export');
+                else if (activePage === 'import') setScannerMode('import');
+                else if (activePage === 'audit') setScannerMode('audit');
+                else setScannerMode('search');
+                setMobileScannerOpen(true);
+              }}
+              className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#C5299B] to-purple-600 text-white flex items-center justify-center shadow-md shadow-pink-500/30 active:scale-95 transition-transform border-2 border-white"
+              title="Quét mã vạch túi máu bằng Camera"
+            >
+              <Barcode className="w-5 h-5" />
+            </button>
+            <span className="text-[10px] font-bold text-[#C5299B] mt-0.5">Quét mã</span>
+          </div>
+
+          {/* 4. Xuất máu */}
+          <button
+            type="button"
+            onClick={() => handleSelectMainPage('export')}
+            className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition ${
+              activePage === 'export'
+                ? 'text-[#C5299B] font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ArrowUpRight className="w-5 h-5" />
+            <span className="text-[10px] mt-0.5">Xuất máu</span>
+          </button>
+
+          {/* 5. Menu Thêm (Mở sidebar drawer) */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition relative ${
+              mobileOpen
+                ? 'text-[#C5299B] font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <div className="relative">
+              <Menu className="w-5 h-5" />
+              {canApproveAny && pendingSummary?.totalPending > 0 && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5">Menu</span>
+          </button>
+        </nav>
+
+        {/* Footer (Hiển thị trên Desktop, ẩn trên Mobile để tối ưu diện tích màn hình) */}
+        <footer className="no-print hidden lg:block bg-white border-t border-slate-200 py-2 px-6 text-xs text-slate-500 shrink-0">
           <div className="w-full flex flex-wrap items-center justify-between gap-3">
             <div>
               <span>{systemConfig.app_name}</span> — Phiên bản v
@@ -1074,6 +1181,23 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Barcode Scanner Đa năng Toàn Hệ Thống trên Mobile */}
+      <BarcodeScannerModal
+        isOpen={mobileScannerOpen}
+        onClose={() => setMobileScannerOpen(false)}
+        title="Quét mã vạch túi máu đa năng"
+        description="Quét mã túi máu để tra cứu nhanh hoặc thêm vào nghiệp vụ"
+        modes={[
+          { key: 'search', label: 'Tra cứu kho', icon: Search },
+          { key: 'export', label: 'Xuất máu', icon: ArrowUpRight },
+          { key: 'import', label: 'Nhập kho', icon: PackagePlus },
+          { key: 'audit', label: 'Kiểm kê', icon: ClipboardCheck },
+        ]}
+        activeMode={scannerMode}
+        onModeChange={(m) => setScannerMode(m)}
+        onScan={handleGlobalScanResult}
+      />
     </div>
   );
 }

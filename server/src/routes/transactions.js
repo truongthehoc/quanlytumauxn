@@ -288,6 +288,9 @@ router.post('/import', authenticate, requirePermission('import.create'), async (
         if (existing.length > 0) {
           throw new Error(`Mã máu "${bloodCode}" đã tồn tại trong kho (chưa xuất)!`);
         }
+
+        // Dọn dẹp bản ghi cũ nếu túi máu từng bị hủy hoặc số lượng <= 0
+        await conn.query('DELETE FROM inventory_lots WHERE blood_code = ? AND quantity <= 0', [bloodCode]);
       }
 
       // Look up default unit_id from blood_products if not provided
@@ -321,7 +324,10 @@ router.post('/import', authenticate, requirePermission('import.create'), async (
       await conn.query(
         `INSERT INTO inventory_lots (blood_code, collection_date, blood_product_id, blood_group, rh_factor, volume_id, unit_id, expiry_date, quantity)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity), collection_date = COALESCE(VALUES(collection_date), collection_date)`,
+         ON DUPLICATE KEY UPDATE 
+           quantity = quantity + VALUES(quantity), 
+           collection_date = VALUES(collection_date),
+           expiry_date = VALUES(expiry_date)`,
         [
           bloodCode,
           collectionDate,
@@ -955,10 +961,14 @@ router.post('/:id/cancel-approve', authenticate, async (req, res) => {
           if (!lotRows.length || lotRows[0].quantity < it.quantity) {
             throw new Error(`Không thể duyệt hủy: Túi máu mã "${it.blood_code}" (${it.product_name}) đã được xuất hoặc sử dụng khỏi kho!`);
           }
-          await conn.query(
-            'UPDATE inventory_lots SET quantity = quantity - ? WHERE id = ?',
-            [it.quantity, lotRows[0].id]
-          );
+          if (lotRows[0].quantity <= it.quantity) {
+            await conn.query('DELETE FROM inventory_lots WHERE id = ?', [lotRows[0].id]);
+          } else {
+            await conn.query(
+              'UPDATE inventory_lots SET quantity = quantity - ? WHERE id = ?',
+              [it.quantity, lotRows[0].id]
+            );
+          }
         } else {
           // Khớp theo thông số lô
           const [lotRows] = await conn.query(
@@ -975,7 +985,11 @@ router.post('/:id/cancel-approve', authenticate, async (req, res) => {
           for (const lr of lotRows) {
             if (needed <= 0) break;
             const deduct = Math.min(lr.quantity, needed);
-            await conn.query('UPDATE inventory_lots SET quantity = quantity - ? WHERE id = ?', [deduct, lr.id]);
+            if (lr.quantity <= deduct) {
+              await conn.query('DELETE FROM inventory_lots WHERE id = ?', [lr.id]);
+            } else {
+              await conn.query('UPDATE inventory_lots SET quantity = quantity - ? WHERE id = ?', [deduct, lr.id]);
+            }
             needed -= deduct;
           }
         }

@@ -19,6 +19,8 @@ import {
   FileText,
   CalendarDays,
   ShieldAlert,
+  Camera,
+  Barcode,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +29,7 @@ import DateInput from '../components/DateInput';
 import QuickAddPartnerModal from '../components/QuickAddPartnerModal';
 import SearchableSelect from '../components/SearchableSelect';
 import Pagination from '../components/Pagination';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 import {
   CancelRequestModal,
   CancelApproveModal,
@@ -44,6 +47,8 @@ export default function ImportView({ onNavigate }) {
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerHistoryOpen, setScannerHistoryOpen] = useState(false);
 
   // Cancellation state
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'COMPLETED' | 'PENDING_CANCEL' | 'CANCELLED'
@@ -433,6 +438,93 @@ export default function ImportView({ onNavigate }) {
     setItems((prev) => prev.filter((it) => it.id !== id));
   };
 
+  const handleItemCollectionDateChange = (id, newDate) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== id) return it;
+        let newExpiry = it.expiry_date;
+        if (newDate) {
+          const dt = new Date(newDate);
+          if (!isNaN(dt.getTime())) {
+            const prod = categories.bloodProducts.find((p) => String(p.id) === String(it.blood_product_id));
+            const shelfDays = Number(prod?.shelf_life_days) || 35;
+            dt.setDate(dt.getDate() + shelfDays);
+            newExpiry = dt.toISOString().slice(0, 10);
+          }
+        }
+        return { ...it, collection_date: newDate, expiry_date: newExpiry };
+      })
+    );
+  };
+
+  const handleItemExpiryDateChange = (id, newDate) => {
+    setItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, expiry_date: newDate } : it))
+    );
+  };
+
+  const handleOpenNewImportForm = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    setDraftCollectionDate(today);
+    setDraftExpiryDate(defaultExpiry(30, today));
+    setDraftBloodCode('');
+    setDraftProductId('');
+    setDraftQty(1);
+    setDraftNote('');
+    setShowForm(true);
+    setMessage('');
+    setError('');
+  };
+
+  const handleReImportCancelledSlip = async (tx) => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/transactions/${tx.id}`);
+      const fullTx = res.data;
+      setPartnerId(fullTx.partner_id || '');
+      setPersonName(fullTx.person_name || '');
+      setNote(fullTx.note ? `Nhập lại từ phiếu ${fullTx.code}: ${fullTx.note}` : `Nhập lại từ phiếu ${fullTx.code}`);
+
+      const today = new Date().toISOString().slice(0, 10);
+      setDraftCollectionDate(today);
+      setDraftExpiryDate(defaultExpiry(30, today));
+
+      const reItems = (fullTx.items || []).map((it) => {
+        const itemCollectionDate = it.collection_date
+          ? String(it.collection_date).slice(0, 10)
+          : today;
+        const itemExpiryDate = it.expiry_date
+          ? String(it.expiry_date).slice(0, 10)
+          : defaultExpiry(35, itemCollectionDate);
+        return {
+          id: Date.now() + Math.random(),
+          blood_code: it.blood_code || '',
+          collection_date: itemCollectionDate,
+          blood_product_id: it.blood_product_id,
+          product_name: it.product_name || '',
+          product_code: it.product_code || '',
+          unit_name: it.unit_name || 'Đơn vị',
+          blood_group: it.blood_group,
+          rh_factor: it.rh_factor,
+          volume_id: it.volume_id,
+          volume_name: it.volume_name || '',
+          expiry_date: itemExpiryDate,
+          quantity: it.quantity || 1,
+          note: it.note || '',
+        };
+      });
+
+      setItems(reItems);
+      setShowForm(true);
+      setMessage(`Đã nạp dữ liệu từ phiếu đã hủy ${fullTx.code}. Bạn có thể kiểm tra và chọn lại ngày lấy máu trước khi nhập.`);
+    } catch (err) {
+      console.error(err);
+      setError('Không thể tải thông tin phiếu hủy để nhập lại');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const totalImportQty = useMemo(
     () => items.reduce((sum, it) => sum + Number(it.quantity || 0), 0),
     [items]
@@ -502,11 +594,7 @@ export default function ImportView({ onNavigate }) {
         {hasPermission('import.create') && (
           <button
             type="button"
-            onClick={() => {
-              setShowForm(true);
-              setMessage('');
-              setError('');
-            }}
+            onClick={handleOpenNewImportForm}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm bg-[#C5299B] hover:bg-[#a82083] text-white"
           >
             <Plus className="w-4 h-4" />
@@ -875,28 +963,48 @@ export default function ImportView({ onNavigate }) {
               {/* Hàng 1: Mã máu, Loại chế phẩm, Nhóm ABO, Hệ Rh, Thể tích */}
               <div className="flex flex-wrap items-end gap-2.5">
                 {/* 1. Mã máu */}
-                <div className="w-full sm:w-[150px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Mã máu (Túi/Bịch) <span className="text-rose-600 font-bold">*</span>
-                  </label>
-                  <input
-                    ref={bloodCodeInputRef}
-                    type="text"
-                    value={draftBloodCode}
-                    onChange={(e) => setDraftBloodCode(e.target.value.toUpperCase())}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (!draftProductId) {
-                          productSelectRef.current?.focus();
-                        } else {
-                          handleAddToImportList();
+                <div className="w-full sm:w-[170px]">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs text-slate-600">
+                      Mã máu (Túi/Bịch) <span className="text-rose-600 font-bold">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setScannerOpen(true)}
+                      className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                    >
+                      <Camera className="w-3 h-3" />
+                      <span>Camera</span>
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      ref={bloodCodeInputRef}
+                      type="text"
+                      value={draftBloodCode}
+                      onChange={(e) => setDraftBloodCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!draftProductId) {
+                            productSelectRef.current?.focus();
+                          } else {
+                            handleAddToImportList();
+                          }
                         }
-                      }
-                    }}
-                    placeholder="Nhập mã máu..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
-                  />
+                      }}
+                      placeholder="Nhập mã máu..."
+                      className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setScannerOpen(true)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                      title="Quét mã vạch túi máu bằng Camera"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* 2. Loại chế phẩm máu */}
@@ -1106,28 +1214,28 @@ export default function ImportView({ onNavigate }) {
                     <tr className="bg-slate-100/70 text-slate-600 text-xs border-b border-slate-200">
                       <th className="py-2.5 px-3 text-center w-[4%]">#</th>
                       <th className="py-2.5 px-3 text-left w-[12%]">Mã máu</th>
-                      <th className="py-2.5 px-3 text-left w-[18%]">
+                      <th className="py-2.5 px-3 text-left w-[17%]">
                         Loại chế phẩm máu
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[8%]">
+                      <th className="py-2.5 px-2 text-center w-[7%]">
                         Nhóm máu
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[8%]">
+                      <th className="py-2.5 px-2 text-center w-[7%]">
                         Thể tích
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[9%]">
+                      <th className="py-2.5 px-2 text-center w-[8%]">
                         Đơn vị tính
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[11%]">
+                      <th className="py-2.5 px-2 text-center w-[13%]">
                         Ngày lấy máu
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[11%]">
+                      <th className="py-2.5 px-2 text-center w-[13%]">
                         Hạn sử dụng
                       </th>
-                      <th className="py-2.5 px-2 text-center w-[7%]">
+                      <th className="py-2.5 px-2 text-center w-[6%]">
                         Số lượng
                       </th>
-                      <th className="py-2.5 px-3 text-left w-[8%]">
+                      <th className="py-2.5 px-3 text-left w-[9%]">
                         Ghi chú
                       </th>
                       <th className="py-2.5 px-2 text-center w-[4%]"></th>
@@ -1176,11 +1284,21 @@ export default function ImportView({ onNavigate }) {
                           <td className="py-2.5 px-2 text-center text-xs text-slate-600">
                             {it.unit_name || 'Đơn vị'}
                           </td>
-                          <td className="py-2.5 px-2 text-center text-xs text-slate-700">
-                            {formatDate(it.collection_date) || '---'}
+                          <td className="py-1.5 px-1.5 text-center">
+                            <DateInput
+                              value={it.collection_date}
+                              onChange={(e) => handleItemCollectionDateChange(it.id, e.target.value)}
+                              placeholder="dd/MM/yyyy"
+                              className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-yellow-50/70 focus:bg-white text-center"
+                            />
                           </td>
-                          <td className="py-2.5 px-2 text-center text-xs text-slate-700">
-                            {formatDate(it.expiry_date)}
+                          <td className="py-1.5 px-1.5 text-center">
+                            <DateInput
+                              value={it.expiry_date}
+                              onChange={(e) => handleItemExpiryDateChange(it.id, e.target.value)}
+                              placeholder="dd/MM/yyyy"
+                              className="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-yellow-50/70 focus:bg-white text-center"
+                            />
                           </td>
                           <td className="py-2.5 px-2 text-center font-bold text-[#C5299B]">
                             {it.quantity}
@@ -1249,8 +1367,16 @@ export default function ImportView({ onNavigate }) {
                   setCurrentPage(1);
                 }}
                 placeholder="Tìm mã phiếu, người giao, đối tác..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:border-[#C5299B] outline-none transition"
+                className="w-full pl-9 pr-9 py-1.5 rounded-xl border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:border-[#C5299B] outline-none transition"
               />
+              <button
+                type="button"
+                onClick={() => setScannerHistoryOpen(true)}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-[#C5299B] hover:bg-slate-200/50 rounded-lg active:scale-95 transition"
+                title="Quét mã vạch tìm kiếm phiếu"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
@@ -1461,6 +1587,17 @@ export default function ImportView({ onNavigate }) {
                             </>
                           )}
 
+                          {tx.status === 'CANCELLED' && hasPermission('import.create') && (
+                            <button
+                              type="button"
+                              onClick={() => handleReImportCancelledSlip(tx)}
+                              title="Nhập lại từ phiếu đã hủy này"
+                              className="p-1.5 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                          )}
+
                           {(!tx.status || tx.status === 'COMPLETED') && canCancelRequest && (
                             <button
                               type="button"
@@ -1506,6 +1643,7 @@ export default function ImportView({ onNavigate }) {
           onRequestCancel={(tx) => setCancelRequestTarget(tx)}
           onApproveCancel={(tx) => setCancelApproveTarget(tx)}
           onRejectCancel={(tx) => setCancelRejectTarget(tx)}
+          onReImport={hasPermission('import.create') ? handleReImportCancelledSlip : null}
         />
       )}
 
@@ -1531,6 +1669,34 @@ export default function ImportView({ onNavigate }) {
         onReject={handleCancelRejectSubmit}
         loading={cancelLoading}
         transaction={cancelRejectTarget}
+      />
+
+      {/* Barcode Scanner cho Nhập Chế Phẩm */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title="Quét mã vạch nhập túi máu"
+        description="Quét mã vạch trên nhãn túi máu để thêm vào danh sách nhập"
+        continuous={false}
+        onScan={(scannedCode) => {
+          setDraftBloodCode(scannedCode.toUpperCase());
+          if (!draftProductId) {
+            setTimeout(() => productSelectRef.current?.focus(), 50);
+          }
+        }}
+      />
+
+      {/* Barcode Scanner cho Lịch sử Nhập */}
+      <BarcodeScannerModal
+        isOpen={scannerHistoryOpen}
+        onClose={() => setScannerHistoryOpen(false)}
+        title="Quét tìm kiếm phiếu nhập"
+        description="Quét mã túi máu hoặc số phiếu để tra cứu lịch sử nhập"
+        continuous={false}
+        onScan={(scannedCode) => {
+          setSearchQuery(scannedCode);
+          setCurrentPage(1);
+        }}
       />
     </div>
   );

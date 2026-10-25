@@ -14,8 +14,10 @@ import {
   TrendingUp,
   AlertTriangle,
   Package,
+  Camera,
 } from 'lucide-react';
 import api from '../api';
+import BarcodeScannerModal from './BarcodeScannerModal';
 
 const SYSTEM_PAGES = [
   { key: 'inventory', title: 'Tồn kho Tủ máu', desc: 'Xem số lượng, nhóm máu ABO/Rh và cảnh báo hạn dùng FEFO', icon: Droplet, keywords: ['ton kho', 'tu mau', 'fefo', 'han dung', 'nhom mau'] },
@@ -41,6 +43,7 @@ function removeAccents(str = '') {
 
 export default function GlobalSearch({ onNavigate, onSearchLot }) {
   const [open, setOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState({ lots: [], transactions: [], audits: [] });
@@ -180,13 +183,23 @@ export default function GlobalSearch({ onNavigate, onSearchLot }) {
           value={query}
           onFocus={() => setOpen(true)}
           onChange={handleChange}
-          placeholder="Tìm mã túi máu, phiếu giao dịch, kỳ kiểm kê... (Ctrl + K)"
-          className="w-full pl-9 pr-14 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white focus:bg-white focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/10 outline-none transition text-slate-800 placeholder:text-slate-400"
+          placeholder="Tìm mã túi máu, phiếu, kiểm kê..."
+          className="w-full pl-9 pr-20 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white focus:bg-white focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/10 outline-none transition text-slate-800 placeholder:text-slate-400"
         />
 
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          {/* Nút quét mã vạch bằng camera */}
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            className="p-1.5 rounded-lg text-[#C5299B] hover:bg-[#C5299B]/10 active:scale-95 transition"
+            title="Quét mã vạch bằng Camera"
+          >
+            <Camera className="w-4 h-4" />
+          </button>
+
           {loading ? (
-            <RefreshCw className="w-3.5 h-3.5 text-[#C5299B] animate-spin" />
+            <RefreshCw className="w-3.5 h-3.5 text-[#C5299B] animate-spin mr-1" />
           ) : query ? (
             <button
               type="button"
@@ -203,6 +216,19 @@ export default function GlobalSearch({ onNavigate, onSearchLot }) {
           )}
         </div>
       </div>
+
+      {/* Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title="Quét mã vạch tìm kiếm nhanh"
+        description="Quét mã vạch túi máu hoặc số phiếu để tra cứu tức thì"
+        onScan={(scannedCode) => {
+          setQuery(scannedCode);
+          searchGlobal(scannedCode);
+          setOpen(true);
+        }}
+      />
 
       {/* Dropdown Popup Results */}
       {open && (

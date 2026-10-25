@@ -90,6 +90,26 @@ input.border-red-500:focus {
   box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.25) !important;
 }
 
+/* Hiệu ứng tia quét laser mã vạch công nghệ cao */
+@keyframes scanner-laser {
+  0% {
+    top: 6%;
+    opacity: 0.8;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.8;
+  }
+}
+
+.animate-scanner-laser {
+  animation: scanner-laser 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @media print {
   body * {
     visibility: hidden;

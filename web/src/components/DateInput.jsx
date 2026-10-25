@@ -64,29 +64,26 @@ const DateInput = forwardRef(function DateInput(
 
   const handleTextChange = (e) => {
     let raw = e.target.value.replace(/[^\d/]/g, '');
-    // Auto-insert slashes when typing digits
-    const digitsOnly = raw.replace(/\//g, '');
-    if (
-      raw.length > text.length &&
-      !raw.includes('/') &&
-      digitsOnly.length >= 2
-    ) {
+    const digitsOnly = raw.replace(/\//g, '').slice(0, 8);
+    let formatted = raw;
+    // Tự động định dạng dấu / khi người dùng gõ dãy số
+    if (!raw.includes('/') && digitsOnly.length >= 2) {
       if (digitsOnly.length <= 2) {
-        raw = `${digitsOnly}/`;
+        formatted = `${digitsOnly}/`;
       } else if (digitsOnly.length <= 4) {
-        raw = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2)}`;
+        formatted = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2)}`;
       } else {
-        raw = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2, 4)}/${digitsOnly.slice(4, 8)}`;
+        formatted = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2, 4)}/${digitsOnly.slice(4)}`;
       }
     }
-    setText(raw);
+    setText(formatted);
 
-    if (raw === '') {
+    if (formatted === '') {
       onChange?.({ target: { value: '' } });
       return;
     }
 
-    const iso = displayToIso(raw);
+    const iso = displayToIso(formatted);
     if (iso) {
       onChange?.({ target: { value: iso } });
     }
@@ -96,6 +93,7 @@ const DateInput = forwardRef(function DateInput(
     const iso = displayToIso(text);
     if (iso) {
       setText(isoToDisplay(iso));
+      onChange?.({ target: { value: iso } });
     } else if (!text && !required) {
       onChange?.({ target: { value: '' } });
     } else {
@@ -132,33 +130,29 @@ const DateInput = forwardRef(function DateInput(
         maxLength={10}
         required={required}
         tabIndex={tabIndex}
-        className={`w-full pr-8 ${className}`}
+        className={`w-full pr-9 ${className}`}
         {...rest}
       />
-      <button
-        type="button"
-        onClick={openPicker}
-        tabIndex={-1}
-        className="absolute right-2.5 text-slate-500 hover:text-[#C5299B] transition"
-        title="Chọn ngày"
-      >
-        <Calendar className="w-4 h-4" />
-      </button>
-      <input
-        ref={nativeDateRef}
-        type="date"
-        min={min}
-        max={max}
-        value={typeof normalizedValue === 'string' ? normalizedValue.slice(0, 10) : ''}
-        onChange={(e) => {
-          const newIso = e.target.value;
-          setText(isoToDisplay(newIso));
-          onChange?.({ target: { value: newIso } });
-        }}
-        tabIndex={-1}
-        aria-hidden="true"
-        className="sr-only pointer-events-none absolute right-0 bottom-0 w-0 h-0 opacity-0"
-      />
+      {/* Vùng icon lịch: hiển thị Calendar icon đẹp mắt và phủ input date trực tiếp lên trên để tương thích 100% mọi trình duyệt */}
+      <div className="absolute right-0 top-0 bottom-0 w-9 flex items-center justify-center text-slate-500 hover:text-[#C5299B] transition">
+        <Calendar className="w-4 h-4 pointer-events-none" />
+        <input
+          ref={nativeDateRef}
+          type="date"
+          min={min}
+          max={max}
+          value={typeof normalizedValue === 'string' ? normalizedValue.slice(0, 10) : ''}
+          onChange={(e) => {
+            const newIso = e.target.value;
+            setText(isoToDisplay(newIso));
+            onChange?.({ target: { value: newIso } });
+          }}
+          tabIndex={-1}
+          aria-label="Chọn ngày từ lịch"
+          title="Bấm để chọn ngày"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        />
+      </div>
     </div>
   );
 });

@@ -28,6 +28,7 @@ import {
   TrendingDown,
   TrendingUp,
   FileText,
+  Camera,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import api from '../api';
@@ -36,6 +37,7 @@ import DateInput from '../components/DateInput';
 import Pagination from '../components/Pagination';
 import PrintAuditReportModal from '../components/PrintAuditReportModal';
 import SearchableSelect from '../components/SearchableSelect';
+import BarcodeScannerModal from '../components/BarcodeScannerModal';
 
 export default function InventoryAuditView() {
   const { user, hasPermission, systemConfig, categories } = useAuth();
@@ -67,6 +69,7 @@ export default function InventoryAuditView() {
   // Scanner state
   const [scanCode, setScanCode] = useState('');
   const [scanMessage, setScanMessage] = useState(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const scanInputRef = useRef(null);
 
   // Helper tính tên kỳ kiểm kê mặc định theo tháng/năm hiện tại
@@ -426,6 +429,38 @@ export default function InventoryAuditView() {
         text: errMsg,
       });
       setTimeout(() => scanInputRef.current?.select(), 50);
+    }
+  };
+
+  const handleScanAuditBag = async (code) => {
+    if (!code?.trim() || !selectedAuditId) return;
+    try {
+      const clean = code.trim().toUpperCase();
+      const res = await api.post(`/audits/${selectedAuditId}/scan`, { blood_code: clean });
+      if (res.data.item) {
+        setAuditItems((prev) => {
+          const idx = prev.findIndex((i) => i.id === res.data.item.id);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = res.data.item;
+            return next;
+          }
+          return [res.data.item, ...prev];
+        });
+      }
+      if (res.data.audit) {
+        setAuditDetail(res.data.audit);
+      }
+      setScanMessage({
+        type: 'success',
+        text: res.data.message || `Đã kiểm đếm thành công [${clean}]!`,
+      });
+    } catch (err) {
+      const errMsg = err.response?.data?.error || 'Lỗi kiểm đếm túi máu';
+      setScanMessage({
+        type: 'error',
+        text: errMsg,
+      });
     }
   };
 
@@ -1214,7 +1249,7 @@ export default function InventoryAuditView() {
               </div>
 
               <form onSubmit={handleScanSubmit} className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                <div className="flex-1 relative">
+                <div className="flex-1 relative min-w-[200px]">
                   <input
                     ref={scanInputRef}
                     type="text"
@@ -1233,6 +1268,16 @@ export default function InventoryAuditView() {
                     </button>
                   )}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setScannerOpen(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-xs transition flex items-center gap-1.5 whitespace-nowrap shrink-0 active:scale-95"
+                  title="Mở Camera quét mã túi máu liên tục"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Quét Camera</span>
+                </button>
 
                 <button
                   type="submit"
@@ -2022,6 +2067,16 @@ export default function InventoryAuditView() {
           onExportExcel={handleExportExcel}
         />
       )}
+
+      {/* Barcode Scanner cho Kiểm Kê Kho (Continuous Mode) */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        title="Quét mã vạch kiểm kê túi máu"
+        description="Quét mã vạch trên nhãn túi máu để ghi nhận kiểm đếm thực tế"
+        continuous={true}
+        onScan={handleScanAuditBag}
+      />
     </div>
   );
 }
