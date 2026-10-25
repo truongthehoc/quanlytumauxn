@@ -64,8 +64,9 @@ export default function ImportView({ onNavigate }) {
     return () => clearTimeout(timer);
   }, [message, error]);
 
-  const defaultExpiry = (shelfLifeDays = 30) => {
-    const d = new Date();
+  const defaultExpiry = (shelfLifeDays = 30, baseDateStr = null) => {
+    const base = baseDateStr ? new Date(baseDateStr) : new Date();
+    const d = isNaN(base.getTime()) ? new Date() : base;
     d.setDate(d.getDate() + (Number(shelfLifeDays) || 30));
     return d.toISOString().slice(0, 10);
   };
@@ -98,12 +99,15 @@ export default function ImportView({ onNavigate }) {
   const [draftQty, setDraftQty] = useState(1);
   const [draftNote, setDraftNote] = useState('');
 
-  const handleCollectionDateChange = (val) => {
+  const handleCollectionDateChange = (eOrVal) => {
+    const val = typeof eOrVal === 'string' ? eOrVal : eOrVal?.target?.value ?? '';
     setDraftCollectionDate(val);
     if (val) {
       const dt = new Date(val);
       if (!isNaN(dt.getTime())) {
-        dt.setDate(dt.getDate() + 35);
+        const prod = categories.bloodProducts.find((p) => String(p.id) === String(draftProductId));
+        const shelfDays = Number(prod?.shelf_life_days) || 35;
+        dt.setDate(dt.getDate() + shelfDays);
         setDraftExpiryDate(dt.toISOString().slice(0, 10));
       }
     }
@@ -348,7 +352,7 @@ export default function ImportView({ onNavigate }) {
     setDraftProductId(val);
     const prod = categories.bloodProducts.find((p) => String(p.id) === String(val));
     if (prod?.shelf_life_days) {
-      setDraftExpiryDate(defaultExpiry(prod.shelf_life_days));
+      setDraftExpiryDate(defaultExpiry(prod.shelf_life_days, draftCollectionDate));
     }
   };
 

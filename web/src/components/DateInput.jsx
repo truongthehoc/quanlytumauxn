@@ -9,6 +9,9 @@ import { Calendar } from 'lucide-react';
 
 // Convert YYYY-MM-DD -> dd/MM/yyyy
 function isoToDisplay(iso) {
+  if (iso && typeof iso === 'object') {
+    iso = iso.target?.value || '';
+  }
   if (!iso || typeof iso !== 'string') return '';
   const clean = iso.slice(0, 10);
   const parts = clean.split('-');
@@ -39,19 +42,25 @@ const DateInput = forwardRef(function DateInput(
     placeholder = 'dd/MM/yyyy',
     onKeyDown,
     tabIndex,
+    min,
+    max,
     ...rest
   },
   ref
 ) {
-  const [text, setText] = useState(() => isoToDisplay(value));
+  const normalizedValue =
+    typeof value === 'object' && value !== null
+      ? (value.target?.value || '')
+      : (value || '');
+  const [text, setText] = useState(() => isoToDisplay(normalizedValue));
   const nativeDateRef = useRef(null);
   const textInputRef = useRef(null);
 
   useImperativeHandle(ref, () => textInputRef.current);
 
   useEffect(() => {
-    setText(isoToDisplay(value));
-  }, [value]);
+    setText(isoToDisplay(normalizedValue));
+  }, [normalizedValue]);
 
   const handleTextChange = (e) => {
     let raw = e.target.value.replace(/[^\d/]/g, '');
@@ -91,7 +100,7 @@ const DateInput = forwardRef(function DateInput(
       onChange?.({ target: { value: '' } });
     } else {
       // Revert to last valid value
-      setText(isoToDisplay(value));
+      setText(isoToDisplay(normalizedValue));
     }
   };
 
@@ -138,7 +147,9 @@ const DateInput = forwardRef(function DateInput(
       <input
         ref={nativeDateRef}
         type="date"
-        value={value ? String(value).slice(0, 10) : ''}
+        min={min}
+        max={max}
+        value={typeof normalizedValue === 'string' ? normalizedValue.slice(0, 10) : ''}
         onChange={(e) => {
           const newIso = e.target.value;
           setText(isoToDisplay(newIso));
