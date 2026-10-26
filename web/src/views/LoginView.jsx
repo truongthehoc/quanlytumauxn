@@ -251,8 +251,22 @@ export default function LoginView() {
             </form>
           </div>
 
-          <div className="mt-8 text-center text-[11px] text-slate-400">
-            Hệ thống quản lý an toàn & bảo mật thông tin nội bộ
+          <div className="mt-8 space-y-3">
+            <div className="text-center text-[11px] text-slate-400">
+              Hệ thống quản lý an toàn & bảo mật thông tin nội bộ
+            </div>
+
+            {/* Thông tin phiên bản & người phát triển trên di động (dưới cùng form) */}
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-500 md:hidden">
+              <div className="flex items-center gap-1.5 truncate">
+                <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">Phiên bản v{systemConfig.app_version || '2.0.1'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 truncate">
+                <Code2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">{systemConfig.app_developer || 'Phòng CNTT'}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
