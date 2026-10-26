@@ -688,6 +688,21 @@ export default function App() {
           )}
         </div>
 
+        {/* STAGING / TEST BANNER (Bản thử nghiệm - gỡ bỏ khi triển khai chính thức) */}
+        <div className={`shrink-0 ${collapsed ? 'px-2 pb-2' : 'px-3 pb-2.5'}`}>
+          <div
+            className={`bg-red-600 text-white font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 select-none ${
+              collapsed
+                ? 'py-2 px-1 text-[10px] flex-col text-center'
+                : 'py-2.5 px-4 text-sm tracking-widest'
+            }`}
+            title="Bản thử nghiệm (STAGGING) - Gỡ bỏ khi triển khai chính thức"
+          >
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>STAGGING</span>
+          </div>
+        </div>
+
         {/* Bottom of Sidebar: Thông tin Đơn vị & Khoa + Nút thu gọn bên phải */}
         <div
           className={`p-3.5 border-t border-slate-200 bg-slate-50/70 shrink-0 flex items-center ${
