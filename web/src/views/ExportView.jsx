@@ -596,19 +596,19 @@ export default function ExportView({ onNavigate }) {
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
           />
 
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
             <div className="w-screen max-w-4xl sm:max-w-5xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
               {/* Header Drawer */}
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center shrink-0">
                     <ArrowUpRight className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#190072]">
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-[#190072] truncate">
                       Tạo phiếu xuất chế phẩm máu
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 hidden sm:block">
                       Chọn khoa/phòng nhận máu và xuất các bịch chế phẩm trong kho
                     </p>
                   </div>
@@ -616,7 +616,7 @@ export default function ExportView({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
+                  className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
                   title="Đóng (Esc)"
                 >
                   <X className="w-5 h-5" />
@@ -625,441 +625,499 @@ export default function ExportView({ onNavigate }) {
 
               {/* Form body có thanh cuộn riêng */}
               <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto flex flex-col justify-between">
-                <div className="p-6 space-y-5">
+                <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
                   {error && (
-                    <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm">
                       {error}
                     </div>
                   )}
 
                   {/* Thông tin Khoa/Phòng & Người nhận */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs text-slate-600 flex items-center gap-1">
-                    <Building2 className="w-3.5 h-3.5 text-[#C5299B]" />
-                    Khoa / Phòng nhận máu
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDeptForm({ code: '', name: '', note: '' });
-                      setDeptError('');
-                      setQuickDeptOpen(true);
-                    }}
-                    className="text-xs text-[#C5299B] hover:underline flex items-center gap-0.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Thêm mới
-                  </button>
-                </div>
-                <SearchableSelect
-                  value={departmentInfo}
-                  onChange={(val) => setDepartmentInfo(val)}
-                  options={[
-                    { value: '', label: '-- Chọn Khoa / Phòng nhận máu --' },
-                    ...activeDepartments.map((d) => ({
-                      value: d.name,
-                      label: d.name,
-                      subLabel: d.code,
-                    })),
-                  ]}
-                  placeholder="-- Chọn Khoa / Phòng nhận máu --"
-                  onAddNew={() => {
-                    setDeptForm({ code: '', name: '', note: '' });
-                    setDeptError('');
-                    setQuickDeptOpen(true);
-                  }}
-                  addNewLabel="Thêm mới Khoa / Phòng..."
-                  className="px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-slate-600 mb-1.5 flex items-center gap-1">
-                  <User className="w-3.5 h-3.5 text-[#C5299B]" />
-                  Người nhận / Bệnh nhân
-                </label>
-                <input
-                  type="text"
-                  value={personName}
-                  onChange={(e) => setPersonName(e.target.value)}
-                  onBlur={() => setPersonName((prev) => toTitleCase(prev))}
-                  placeholder="Nhập họ tên người lĩnh máu hoặc bệnh nhân..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-slate-600 mb-1.5">
-                  Ghi chú phiếu xuất
-                </label>
-                <input
-                  type="text"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Nhập ghi chú xuất..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
-                />
-              </div>
-            </div>
-
-            {/* Thanh nhập nhanh chế phẩm (Nhập/quét Mã máu hoặc Chọn chế phẩm -> Tự load thông tin -> Enter hoặc +) */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-              <div className="text-xs font-bold text-[#190072] flex items-center justify-between">
-                <span>Chọn chế phẩm đưa vào danh sách xuất (Nhập/quét Mã máu hoặc chọn Loại chế phẩm)</span>
-                {selectedDraftLot && (
-                  <span className="text-[11px] font-normal text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    Đã tải thông tin: <strong>{selectedDraftLot.product_name}</strong> [{selectedDraftLot.blood_group}{selectedDraftLot.rh_factor}]
-                  </span>
-                )}
-              </div>
-
-              {/* Hàng 1: Mã máu, Loại chế phẩm, Nhóm ABO, Hệ Rh, Thể tích */}
-              <div className="flex flex-wrap items-end gap-2.5">
-                {/* 1. Mã máu (Túi) */}
-                <div className="w-full sm:w-[170px]">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs text-slate-600">
-                      Mã máu (Túi/Bịch)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setScannerOpen(true)}
-                      className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
-                    >
-                      <Camera className="w-3 h-3" />
-                      <span>Camera</span>
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      ref={bloodCodeInputRef}
-                      type="text"
-                      value={draftBloodCode}
-                      onChange={(e) => handleBloodCodeChange(e.target.value)}
-                      onKeyDown={handleBloodCodeKeyDown}
-                      placeholder="Nhập/quét mã..."
-                      className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setScannerOpen(true)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
-                      title="Bật camera quét mã túi máu"
-                    >
-                      <Camera className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* 2. Loại chế phẩm máu trong kho (FEFO) */}
-                <div className="w-full sm:flex-1 sm:min-w-[220px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Loại chế phẩm máu trong kho (FEFO)
-                  </label>
-                  <SearchableSelect
-                    ref={lotSelectRef}
-                    value={draftLotId}
-                    onChange={(val) => handleDraftLotChange(val)}
-                    onAfterSelect={() => {
-                      setTimeout(() => {
-                        qtyInputRef.current?.focus();
-                        qtyInputRef.current?.select();
-                      }, 20);
-                    }}
-                    options={lots.map((l) => ({
-                      value: l.id,
-                      label: `${l.blood_code ? `[Mã: ${l.blood_code}] ` : ''}${l.product_name} (${l.volume_name})`,
-                      subLabel: `[${l.blood_group}${l.rh_factor}] — HSD: ${formatDate(l.expiry_date)} — Tồn: ${l.quantity} ${l.unit_name} | Mã: ${l.blood_code || l.product_code}`,
-                    }))}
-                    placeholder="Hãy nhập tên hoặc mã chế phẩm máu"
-                    className="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50"
-                  />
-                </div>
-
-                {/* 3. Nhóm ABO (tự động load) */}
-                <div className="w-[calc(50%-5px)] sm:w-[95px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Nhóm ABO
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={selectedDraftLot ? `Nhóm ${selectedDraftLot.blood_group}` : ''}
-                    placeholder="Nhóm ABO"
-                    className="w-full px-2 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
-                  />
-                </div>
-
-                {/* 4. Hệ Rh (tự động load) */}
-                <div className="w-[calc(50%-5px)] sm:w-[85px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Hệ Rh
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={selectedDraftLot ? `Rh(${selectedDraftLot.rh_factor})` : ''}
-                    placeholder="Hệ Rh"
-                    className="w-full px-2 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
-                  />
-                </div>
-
-                {/* 5. Thể tích (tự động load) */}
-                <div className="w-[calc(50%-5px)] sm:w-[95px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Thể tích
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={selectedDraftLot ? (selectedDraftLot.volume_name || `${selectedDraftLot.volume_ml} ml`) : ''}
-                    placeholder="Thể tích"
-                    className="w-full px-2 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              {/* Hàng 2: Hạn sử dụng, Tồn khả dụng, SL xuất, Ghi chú, Nút + */}
-              <div className="flex flex-wrap items-end gap-2.5">
-                {/* 6. Hạn sử dụng (tự động load) */}
-                <div className="w-[calc(50%-5px)] sm:w-[135px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Hạn sử dụng
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={selectedDraftLot ? formatDate(selectedDraftLot.expiry_date) : ''}
-                    placeholder="Hạn sử dụng"
-                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
-                  />
-                </div>
-
-                {/* 7. Tồn kho khả dụng */}
-                <div className="w-[calc(50%-5px)] sm:w-[170px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Tồn khả dụng
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={selectedDraftLot ? `${remainingDraftStock} ${selectedDraftLot.unit_name || 'Bịch'}` : ''}
-                    title={selectedDraftLot ? `${remainingDraftStock} ${selectedDraftLot.unit_name || 'Bịch'}` : ''}
-                    placeholder="Tồn khả dụng"
-                    className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-100 text-slate-700 font-semibold text-center cursor-not-allowed"
-                  />
-                </div>
-
-                {/* 8. Số lượng xuất */}
-                <div className="w-[calc(50%-5px)] sm:w-[80px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    SL xuất
-                  </label>
-                  <input
-                    ref={qtyInputRef}
-                    type="number"
-                    min={1}
-                    value={draftQty}
-                    onChange={(e) => handleDraftQtyChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        noteInputRef.current?.focus();
-                      }
-                    }}
-                    className={`w-full px-2 py-2 rounded-xl border text-center text-sm outline-none transition focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 ${
-                      isOverStock
-                        ? 'border-rose-500 bg-rose-50 text-rose-700'
-                        : 'border-slate-300 bg-yellow-50'
-                    }`}
-                  />
-                </div>
-
-                {/* 9. Ghi chú dòng (thu gọn lại cân đối với ô Tồn khả dụng) */}
-                <div className="w-full sm:flex-1 sm:min-w-[160px]">
-                  <label className="block text-xs text-slate-600 mb-1">
-                    Ghi chú
-                  </label>
-                  <input
-                    ref={noteInputRef}
-                    type="text"
-                    value={draftNote}
-                    onChange={(e) => setDraftNote(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddToExportList();
-                      }
-                    }}
-                    placeholder="Ghi chú dòng xuất..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
-                  />
-                </div>
-
-                {/* 10. Nút + */}
-                <div className="w-full sm:w-[44px]">
-                  <button
-                    ref={addBtnRef}
-                    type="button"
-                    onClick={handleAddToExportList}
-                    disabled={!selectedDraftLot || isOverStock}
-                    title="Đưa vào danh sách xuất (Enter hoặc +)"
-                    className="w-full h-[38px] rounded-xl bg-[#C5299B] hover:bg-[#a82083] disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              {isOverStock && (
-                <div className="text-xs text-rose-600 pt-1 font-medium">
-                  Cảnh báo: Số lượng xuất ({draftQty}) lớn hơn số tồn khả dụng ({remainingDraftStock} {selectedDraftLot?.unit_name})!
-                </div>
-              )}
-            </div>
-
-            {/* Danh sách chế phẩm xuất kho */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
-              <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
-                <span className="section-title text-xs font-bold text-[#190072]">
-                  Danh sách chế phẩm xuất ({exportList.length} dòng — Tổng:{' '}
-                  {totalExportQty} đơn vị)
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[880px] table-fixed text-sm">
-                  <thead>
-                    <tr className="bg-slate-100/70 text-slate-600 text-xs border-b border-slate-200">
-                      <th className="py-2.5 px-3 text-center w-[4%]">#</th>
-                      <th className="py-2.5 px-3 text-left w-[13%]">Mã máu (Túi)</th>
-                      <th className="py-2.5 px-3 text-left w-[20%]">
-                        Tên chế phẩm máu
-                      </th>
-                      <th className="py-2.5 px-2.5 text-center w-[9%]">
-                        Nhóm máu
-                      </th>
-                      <th className="py-2.5 px-2.5 text-center w-[9%]">
-                        Thể tích
-                      </th>
-                      <th className="py-2.5 px-2.5 text-center w-[12%]">
-                        Đơn vị tính
-                      </th>
-                      <th className="py-2.5 px-2.5 text-center w-[11%]">
-                        Hạn sử dụng
-                      </th>
-                      <th className="py-2.5 px-2.5 text-center w-[9%]">
-                        Số lượng xuất
-                      </th>
-                      <th className="py-2.5 px-3 text-left w-[9%]">
-                        Ghi chú
-                      </th>
-                      <th className="py-2.5 px-2 text-center w-[4%]">Xóa</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {exportList.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={10}
-                          className="py-8 text-center text-slate-400 text-sm"
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs text-slate-600 flex items-center gap-1 font-medium">
+                          <Building2 className="w-3.5 h-3.5 text-[#C5299B]" />
+                          Khoa / Phòng nhận máu
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeptForm({ code: '', name: '', note: '' });
+                            setDeptError('');
+                            setQuickDeptOpen(true);
+                          }}
+                          className="text-xs text-[#C5299B] hover:underline flex items-center gap-0.5"
                         >
-                          Chưa có chế phẩm nào trong danh sách xuất. Hãy chọn chế phẩm ở thanh phía trên và bấm dấu (+) hoặc nhấn Enter.
-                        </td>
-                      </tr>
-                    ) : (
-                      exportList.map((item, idx) => (
-                        <tr key={item.lot_id}>
-                          <td className="py-2.5 px-3 text-center text-slate-500">
-                            {idx + 1}
-                          </td>
-                          <td className="py-2.5 px-3 font-mono text-xs font-semibold">
-                            {item.blood_code ? (
-                              <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">
-                                {item.blood_code}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400">---</span>
-                            )}
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-900 truncate">
-                            {item.product_name}
-                          </td>
-                          <td className="py-2.5 px-2.5 text-center">
-                            <span
-                              className={`inline-block px-2.5 py-0.5 rounded-lg text-xs ${
-                                item.rh_factor === '-'
-                                  ? 'bg-purple-600 text-white'
-                                  : 'bg-[#fce7f6] text-[#190072] border border-[#eab3dc]'
-                              }`}
-                            >
-                              {item.blood_group}
-                              {item.rh_factor}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-2.5 text-center text-slate-700">
-                            {item.volume_name}
-                          </td>
-                          <td className="py-2.5 px-2.5 text-center text-slate-700">
-                            {item.unit_name}
-                          </td>
-                          <td className="py-2.5 px-2.5 text-center text-slate-800">
-                            {formatDate(item.expiry_date)}
-                          </td>
-                          <td className="py-2.5 px-2.5 text-center text-[#C5299B]">
-                            {item.quantity}
-                          </td>
-                          <td className="py-2.5 px-3 text-slate-600 truncate">
-                            {item.note || '---'}
-                          </td>
-                          <td className="py-2.5 px-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveFromList(item.lot_id)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition"
-                              title="Xóa khỏi danh sách xuất"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-                </div>
-              </div>
+                          <Plus className="w-3.5 h-3.5" />
+                          Thêm mới
+                        </button>
+                      </div>
+                      <SearchableSelect
+                        value={departmentInfo}
+                        onChange={(val) => setDepartmentInfo(val)}
+                        options={[
+                          { value: '', label: '-- Chọn Khoa / Phòng nhận máu --' },
+                          ...activeDepartments.map((d) => ({
+                            value: d.name,
+                            label: d.name,
+                            subLabel: d.code,
+                          })),
+                        ]}
+                        placeholder="-- Chọn Khoa / Phòng nhận máu --"
+                        onAddNew={() => {
+                          setDeptForm({ code: '', name: '', note: '' });
+                          setDeptError('');
+                          setQuickDeptOpen(true);
+                        }}
+                        addNewLabel="Thêm mới Khoa / Phòng..."
+                        className="px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
+                      />
+                    </div>
 
-              {/* Footer dính đáy Drawer */}
-              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end items-center gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm hover:bg-white transition"
-                >
-                  Đóng / Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={exportList.length === 0}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] disabled:opacity-40 text-white text-sm font-medium shadow-sm transition"
-                >
-                  <Save className="w-4 h-4" />
-                  Lưu phiếu
-                </button>
-              </div>
-            </form>
+                    <div>
+                      <label className="block text-xs text-slate-600 mb-1.5 flex items-center gap-1 font-medium">
+                        <User className="w-3.5 h-3.5 text-[#C5299B]" />
+                        Người nhận / Bệnh nhân
+                      </label>
+                      <input
+                        type="text"
+                        value={personName}
+                        onChange={(e) => setPersonName(e.target.value)}
+                        onBlur={() => setPersonName((prev) => toTitleCase(prev))}
+                        placeholder="Nhập họ tên người lĩnh máu hoặc bệnh nhân..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-slate-600 mb-1.5 font-medium">
+                        Ghi chú phiếu xuất
+                      </label>
+                      <input
+                        type="text"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Nhập ghi chú xuất..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Thanh nhập nhanh chế phẩm (Nhập/quét Mã máu hoặc Chọn chế phẩm -> Tự load thông tin -> Enter hoặc +) */}
+                  <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div className="text-xs font-bold text-[#190072] flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <span>Chọn chế phẩm đưa vào danh sách xuất</span>
+                      {selectedDraftLot && (
+                        <span className="text-[11px] font-normal text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 truncate">
+                          Đã tải: <strong>{selectedDraftLot.product_name}</strong> [{selectedDraftLot.blood_group}{selectedDraftLot.rh_factor}]
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Hàng 1: Mã máu & Loại chế phẩm */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
+                      {/* 1. Mã máu (Túi) */}
+                      <div className="w-full sm:w-[170px] shrink-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-xs text-slate-600 font-medium">
+                            Mã máu (Túi/Bịch)
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setScannerOpen(true)}
+                            className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                          >
+                            <Camera className="w-3 h-3" />
+                            <span>Camera</span>
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <input
+                            ref={bloodCodeInputRef}
+                            type="text"
+                            value={draftBloodCode}
+                            onChange={(e) => handleBloodCodeChange(e.target.value)}
+                            onKeyDown={handleBloodCodeKeyDown}
+                            placeholder="Nhập/quét mã..."
+                            className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-300 bg-yellow-50 text-sm uppercase font-semibold text-[#190072] placeholder:font-sans placeholder:normal-case placeholder:font-normal placeholder:text-slate-400 placeholder:text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setScannerOpen(true)}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                            title="Bật camera quét mã túi máu"
+                          >
+                            <Camera className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 2. Loại chế phẩm máu trong kho (FEFO) */}
+                      <div className="w-full sm:flex-1 sm:min-w-[220px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Loại chế phẩm máu trong kho (FEFO)
+                        </label>
+                        <SearchableSelect
+                          ref={lotSelectRef}
+                          value={draftLotId}
+                          onChange={(val) => handleDraftLotChange(val)}
+                          onAfterSelect={() => {
+                            setTimeout(() => {
+                              qtyInputRef.current?.focus();
+                              qtyInputRef.current?.select();
+                            }, 20);
+                          }}
+                          options={lots.map((l) => ({
+                            value: l.id,
+                            label: `${l.blood_code ? `[Mã: ${l.blood_code}] ` : ''}${l.product_name} (${l.volume_name})`,
+                            subLabel: `[${l.blood_group}${l.rh_factor}] — HSD: ${formatDate(l.expiry_date)} — Tồn: ${l.quantity} ${l.unit_name} | Mã: ${l.blood_code || l.product_code}`,
+                          }))}
+                          placeholder="Hãy nhập tên hoặc mã chế phẩm máu"
+                          className="px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-yellow-50"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Hàng 2: Thông tin tự động load (Sắp xếp cân đối 3 cột trên mobile) */}
+                    <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-end gap-2 sm:gap-2.5">
+                      {/* 3. Nhóm ABO (tự động load) */}
+                      <div className="col-span-1 sm:w-[95px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Nhóm ABO
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          value={selectedDraftLot ? `Nhóm ${selectedDraftLot.blood_group}` : ''}
+                          placeholder="Nhóm ABO"
+                          className="w-full px-1.5 sm:px-2 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
+                        />
+                      </div>
+
+                      {/* 4. Hệ Rh (tự động load) */}
+                      <div className="col-span-1 sm:w-[85px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Hệ Rh
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          value={selectedDraftLot ? `Rh(${selectedDraftLot.rh_factor})` : ''}
+                          placeholder="Hệ Rh"
+                          className="w-full px-1.5 sm:px-2 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
+                        />
+                      </div>
+
+                      {/* 5. Thể tích (tự động load) */}
+                      <div className="col-span-1 sm:w-[95px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Thể tích
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          value={selectedDraftLot ? (selectedDraftLot.volume_name || `${selectedDraftLot.volume_ml} ml`) : ''}
+                          placeholder="Thể tích"
+                          className="w-full px-1.5 sm:px-2 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
+                        />
+                      </div>
+
+                      {/* 6. Hạn sử dụng (tự động load) */}
+                      <div className="col-span-2 sm:col-span-1 sm:w-[135px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Hạn sử dụng
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          value={selectedDraftLot ? formatDate(selectedDraftLot.expiry_date) : ''}
+                          placeholder="Hạn sử dụng"
+                          className="w-full px-2 sm:px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-yellow-50 text-slate-800 font-medium text-center cursor-not-allowed"
+                        />
+                      </div>
+
+                      {/* 7. Tồn kho khả dụng */}
+                      <div className="col-span-1 sm:w-[170px]">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Tồn khả dụng
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          value={selectedDraftLot ? `${remainingDraftStock} ${selectedDraftLot.unit_name || 'Bịch'}` : ''}
+                          title={selectedDraftLot ? `${remainingDraftStock} ${selectedDraftLot.unit_name || 'Bịch'}` : ''}
+                          placeholder="Tồn khả dụng"
+                          className="w-full px-1.5 sm:px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-100 text-slate-700 font-semibold text-center cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Hàng 3: SL xuất, Ghi chú, Nút + (Gom trên 1 hàng cân đối hoàn hảo) */}
+                    <div className="flex items-end gap-2 sm:gap-2.5 pt-1">
+                      {/* 8. Số lượng xuất */}
+                      <div className="w-[85px] sm:w-[80px] shrink-0">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          SL xuất
+                        </label>
+                        <input
+                          ref={qtyInputRef}
+                          type="number"
+                          min={1}
+                          value={draftQty}
+                          onChange={(e) => handleDraftQtyChange(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              noteInputRef.current?.focus();
+                            }
+                          }}
+                          className={`w-full px-2 py-2 rounded-xl border text-center text-sm outline-none transition focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 ${
+                            isOverStock
+                              ? 'border-rose-500 bg-rose-50 text-rose-700 font-bold'
+                              : 'border-slate-300 bg-yellow-50 font-bold text-[#190072]'
+                          }`}
+                        />
+                      </div>
+
+                      {/* 9. Ghi chú dòng */}
+                      <div className="flex-1 min-w-0">
+                        <label className="block text-xs text-slate-600 mb-1 font-medium">
+                          Ghi chú dòng
+                        </label>
+                        <input
+                          ref={noteInputRef}
+                          type="text"
+                          value={draftNote}
+                          onChange={(e) => setDraftNote(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddToExportList();
+                            }
+                          }}
+                          placeholder="Ghi chú dòng..."
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:border-[#C5299B] focus:ring-2 focus:ring-[#C5299B]/20 outline-none transition"
+                        />
+                      </div>
+
+                      {/* 10. Nút + */}
+                      <div className="shrink-0">
+                        <button
+                          ref={addBtnRef}
+                          type="button"
+                          onClick={handleAddToExportList}
+                          disabled={!selectedDraftLot || isOverStock}
+                          title="Đưa vào danh sách xuất (Enter hoặc +)"
+                          className="w-[42px] sm:w-[44px] h-[38px] rounded-xl bg-[#C5299B] hover:bg-[#a82083] disabled:opacity-40 text-white flex items-center justify-center shadow-sm transition active:scale-95"
+                        >
+                          <Plus className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isOverStock && (
+                      <div className="text-xs text-rose-600 pt-1 font-medium">
+                        Cảnh báo: Số lượng xuất ({draftQty}) lớn hơn số tồn khả dụng ({remainingDraftStock} {selectedDraftLot?.unit_name})!
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Danh sách chế phẩm xuất kho */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="bg-slate-50 px-3.5 sm:px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
+                      <span className="section-title text-xs font-bold text-[#190072]">
+                        Danh sách chế phẩm xuất ({exportList.length} dòng — Tổng:{' '}
+                        {totalExportQty} đơn vị)
+                      </span>
+                    </div>
+
+                    {/* Danh sách trên Di động (md:hidden) */}
+                    <div className="md:hidden divide-y divide-slate-100 bg-white">
+                      {exportList.length === 0 ? (
+                        <div className="py-6 text-center text-slate-400 text-xs px-4">
+                          Chưa có chế phẩm nào trong danh sách xuất. Chọn chế phẩm ở trên và bấm dấu (+) để thêm.
+                        </div>
+                      ) : (
+                        exportList.map((item, idx) => (
+                          <div key={item.lot_id} className="p-3 flex items-center justify-between gap-2.5">
+                            <div className="min-w-0 space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs font-bold text-slate-400">#{idx + 1}</span>
+                                {item.blood_code && (
+                                  <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-mono text-[11px] font-semibold border border-blue-200 shrink-0">
+                                    {item.blood_code}
+                                  </span>
+                                )}
+                                <span
+                                  className={`px-1.5 py-0.2 rounded text-[11px] font-bold shrink-0 ${
+                                    item.rh_factor === '-'
+                                      ? 'bg-purple-600 text-white'
+                                      : 'bg-[#fce7f6] text-[#190072] border border-[#eab3dc]'
+                                  }`}
+                                >
+                                  {item.blood_group}{item.rh_factor}
+                                </span>
+                                <span className="text-xs font-semibold text-slate-900 truncate">
+                                  {item.product_name}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-[11px] text-slate-500 flex-wrap">
+                                <span>{item.volume_name}</span>
+                                <span>• HSD: {formatDate(item.expiry_date)}</span>
+                                {item.note && <span className="italic text-slate-400">• {item.note}</span>}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span className="text-sm font-bold text-[#C5299B]">x{item.quantity}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFromList(item.lot_id)}
+                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition"
+                                title="Xóa khỏi danh sách xuất"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Bảng trên Màn hình Máy tính (hidden md:block) */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full min-w-[880px] table-fixed text-sm">
+                        <thead>
+                          <tr className="bg-slate-100/70 text-slate-600 text-xs border-b border-slate-200">
+                            <th className="py-2.5 px-3 text-center w-[4%]">#</th>
+                            <th className="py-2.5 px-3 text-left w-[13%]">Mã máu (Túi)</th>
+                            <th className="py-2.5 px-3 text-left w-[20%]">
+                              Tên chế phẩm máu
+                            </th>
+                            <th className="py-2.5 px-2.5 text-center w-[9%]">
+                              Nhóm máu
+                            </th>
+                            <th className="py-2.5 px-2.5 text-center w-[9%]">
+                              Thể tích
+                            </th>
+                            <th className="py-2.5 px-2.5 text-center w-[12%]">
+                              Đơn vị tính
+                            </th>
+                            <th className="py-2.5 px-2.5 text-center w-[11%]">
+                              Hạn sử dụng
+                            </th>
+                            <th className="py-2.5 px-2.5 text-center w-[9%]">
+                              Số lượng xuất
+                            </th>
+                            <th className="py-2.5 px-3 text-left w-[9%]">
+                              Ghi chú
+                            </th>
+                            <th className="py-2.5 px-2 text-center w-[4%]">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {exportList.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={10}
+                                className="py-8 text-center text-slate-400 text-sm"
+                              >
+                                Chưa có chế phẩm nào trong danh sách xuất. Hãy chọn chế phẩm ở thanh phía trên và bấm dấu (+) hoặc nhấn Enter.
+                              </td>
+                            </tr>
+                          ) : (
+                            exportList.map((item, idx) => (
+                              <tr key={item.lot_id}>
+                                <td className="py-2.5 px-3 text-center text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="py-2.5 px-3 font-mono text-xs font-semibold">
+                                  {item.blood_code ? (
+                                    <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800">
+                                      {item.blood_code}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400">---</span>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3 text-slate-900 truncate">
+                                  {item.product_name}
+                                </td>
+                                <td className="py-2.5 px-2.5 text-center">
+                                  <span
+                                    className={`inline-block px-2.5 py-0.5 rounded-lg text-xs ${
+                                      item.rh_factor === '-'
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-[#fce7f6] text-[#190072] border border-[#eab3dc]'
+                                    }`}
+                                  >
+                                    {item.blood_group}
+                                    {item.rh_factor}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-2.5 text-center text-slate-700">
+                                  {item.volume_name}
+                                </td>
+                                <td className="py-2.5 px-2.5 text-center text-slate-700">
+                                  {item.unit_name}
+                                </td>
+                                <td className="py-2.5 px-2.5 text-center text-slate-800">
+                                  {formatDate(item.expiry_date)}
+                                </td>
+                                <td className="py-2.5 px-2.5 text-center text-[#C5299B]">
+                                  {item.quantity}
+                                </td>
+                                <td className="py-2.5 px-3 text-slate-600 truncate">
+                                  {item.note || '---'}
+                                </td>
+                                <td className="py-2.5 px-2 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveFromList(item.lot_id)}
+                                    className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition"
+                                    title="Xóa khỏi danh sách xuất"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer dính đáy Drawer */}
+                <div className="px-4 sm:px-6 py-3 sm:py-4 bg-slate-50 border-t border-slate-200 flex justify-end items-center gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs sm:text-sm hover:bg-white transition"
+                  >
+                    Đóng / Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={exportList.length === 0}
+                    className="flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] disabled:opacity-40 text-white text-xs sm:text-sm font-medium shadow-sm transition"
+                  >
+                    <Save className="w-4 h-4" />
+                    Lưu phiếu
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
       {/* Lịch sử Xuất Chế Phẩm Máu (Mặc định hiển thị danh sách này) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
