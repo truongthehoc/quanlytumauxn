@@ -28,6 +28,7 @@ import {
   KeyRound,
   FileText,
   Check,
+  Phone,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -578,16 +579,53 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
     }
   };
 
+  const SYSTEM_TABS = [
+    { key: 'CONFIG', label: 'Cấu hình', fullLabel: 'Cấu hình hệ thống', icon: Settings },
+    { key: 'INFO', label: 'Thông tin', fullLabel: 'Thông tin đơn vị', icon: Info },
+    { key: 'USERS', label: 'Người dùng', fullLabel: 'Người dùng', icon: Users },
+    { key: 'ROLES', label: 'Nhóm quyền', fullLabel: 'Nhóm quyền', icon: Shield },
+    { key: 'BACKUP', label: 'Sao lưu', fullLabel: 'Sao lưu & Khôi phục', icon: DatabaseBackup },
+    { key: 'LOGS', label: 'Nhật ký', fullLabel: 'Nhật ký hoạt động', icon: ScrollText },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5">
+      {/* 0. Thanh chuyển đổi tab quản trị ngang tối ưu trên di động */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
+        {SYSTEM_TABS.map((t) => {
+          const TabIcon = t.icon;
+          const isActive = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => {
+                setTab(t.key);
+                setMessage('');
+                setError('');
+              }}
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
+                isActive
+                  ? 'bg-[#C5299B] text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <TabIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t.fullLabel}</span>
+              <span className="sm:hidden">{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {message && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-sm font-normal flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+        <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs sm:text-sm font-medium flex items-center gap-2 shadow-2xs">
+          <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
           <span>{message}</span>
         </div>
       )}
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-700 text-sm font-normal">
+        <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50 border border-rose-300 text-rose-700 text-xs sm:text-sm font-medium shadow-2xs">
           {error}
         </div>
       )}
@@ -927,29 +965,149 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
       {/* TAB 3: NGƯỜI DÙNG */}
       {tab === 'USERS' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="px-3.5 sm:px-6 py-3 sm:py-4 border-b border-slate-200 flex items-center justify-between gap-3">
             <div>
-              <h3 className="section-title text-sm font-bold text-[#190072]">
+              <h3 className="section-title text-sm sm:text-base font-bold text-[#190072] leading-tight">
                 Quản lý Tài khoản Người dùng ({users.length})
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] sm:text-xs text-slate-500 hidden sm:block">
                 Người dùng sử dụng hệ thống theo Nhóm quyền được gán
               </p>
             </div>
             <button
               onClick={openAddUser}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-normal"
+              className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-2xs transition active:scale-95 shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              Thêm người dùng
+              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Thêm mới</span>
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card List: Hiển thị dạng thẻ có tương phản màu xen kẽ cao */}
+          <div className="md:hidden divide-y-2 divide-slate-200">
+            {users
+              .slice((usersPage - 1) * usersPageSize, usersPage * usersPageSize)
+              .map((u, idx) => (
+                <div
+                  key={u.id}
+                  className={`p-3 space-y-2 border-l-4 ${
+                    u.is_active ? 'border-l-emerald-500' : 'border-l-slate-300'
+                  } ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="font-mono text-xs font-bold text-[#C5299B]">
+                        @{u.username}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                        {u.full_name}
+                      </h4>
+                    </div>
+                    {u.is_active ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                        Hoạt động
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-semibold shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        Đã khóa
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="px-2 py-0.5 rounded-md bg-[#fdf2fa] text-[#190072] border border-[#f5c6e8] text-[11px] font-semibold">
+                      {u.role_name}
+                    </span>
+                    {u.phone && (
+                      <div className="flex items-center gap-1 text-[11px] text-slate-600">
+                        <Phone className="w-3 h-3 text-slate-400" />
+                        <a href={`tel:${u.phone}`} className="underline text-[#190072]">
+                          {u.phone}
+                        </a>
+                      </div>
+                    )}
+                    {u.email && (
+                      <span className="text-[11px] text-slate-400 truncate">
+                        {u.email}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-500">Khóa/Mở:</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(u.is_active)}
+                        disabled={
+                          togglingUserId === u.id ||
+                          (user && user.id === u.id) ||
+                          u.username === 'admin'
+                        }
+                        onClick={() => handleToggleUserStatus(u)}
+                        className={`relative inline-flex items-center h-5 w-9 rounded-full transition-colors duration-200 ease-in-out focus:outline-none select-none ${
+                          (user && user.id === u.id) || u.username === 'admin'
+                            ? 'opacity-40 cursor-not-allowed'
+                            : 'cursor-pointer hover:opacity-90'
+                        } ${u.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                      >
+                        <span
+                          className={`inline-block w-3.5 h-3.5 transform rounded-full bg-white shadow-md transition duration-200 ease-in-out ${
+                            u.is_active ? 'translate-x-4' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => openEditUser(u)}
+                        title="Sửa thông tin"
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => openChangePassword(u)}
+                        title="Đổi mật khẩu"
+                        className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 transition"
+                      >
+                        <KeyRound className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteUser(u)}
+                        disabled={!u.can_delete}
+                        title={
+                          !u.can_delete
+                            ? u.delete_prevent_reason || 'Tài khoản đã có lịch sử dữ liệu, không thể xóa'
+                            : 'Xóa tài khoản'
+                        }
+                        className={`p-1.5 rounded-lg transition ${
+                          !u.can_delete
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                        }`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs  text-slate-600">
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
                   <th className="py-3 px-4 text-left">Tên đăng nhập</th>
                   <th className="py-3 px-4 text-left">Họ và tên</th>
                   <th className="py-3 px-4 text-left">Nhóm quyền được gán</th>
@@ -1214,14 +1372,14 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
       {/* TAB 5: SAO LƯU & KHÔI PHỤC */}
       {tab === 'BACKUP' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
             {/* Cấu hình tự động sao lưu */}
             <form
               onSubmit={handleSaveConfig}
-              className="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4"
+              className="lg:col-span-6 bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4"
             >
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
                 <div>
                   <h3 className="section-title text-sm font-bold text-[#190072]">
                     Cài đặt Tự động Sao lưu Hệ thống
@@ -1242,8 +1400,8 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 </span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-                <label className="flex items-center gap-3 cursor-pointer select-none">
+              <div className="p-3 sm:p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                <label className="flex items-start sm:items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={configForm.auto_backup_enabled === 'true'}
@@ -1253,7 +1411,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                         auto_backup_enabled: e.target.checked ? 'true' : 'false',
                       })
                     }
-                    className="w-4 h-4 rounded text-[#C5299B] focus:ring-[#C5299B]"
+                    className="w-4 h-4 mt-0.5 sm:mt-0 rounded text-[#C5299B] focus:ring-[#C5299B]"
                   />
                   <div>
                     <span className="text-sm font-semibold text-slate-800">
@@ -1268,7 +1426,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
               {/* Khung cấu hình thời gian & thông số */}
               <div className={`space-y-3.5 transition-all ${configForm.auto_backup_enabled === 'true' ? 'opacity-100' : 'opacity-40 pointer-events-none select-none'}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {/* Cột 1: Thời gian tự động sao lưu */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
@@ -1355,7 +1513,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 <button
                   type="submit"
                   disabled={savingConfig}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-normal disabled:opacity-50 transition"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-normal disabled:opacity-50 transition"
                 >
                   <Save className="w-4 h-4" />
                   {savingConfig ? 'Đang lưu...' : 'Lưu cài đặt tự động sao lưu'}
@@ -1364,12 +1522,12 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
             </form>
 
             {/* Sao lưu thủ công & Khôi phục từ file */}
-            <div className="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
+            <div className="lg:col-span-6 bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5 flex flex-col justify-between">
               <div>
                 <h3 className="section-title text-sm font-bold text-[#190072] border-b border-slate-200 pb-3">
                   Sao lưu Thủ công & Khôi phục từ File
                 </h3>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={backupNote}
@@ -1380,22 +1538,25 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   <button
                     type="button"
                     onClick={() => handleManualBackup('MANUAL')}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-normal  shrink-0 shadow-sm"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-normal shrink-0 shadow-sm"
                   >
-                    Sao lưu thủ công ngay
+                    <DatabaseBackup className="w-4 h-4" />
+                    <span>Sao lưu thủ công ngay</span>
                   </button>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-slate-200">
-                <label className="block text-xs font-normal  text-slate-600 mb-2">
+                <label className="block text-xs font-normal text-slate-600 mb-2">
                   Khôi phục hệ thống từ file sao lưu trên máy tính (.json)
                 </label>
-                <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/40 hover:bg-indigo-50 text-indigo-700 text-xs font-normal  transition">
-                  <Upload className="w-4 h-4" />
-                  {restoring
-                    ? 'Đang khôi phục dữ liệu...'
-                    : 'Chọn File Sao Lưu (.json) để Khôi phục'}
+                <label className="cursor-pointer flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/40 hover:bg-indigo-50 text-indigo-700 text-xs font-normal transition text-center">
+                  <Upload className="w-4 h-4 shrink-0" />
+                  <span>
+                    {restoring
+                      ? 'Đang khôi phục dữ liệu...'
+                      : 'Chọn File Sao Lưu (.json) để Khôi phục'}
+                  </span>
                   <input
                     type="file"
                     accept=".json"
@@ -1409,13 +1570,98 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
           </div>
 
           {/* Danh sách các bản sao lưu */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="section-title text-sm font-bold text-[#190072]">
                 Danh sách các Phiên bản Sao lưu ({backups.length})
               </h3>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Cards for Backups */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {backups.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  Chưa có phiên bản sao lưu nào.
+                </div>
+              ) : (
+                backups
+                  .slice((backupsPage - 1) * backupsPageSize, backupsPage * backupsPageSize)
+                  .map((b, idx) => {
+                    const isAuto = b.backup_type === 'AUTO';
+                    return (
+                      <div
+                        key={b.id}
+                        className={`p-3.5 space-y-2.5 transition-colors border-l-4 ${
+                          isAuto ? 'border-l-blue-500' : 'border-l-emerald-500'
+                        } ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'}`}
+                      >
+                        {/* Row 1: File name + type badge */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-mono text-xs font-bold text-slate-800 break-all leading-tight">
+                            {b.file_name}
+                          </div>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
+                              isAuto
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            }`}
+                          >
+                            {isAuto ? 'Tự động' : 'Thủ công'}
+                          </span>
+                        </div>
+
+                        {/* Row 2: Dung lượng + Thời gian */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+                          <div className="flex items-center gap-1 font-mono font-medium text-slate-700 bg-white/80 px-2 py-0.5 rounded border border-slate-200/80">
+                            <span>{(b.file_size / 1024).toFixed(1)} KB</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                            <span>{new Date(b.created_at).toLocaleString('vi-VN')}</span>
+                          </div>
+                        </div>
+
+                        {/* Row 3: Ghi chú nếu có */}
+                        {b.note && (
+                          <div className="text-xs text-slate-600 bg-white/70 p-1.5 rounded border border-slate-200/60 italic">
+                            <span className="font-medium text-slate-700 not-italic">Ghi chú: </span>
+                            {b.note}
+                          </div>
+                        )}
+
+                        {/* Row 4: Action Buttons */}
+                        <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/60">
+                          <button
+                            onClick={() => handleDownloadBackup(b)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium active:scale-95 transition"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Tải về</span>
+                          </button>
+                          <button
+                            onClick={() => handleRestoreFromList(b)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium active:scale-95 transition shadow-xs"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Khôi phục</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBackup(b.id)}
+                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 active:scale-95 transition"
+                            title="Xóa bản sao lưu"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs  text-slate-600">
@@ -1497,22 +1743,22 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
       {tab === 'LOGS' && (
         <div className="space-y-4">
           {/* Top Quick Category KPI Filter Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
             {/* Tất cả */}
             <div
               onClick={() => {
                 setLogsCategory('ALL');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'ALL'
                   ? 'border-[#C5299B] bg-[#fdf2fa] ring-2 ring-[#C5299B]/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-slate-500 uppercase">Tất cả nhật ký</div>
-              <div className="text-2xl font-extrabold text-[#190072] mt-1">{logsStats.total_logs}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Hôm nay: {logsStats.today_logs}</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase truncate">Tất cả nhật ký</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-[#190072] mt-0.5 sm:mt-1">{logsStats.total_logs}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Hôm nay: {logsStats.today_logs}</div>
             </div>
 
             {/* Đăng nhập / Xác thực */}
@@ -1521,15 +1767,15 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 setLogsCategory('AUTH');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'AUTH'
                   ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-emerald-700 uppercase">Xác thực / Đăng nhập</div>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1">{logsStats.auth_count}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Login, Logout</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 uppercase truncate">Xác thực / Đăng nhập</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-emerald-700 mt-0.5 sm:mt-1">{logsStats.auth_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Login, Logout</div>
             </div>
 
             {/* Giao dịch máu */}
@@ -1538,15 +1784,15 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 setLogsCategory('TRANSACTION');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'TRANSACTION'
                   ? 'border-blue-500 bg-blue-50/70 ring-2 ring-blue-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-blue-700 uppercase">Giao dịch máu</div>
-              <div className="text-2xl font-extrabold text-blue-700 mt-1">{logsStats.tx_count}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Xuất, Nhập, Mượn, Hủy</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-blue-700 uppercase truncate">Giao dịch máu</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-blue-700 mt-0.5 sm:mt-1">{logsStats.tx_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Xuất, Nhập, Hủy</div>
             </div>
 
             {/* Kiểm kê */}
@@ -1555,15 +1801,15 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 setLogsCategory('AUDIT');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'AUDIT'
                   ? 'border-purple-500 bg-purple-50/70 ring-2 ring-purple-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-purple-700 uppercase">Kiểm kê quỹ máu</div>
-              <div className="text-2xl font-extrabold text-purple-700 mt-1">{logsStats.audit_count}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Tạo kỳ, Chốt, Cân bằng</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-purple-700 uppercase truncate">Kiểm kê quỹ máu</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-purple-700 mt-0.5 sm:mt-1">{logsStats.audit_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Tạo kỳ, Chốt kho</div>
             </div>
 
             {/* Danh mục */}
@@ -1572,15 +1818,15 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 setLogsCategory('CATEGORY');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'CATEGORY'
                   ? 'border-pink-500 bg-pink-50/70 ring-2 ring-pink-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-pink-700 uppercase">Quản lý Danh mục</div>
-              <div className="text-2xl font-extrabold text-pink-700 mt-1">{logsStats.category_count}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Đối tác, Khoa, Cảnh báo</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-pink-700 uppercase truncate">Quản lý Danh mục</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-pink-700 mt-0.5 sm:mt-1">{logsStats.category_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Đối tác, Khoa phòng</div>
             </div>
 
             {/* Hệ thống */}
@@ -1589,42 +1835,42 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 setLogsCategory('SYSTEM');
                 setLogsPage(1);
               }}
-              className={`p-3.5 rounded-2xl border cursor-pointer transition shadow-2xs ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border cursor-pointer transition shadow-2xs ${
                 logsCategory === 'SYSTEM'
                   ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/20'
                   : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="text-[11px] font-semibold text-amber-700 uppercase">Cấu hình & Quản trị</div>
-              <div className="text-2xl font-extrabold text-amber-700 mt-1">{logsStats.system_count}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">User, Role, Backup, Config</div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-amber-700 uppercase truncate">Cấu hình & Quản trị</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-amber-700 mt-0.5 sm:mt-1">{logsStats.system_count}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">User, Role, Backup</div>
             </div>
           </div>
 
           {/* Main Card with Filter Bar & Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             {/* Filter Toolbar */}
-            <div className="p-4 border-b border-slate-200 bg-slate-50/60 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="p-3.5 sm:p-4 border-b border-slate-200 bg-slate-50/60 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center shrink-0">
                     <ScrollText className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="section-title text-sm font-bold text-[#190072]">
-                      Nhật ký Hoạt động & Lịch sử Thao tác ({logsTotal})
+                      Nhật ký Hoạt động ({logsTotal})
                     </h3>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-400 hidden sm:block">
                       Ghi nhận đầy đủ nhật ký đăng nhập, giao dịch, kiểm kê và quản trị hệ thống
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 ml-auto">
                   <button
                     onClick={fetchLogs}
                     disabled={logsLoading}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-white text-slate-700 text-xs font-normal transition"
+                    className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-white text-slate-700 text-xs font-normal transition"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${logsLoading ? 'animate-spin' : ''}`} />
                     <span>Làm mới</span>
@@ -1640,7 +1886,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                         setLogsToDate('');
                         setLogsPage(1);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-normal transition"
+                      className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-normal transition"
                     >
                       Xóa lọc
                     </button>
@@ -1649,7 +1895,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               </div>
 
               {/* Filter controls row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 sm:gap-2.5 pt-1">
                 {/* Search */}
                 <div className="lg:col-span-4 relative">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1660,7 +1906,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                       setLogsSearch(e.target.value);
                       setLogsPage(1);
                     }}
-                    placeholder="Tìm theo thao tác, nội dung, user, IP..."
+                    placeholder="Tìm theo thao tác, user, IP..."
                     className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#C5299B]"
                   />
                 </div>
@@ -1728,8 +1974,108 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
+            {/* Mobile Cards for Activity Logs */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {logsLoading ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C5299B]" />
+                  Đang tải nhật ký hoạt động...
+                </div>
+              ) : logs.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  Không có bản ghi nhật ký nào phù hợp với bộ lọc tìm kiếm.
+                </div>
+              ) : (
+                logs.map((log, idx) => {
+                  const catConfig = {
+                    AUTH: { label: 'Xác thực', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', border: 'border-l-emerald-500' },
+                    TRANSACTION: { label: 'Giao dịch', color: 'bg-blue-50 text-blue-700 border-blue-200', border: 'border-l-blue-500' },
+                    AUDIT: { label: 'Kiểm kê', color: 'bg-purple-50 text-purple-700 border-purple-200', border: 'border-l-purple-500' },
+                    CATEGORY: { label: 'Danh mục', color: 'bg-pink-50 text-pink-700 border-pink-200', border: 'border-l-pink-500' },
+                    SYSTEM: { label: 'Hệ thống', color: 'bg-amber-50 text-amber-700 border-amber-200', border: 'border-l-amber-500' },
+                  }[log.action_category] || { label: log.action_category, color: 'bg-slate-100 text-slate-700 border-slate-200', border: 'border-l-slate-400' };
+
+                  const statusConfig = {
+                    SUCCESS: { label: 'Thành công', color: 'bg-emerald-100 text-emerald-800' },
+                    FAILED: { label: 'Thất bại', color: 'bg-rose-100 text-rose-800' },
+                    WARNING: { label: 'Cảnh báo', color: 'bg-amber-100 text-amber-800' },
+                  }[log.status] || { label: log.status, color: 'bg-slate-100 text-slate-700' };
+
+                  const dt = new Date(log.created_at);
+                  const timeStr = dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                  const dateStr = dt.toLocaleDateString('vi-VN');
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={`p-3 space-y-2 transition-colors border-l-4 ${catConfig.border} ${
+                        idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                      }`}
+                    >
+                      {/* Row 1: Badges & Time */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md border text-[10px] font-semibold ${catConfig.color}`}>
+                            {catConfig.label}
+                          </span>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${statusConfig.color}`}>
+                            {statusConfig.label}
+                          </span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="font-mono font-bold text-xs text-slate-800">{timeStr}</span>
+                          <span className="text-[10px] text-slate-400 ml-1.5">{dateStr}</span>
+                        </div>
+                      </div>
+
+                      {/* Row 2: Action Name & Description */}
+                      <div>
+                        <div className="font-bold text-slate-900 text-xs leading-snug">
+                          {log.action_name}
+                        </div>
+                        {log.description && (
+                          <div className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                            {log.description}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Row 3: User Info, IP & Metadata trigger */}
+                      <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60 text-xs">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-5 h-5 rounded-full bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center font-bold text-[10px] shrink-0">
+                            {(log.username || 'S')[0].toUpperCase()}
+                          </div>
+                          <span className="font-medium text-slate-800 text-[11px] truncate">
+                            {log.full_name || log.username || 'Hệ thống'}
+                          </span>
+                          {log.ip_address && (
+                            <span className="font-mono text-[10px] text-slate-500 bg-white/80 px-1.5 py-0.5 rounded border border-slate-200/80 shrink-0">
+                              {log.ip_address}
+                            </span>
+                          )}
+                        </div>
+
+                        {log.metadata && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLogDetail(log)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-[#C5299B] text-[10px] font-semibold border border-pink-200 shrink-0 active:scale-95 transition"
+                            title="Xem chi tiết dữ liệu JSON"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>JSON</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
@@ -1871,9 +2217,9 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
       {/* Modal Inspector Chi tiết Metadata Log */}
       {selectedLogDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 shrink-0">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#C5299B]" />
                 <h3 className="text-base font-bold text-[#190072]">
@@ -1889,8 +2235,8 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               </button>
             </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div className="p-5 space-y-3 text-xs overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                 <div>
                   <span className="text-slate-400">Thao tác:</span>{' '}
                   <strong className="text-slate-800">{selectedLogDetail.action_name}</strong>
@@ -1927,7 +2273,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               )}
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end p-4 border-t border-slate-100 bg-slate-50 shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedLogDetail(null)}
@@ -1942,10 +2288,10 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
       {/* Modal Add/Edit User */}
       {userModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3.5 mb-4">
-              <h3 className="modal-title text-lg font-bold text-[#190072]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 shrink-0">
+              <h3 className="modal-title text-base sm:text-lg font-bold text-[#190072]">
                 {editingUser ? 'Cập nhật Người dùng' : 'Thêm mới Người dùng'}
               </h3>
               <button
@@ -1957,7 +2303,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSaveUser} className="space-y-4">
+            <form onSubmit={handleSaveUser} className="p-5 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-xs font-normal text-slate-600 mb-1">
                   Tên đăng nhập <span className="text-rose-600">*</span>
@@ -2028,7 +2374,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-normal text-slate-600 mb-1">
                     Điện thoại
@@ -2054,7 +2400,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setUserModal(false)}
@@ -2076,9 +2422,9 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
 
       {/* Modal Đổi mật khẩu người dùng */}
       {resetPwdUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="px-6 py-4 bg-gradient-to-r from-[#190072]/5 to-[#C5299B]/5 border-b border-slate-200/80 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="px-5 sm:px-6 py-4 bg-gradient-to-r from-[#190072]/5 to-[#C5299B]/5 border-b border-slate-200/80 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-xs">
                   <KeyRound className="w-5 h-5" />
@@ -2102,7 +2448,7 @@ export default function SystemView({ activeSubTab = 'CONFIG' }) {
               </button>
             </div>
 
-            <form onSubmit={handleSaveResetPassword} className="p-6 space-y-4">
+            <form onSubmit={handleSaveResetPassword} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Mật khẩu mới <span className="text-rose-600">*</span>
