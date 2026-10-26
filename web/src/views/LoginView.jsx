@@ -55,9 +55,9 @@ export default function LoginView() {
       </svg>
 
       {/* Khung chính Đăng nhập */}
-      <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-        {/* Cột trái: Thông tin Bệnh viện & Các chức năng đặc biệt */}
-        <div className="md:col-span-6 bg-[#190072] text-white p-8 flex flex-col justify-between relative">
+      <div className="relative z-10 w-full max-w-md md:max-w-4xl grid grid-cols-1 md:grid-cols-12 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        {/* Cột trái: Thông tin Bệnh viện & Các chức năng đặc biệt (Ẩn trên di động) */}
+        <div className="hidden md:flex md:col-span-6 bg-[#190072] text-white p-8 flex-col justify-between relative">
           <div>
             {/* Đơn vị & Khoa: Tên đơn vị luôn lớn hơn tên khoa */}
             <div className="mb-6">
@@ -131,7 +131,7 @@ export default function LoginView() {
         </div>
 
         {/* Cột phải: Form Đăng nhập */}
-        <div className="md:col-span-6 p-8 md:p-10 flex flex-col justify-between bg-white">
+        <div className="col-span-1 md:col-span-6 p-6 sm:p-8 md:p-10 flex flex-col justify-between bg-white">
           <div>
             {/* Header vùng bên phải: Logo bên trái & Xác thực hệ thống bên phải */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
