@@ -129,130 +129,240 @@ export default function ReportsView() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Filter & Actions Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-normal  text-slate-600">
-            <Filter className="w-4 h-4 text-[#C5299B]" />
-            Từ ngày:
+    <div className="space-y-4 sm:space-y-5">
+      {/* 0. Thanh tiêu đề trang gọn gàng cho di động */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#190072] to-[#C5299B] text-white flex items-center justify-center shadow-xs shrink-0">
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-xl font-bold text-[#190072] leading-tight">
+              Báo cáo & Thống kê
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 hidden sm:block">
+              Tổng hợp nhập xuất tồn, cảnh báo hạn dùng và theo dõi công nợ đối tác
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Actions Bar - Tối ưu cho Mobile */}
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-xs space-y-3">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs font-normal text-slate-600">
+            <span className="flex items-center gap-1 font-semibold text-slate-700">
+              <Filter className="w-3.5 h-3.5 text-[#C5299B]" />
+              Từ ngày:
+            </span>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-sm font-normal"
+              className="w-full sm:w-auto px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-normal outline-none focus:border-[#C5299B]"
             />
           </div>
-          <div className="flex items-center gap-2 text-xs font-normal  text-slate-600">
-            Đến ngày:
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs font-normal text-slate-600">
+            <span className="font-semibold text-slate-700">Đến ngày:</span>
             <input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-sm font-normal"
+              className="w-full sm:w-auto px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs sm:text-sm font-normal outline-none focus:border-[#C5299B]"
             />
           </div>
-          <button
-            onClick={fetchReports}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-normal"
-          >
-            Xem báo cáo
-          </button>
-        </div>
 
-        <div className="flex items-center gap-2.5">
-          {hasPermission('reports.export_excel') && (
+          <div className="col-span-2 sm:col-span-1 flex items-center gap-2 mt-1 sm:mt-0">
             <button
-              onClick={handleExportExcel}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-normal shadow-sm transition"
+              onClick={fetchReports}
+              disabled={loading}
+              className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-2xs transition active:scale-95"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Xuất file Excel (.xlsx)
+              {loading ? 'Đang tải...' : 'Xem báo cáo'}
             </button>
-          )}
-          {hasPermission('reports.print') && (
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-normal shadow-sm transition"
-            >
-              <Printer className="w-4 h-4" />
-              In báo cáo
-            </button>
-          )}
+
+            {hasPermission('reports.export_excel') && (
+              <button
+                onClick={handleExportExcel}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs transition active:scale-95"
+                title="Xuất file Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Xuất Excel</span>
+                <span className="sm:hidden">Excel</span>
+              </button>
+            )}
+
+            {hasPermission('reports.print') && (
+              <button
+                onClick={() => window.print()}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-2xs transition active:scale-95"
+                title="In báo cáo"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">In báo cáo</span>
+                <span className="sm:hidden">In</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Report Tabs */}
-      <div className="flex flex-wrap gap-2">
+      {/* Report Tabs - Cuộn ngang mượt mà trên di động */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
         <button
           onClick={() => setReportTab('MOVEMENT')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-normal  transition ${
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
             reportTab === 'MOVEMENT'
-              ? 'bg-[#C5299B] text-white shadow'
+              ? 'bg-[#C5299B] text-white shadow-xs'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <BarChart3 className="w-4 h-4" />
-          1. Báo cáo Nhập - Xuất - Mượn - Tồn kho
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">1. Báo cáo Nhập - Xuất - Mượn - Tồn kho</span>
+          <span className="sm:hidden">Nhập - Xuất - Tồn</span>
         </button>
 
         <button
           onClick={() => setReportTab('EXPIRY')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-normal  transition ${
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
             reportTab === 'EXPIRY'
-              ? 'bg-[#C5299B] text-white shadow'
+              ? 'bg-[#C5299B] text-white shadow-xs'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Clock className="w-4 h-4" />
-          2. Báo cáo Tồn kho theo Lô & Cảnh báo Hạn dùng
+          <Clock className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">2. Báo cáo Tồn kho theo Lô & Cảnh báo Hạn dùng</span>
+          <span className="sm:hidden">Lô & Hạn dùng</span>
         </button>
 
         <button
           onClick={() => setReportTab('PARTNER_DEBT')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-normal  transition ${
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
             reportTab === 'PARTNER_DEBT'
-              ? 'bg-[#C5299B] text-white shadow'
+              ? 'bg-[#C5299B] text-white shadow-xs'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Repeat className="w-4 h-4" />
-          3. Báo cáo Mượn / Cho mượn theo Đơn vị Đối tác
+          <Repeat className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">3. Báo cáo Mượn / Cho mượn theo Đơn vị Đối tác</span>
+          <span className="sm:hidden">Mượn / Cho mượn</span>
         </button>
       </div>
 
       {/* Printable Report Area */}
       <div
         id="printable-area"
-        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
+        className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-6"
       >
         {/* Print Header */}
-        <div className="border-b border-slate-200 pb-4 mb-5 flex items-center justify-between">
+        <div className="border-b border-slate-200 pb-3 mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-xs font-normal  text-slate-500">
+            <p className="text-[11px] sm:text-xs font-normal text-slate-500">
               {systemConfig.unit_name}
             </p>
-            <h2 className="text-base font-normal  text-[#C5299B]">
+            <h2 className="text-sm sm:text-base font-bold text-[#C5299B]">
               {systemConfig.department_name}
             </h2>
           </div>
-          <div className="text-right text-xs text-slate-500">
+          <div className="text-left sm:text-right text-[11px] sm:text-xs text-slate-500">
             <p>
               Kỳ báo cáo: <strong>{fromDate}</strong> đến <strong>{toDate}</strong>
             </p>
-            <p>Ngày kết xuất: {new Date().toLocaleString('vi-VN')}</p>
+            <p className="hidden sm:block">Ngày kết xuất: {new Date().toLocaleString('vi-VN')}</p>
           </div>
         </div>
 
         {reportTab === 'MOVEMENT' && (
           <div>
-            <h3 className="section-title text-lg font-bold text-[#190072] text-center mb-4">
+            <h3 className="section-title text-sm sm:text-base font-bold text-[#190072] text-center mb-3 sm:mb-4">
               Báo cáo tổng hợp Nhập - Xuất - Mượn - Tồn kho chế phẩm máu
             </h3>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List: Hiển thị trên màn hình nhỏ với tương phản cao */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {movementReport
+                .filter(
+                  (r) =>
+                    r.current_stock > 0 ||
+                    r.imported_qty > 0 ||
+                    r.exported_qty > 0 ||
+                    r.lent_qty > 0 ||
+                    r.borrowed_qty > 0
+                )
+                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                .map((row, idx) => (
+                  <div
+                    key={row.blood_product_id}
+                    className={`p-3 space-y-2 border-l-4 border-l-[#C5299B] ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-xs font-bold text-[#C5299B]">
+                          {row.product_code}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 line-clamp-1">
+                          {row.product_name}
+                        </h4>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-[#fdf2fa] text-[#190072] font-semibold text-xs border border-[#f5c6e8] shrink-0">
+                        {row.blood_group} ({row.rh_factor === '+' ? 'Rh+' : 'Rh-'})
+                      </span>
+                    </div>
+
+                    {/* 4 Chỉ số lưu lượng */}
+                    <div className="grid grid-cols-4 gap-1 text-center text-xs py-1">
+                      <div className="p-1.5 rounded-lg bg-emerald-50/70 border border-emerald-100">
+                        <div className="text-[10px] text-emerald-700">Nhập</div>
+                        <div className="font-bold text-emerald-800 text-xs sm:text-sm">
+                          {row.imported_qty}
+                        </div>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-rose-50/70 border border-rose-100">
+                        <div className="text-[10px] text-rose-700">Xuất</div>
+                        <div className="font-bold text-rose-800 text-xs sm:text-sm">
+                          {row.exported_qty}
+                        </div>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-indigo-50/70 border border-indigo-100">
+                        <div className="text-[10px] text-indigo-700">Cho mượn</div>
+                        <div className="font-bold text-indigo-800 text-xs sm:text-sm">
+                          {row.lent_qty}
+                        </div>
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-purple-50/70 border border-purple-100">
+                        <div className="text-[10px] text-purple-700">Mượn về</div>
+                        <div className="font-bold text-purple-800 text-xs sm:text-sm">
+                          {row.borrowed_qty}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tồn hiện tại & Quá hạn */}
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200/60">
+                      <span className="text-slate-600">
+                        Tồn kho hiện tại: <strong className="text-sm font-extrabold text-slate-900">{row.current_stock}</strong> bịch
+                      </span>
+                      {Number(row.expired_stock) > 0 ? (
+                        <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                          {row.expired_stock} quá hạn
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-emerald-700 font-medium">An toàn</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm border-collapse border border-slate-300">
                 <thead>
-                  <tr className="bg-slate-100 text-slate-700 text-xs ">
+                  <tr className="bg-slate-100 text-slate-700 text-xs">
                     <th className="border border-slate-300 py-2.5 px-3 text-center">STT</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">Mã CP</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">
@@ -352,13 +462,87 @@ export default function ReportsView() {
 
         {reportTab === 'EXPIRY' && (
           <div>
-            <h3 className="section-title text-lg font-bold text-[#190072] text-center mb-4">
+            <h3 className="section-title text-sm sm:text-base font-bold text-[#190072] text-center mb-3 sm:mb-4">
               Báo cáo chi tiết lô tồn kho & cảnh báo hạn sử dụng
             </h3>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List cho Lô & Hạn dùng */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {lots
+                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                .map((l, idx) => {
+                  const badge = getExpiryBadgeInfo(
+                    l.days_remaining,
+                    systemConfig?.expiry_warning_milestones
+                  );
+                  const isExpired = l.expiry_status === 'EXPIRED';
+                  const isWarning = l.expiry_status === 'WARNING';
+                  const borderColor = isExpired
+                    ? 'border-l-rose-500'
+                    : isWarning
+                    ? 'border-l-amber-500'
+                    : 'border-l-emerald-500';
+
+                  return (
+                    <div
+                      key={l.id}
+                      className={`p-3 space-y-2 border-l-4 ${borderColor} ${
+                        idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-mono text-xs font-bold text-[#C5299B]">
+                            {l.blood_code || l.product_code}
+                          </span>
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5 line-clamp-1">
+                            {l.product_name}
+                          </h4>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-base font-extrabold text-[#190072]">
+                            {l.quantity}
+                          </span>
+                          <span className="text-xs text-slate-500 ml-1">{l.unit_name}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span className="px-2 py-0.5 rounded-md bg-[#fdf2fa] text-[#190072] font-semibold border border-[#f5c6e8]">
+                          {l.blood_group}{l.rh_factor}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-slate-200/80 text-slate-700 font-medium text-[11px]">
+                          {l.volume_name}
+                        </span>
+                        <span
+                          style={{
+                            backgroundColor: badge.bgColor,
+                            color: badge.textColor,
+                            borderColor: badge.borderColor,
+                          }}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                        >
+                          {badge.icon === 'alert' && <AlertTriangle className="w-3 h-3 shrink-0" />}
+                          {badge.icon === 'clock' && <Clock className="w-3 h-3 shrink-0" />}
+                          {badge.icon === 'check' && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                          <span>{badge.text}</span>
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-200/60">
+                        <span>Lấy: {l.collection_date ? new Date(l.collection_date).toLocaleDateString('vi-VN') : '---'}</span>
+                        <span>HSD: <strong className="text-slate-800">{new Date(l.expiry_date).toLocaleDateString('vi-VN')}</strong></span>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm border-collapse border border-slate-300">
                 <thead>
-                  <tr className="bg-slate-100 text-slate-700 text-xs ">
+                  <tr className="bg-slate-100 text-slate-700 text-xs">
                     <th className="border border-slate-300 py-2.5 px-3 text-center">STT</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">Mã máu (Túi)</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">Mã CP</th>
@@ -405,56 +589,56 @@ export default function ReportsView() {
                         <td className="border border-slate-300 py-2 px-3 font-mono text-xs">
                           {l.product_code}
                         </td>
-                      <td className="border border-slate-300 py-2 px-3 font-normal">
-                        {l.product_name}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal text-[#C5299B]">
-                        {l.blood_group}
-                        {l.rh_factor}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center">
-                        {l.volume_name}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal text-slate-700">
-                        {l.collection_date ? new Date(l.collection_date).toLocaleDateString('vi-VN') : '---'}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal">
-                        {new Date(l.expiry_date).toLocaleDateString('vi-VN')}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal">
-                        {(() => {
-                          const badge = getExpiryBadgeInfo(
-                            l.days_remaining,
-                            systemConfig?.expiry_warning_milestones
-                          );
-                          return (
-                            <span
-                              style={{
-                                backgroundColor: badge.bgColor,
-                                color: badge.textColor,
-                                borderColor: badge.borderColor,
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                            >
-                              {badge.icon === 'alert' && (
-                                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                              )}
-                              {badge.icon === 'clock' && (
-                                <Clock className="w-3.5 h-3.5 shrink-0" />
-                              )}
-                              {badge.icon === 'check' && (
-                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                              )}
-                              <span>{badge.text}</span>
-                            </span>
-                          );
-                        })()}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal">
-                        {l.quantity}
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="border border-slate-300 py-2 px-3 font-normal">
+                          {l.product_name}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal text-[#C5299B]">
+                          {l.blood_group}
+                          {l.rh_factor}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center">
+                          {l.volume_name}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal text-slate-700">
+                          {l.collection_date ? new Date(l.collection_date).toLocaleDateString('vi-VN') : '---'}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal">
+                          {new Date(l.expiry_date).toLocaleDateString('vi-VN')}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal">
+                          {(() => {
+                            const badge = getExpiryBadgeInfo(
+                              l.days_remaining,
+                              systemConfig?.expiry_warning_milestones
+                            );
+                            return (
+                              <span
+                                style={{
+                                  backgroundColor: badge.bgColor,
+                                  color: badge.textColor,
+                                  borderColor: badge.borderColor,
+                                }}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                              >
+                                {badge.icon === 'alert' && (
+                                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                )}
+                                {badge.icon === 'clock' && (
+                                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                                )}
+                                {badge.icon === 'check' && (
+                                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                )}
+                                <span>{badge.text}</span>
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal">
+                          {l.quantity}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -472,13 +656,88 @@ export default function ReportsView() {
 
         {reportTab === 'PARTNER_DEBT' && (
           <div>
-            <h3 className="section-title text-lg font-bold text-[#190072] text-center mb-4">
+            <h3 className="section-title text-sm sm:text-base font-bold text-[#190072] text-center mb-3 sm:mb-4">
               Báo cáo theo dõi Mượn / Cho mượn theo đơn vị đối tác
             </h3>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Card List cho Công nợ đối tác */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {partnerBorrowLend
+                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                .map((p, idx) => (
+                  <div
+                    key={p.partner_id}
+                    className={`p-3 space-y-2 border-l-4 border-l-indigo-500 ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-xs font-bold text-indigo-700">
+                          {p.partner_code}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                          {p.partner_name}
+                        </h4>
+                      </div>
+                      {p.phone && (
+                        <a
+                          href={`tel:${p.phone}`}
+                          className="text-xs text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md shrink-0"
+                        >
+                          {p.phone}
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                      {/* Cho mượn */}
+                      <div className="p-2 rounded-xl bg-indigo-50/70 border border-indigo-100">
+                        <div className="text-[10px] text-indigo-700 font-semibold mb-1">CHO MƯỢN</div>
+                        <div className="space-y-0.5 text-[11px]">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Đã cho:</span>
+                            <span className="font-medium text-slate-800">{p.total_lent}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Đã thu:</span>
+                            <span className="font-medium text-emerald-700">{p.lent_returned}</span>
+                          </div>
+                          <div className="flex justify-between pt-0.5 border-t border-indigo-200/60 font-bold text-indigo-900">
+                            <span>Còn nợ:</span>
+                            <span>{p.lent_remaining} bịch</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mượn về */}
+                      <div className="p-2 rounded-xl bg-purple-50/70 border border-purple-100">
+                        <div className="text-[10px] text-purple-700 font-semibold mb-1">ĐI MƯỢN</div>
+                        <div className="space-y-0.5 text-[11px]">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Đã mượn:</span>
+                            <span className="font-medium text-slate-800">{p.total_borrowed}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Đã trả:</span>
+                            <span className="font-medium text-emerald-700">{p.borrowed_returned}</span>
+                          </div>
+                          <div className="flex justify-between pt-0.5 border-t border-purple-200/60 font-bold text-purple-900">
+                            <span>Còn nợ:</span>
+                            <span>{p.borrowed_remaining} bịch</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm border-collapse border border-slate-300">
                 <thead>
-                  <tr className="bg-slate-100 text-slate-700 text-xs ">
+                  <tr className="bg-slate-100 text-slate-700 text-xs">
                     <th className="border border-slate-300 py-2.5 px-3 text-center">STT</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">Mã ĐV</th>
                     <th className="border border-slate-300 py-2.5 px-3 text-left">
@@ -512,32 +771,32 @@ export default function ReportsView() {
                         <td className="border border-slate-300 py-2 px-3 text-center">
                           {(currentPage - 1) * pageSize + idx + 1}
                         </td>
-                      <td className="border border-slate-300 py-2 px-3 font-mono text-xs">
-                        {p.partner_code}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 font-normal text-slate-800">
-                        {p.partner_name}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal">
-                        {p.total_lent}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center text-emerald-700 font-normal">
-                        {p.lent_returned}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal text-indigo-700 bg-indigo-50/40">
-                        {p.lent_remaining}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal">
-                        {p.total_borrowed}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center text-emerald-700 font-normal">
-                        {p.borrowed_returned}
-                      </td>
-                      <td className="border border-slate-300 py-2 px-3 text-center font-normal text-purple-700 bg-purple-50/40">
-                        {p.borrowed_remaining}
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="border border-slate-300 py-2 px-3 font-mono text-xs">
+                          {p.partner_code}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 font-normal text-slate-800">
+                          {p.partner_name}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal">
+                          {p.total_lent}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center text-emerald-700 font-normal">
+                          {p.lent_returned}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal text-indigo-700 bg-indigo-50/40">
+                          {p.lent_remaining}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal">
+                          {p.total_borrowed}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center text-emerald-700 font-normal">
+                          {p.borrowed_returned}
+                        </td>
+                        <td className="border border-slate-300 py-2 px-3 text-center font-normal text-purple-700 bg-purple-50/40">
+                          {p.borrowed_remaining}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

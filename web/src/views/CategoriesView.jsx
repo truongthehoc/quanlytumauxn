@@ -14,6 +14,7 @@ import {
   Save,
   RefreshCw,
   CheckCircle2,
+  Phone,
 } from 'lucide-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -306,74 +307,109 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
   const slicePage = (arr = []) =>
     arr.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  const CATEGORY_TABS = [
+    { key: 'PARTNERS', label: 'Đối tác', fullLabel: 'Đơn vị đối tác', icon: Building2 },
+    { key: 'DEPARTMENTS', label: 'Khoa/Phòng', fullLabel: 'Khoa / Phòng', icon: Stethoscope },
+    { key: 'PRODUCTS', label: 'Chế phẩm', fullLabel: 'Loại chế phẩm', icon: Droplet },
+    { key: 'UNITS', label: 'ĐVT', fullLabel: 'Đơn vị tính', icon: Scale },
+    { key: 'ALERTS', label: 'Cảnh báo HSD', fullLabel: 'Cảnh báo HSD', icon: AlertTriangle },
+  ];
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5 sm:space-y-4">
+      {/* 0. Thanh chuyển đổi danh mục ngang tối ưu trên di động */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
+        {CATEGORY_TABS.map((tab) => {
+          const TabIcon = tab.icon;
+          const isActive = subTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setSubTab(tab.key);
+                setCurrentPage(1);
+              }}
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition shrink-0 ${
+                isActive
+                  ? 'bg-[#C5299B] text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <TabIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{tab.fullLabel}</span>
+              <span className="sm:hidden">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {message && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm">
           {message}
         </div>
       )}
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
+        <div className="p-3 sm:p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm">
           {error}
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         {/* Card Header with Add Button */}
-        <div className="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center">
-              <HeaderIcon className="w-5 h-5" />
+        <div className="px-3.5 sm:px-6 py-3 sm:py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center shrink-0">
+              <HeaderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h3 className="section-title text-base font-bold text-[#190072]">
+              <h3 className="section-title text-sm sm:text-base font-bold text-[#190072] leading-tight">
                 {headerInfo.title}
               </h3>
-              <p className="text-xs text-slate-500">{headerInfo.subtitle}</p>
+              <p className="text-[11px] sm:text-xs text-slate-500 hidden sm:block">{headerInfo.subtitle}</p>
             </div>
           </div>
 
           {canManage && (
             subTab === 'ALERTS' ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={handleResetMilestones}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs transition"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium transition active:scale-95"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  Mặc định
+                  <span className="hidden sm:inline">Mặc định</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleAddMilestone}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#C5299B] text-[#C5299B] hover:bg-[#fdf2fa] text-xs font-medium transition"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[#C5299B] text-[#C5299B] hover:bg-[#fdf2fa] text-xs font-medium transition active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Thêm mốc cảnh báo
+                  <span>+ Mốc</span>
                 </button>
                 <button
                   type="button"
                   disabled={savingMilestones}
                   onClick={handleSaveMilestones}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-sm transition disabled:opacity-60"
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-2xs transition active:scale-95 disabled:opacity-60"
                 >
                   {savingMilestones ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     <Save className="w-3.5 h-3.5" />
                   )}
-                  <span>Lưu cấu hình cảnh báo</span>
+                  <span>Lưu cấu hình</span>
                 </button>
               </div>
             ) : (
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-normal shadow-sm transition"
+                className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white text-xs font-semibold shadow-2xs transition active:scale-95"
               >
-                <Plus className="w-4 h-4" />
-                Thêm mới
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Thêm mới</span>
               </button>
             )
           )}
@@ -381,124 +417,130 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
 
         {/* 1. ĐƠN VỊ ĐỐI TÁC */}
         {subTab === 'PARTNERS' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
-                  <th className="py-3 px-4 text-left">Mã đơn vị</th>
-                  <th className="py-3 px-4 text-left">Tên đơn vị</th>
-                  <th className="py-3 px-4 text-left">SĐT</th>
-                  <th className="py-3 px-4 text-left">Người liên hệ</th>
-                  <th className="py-3 px-4 text-left">Địa chỉ</th>
-                  <th className="py-3 px-4 text-left">Ghi chú</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {slicePage(categories.partners).map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50">
-                    <td className="py-3 px-4 font-mono text-slate-700">
-                      {p.code}
-                    </td>
-                    <td className="py-3 px-4 text-slate-900">
-                      {p.name}
-                    </td>
-                    <td className="py-3 px-4 text-slate-700">
-                      {p.phone || '---'}
-                    </td>
-                    <td className="py-3 px-4 text-slate-700">
-                      {p.contact_person || '---'}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {p.address || '---'}
-                    </td>
-                    <td className="py-3 px-4 text-slate-500">
-                      {p.note || '---'}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      {p.is_active ? (
-                        <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Đang sử dụng
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-xs bg-slate-100 text-slate-500 border border-slate-200">
-                          Ngưng sử dụng
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {canManage && (
-                        <div className="inline-flex gap-1.5">
-                          <button
-                            onClick={() => openEditModal(p)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p)}
-                            title={
-                              Number(p.usage_count) > 0
-                                ? 'Đang có dữ liệu ràng buộc, không thể xóa'
-                                : 'Xóa'
-                            }
-                            className={`p-1.5 rounded-lg ${
-                              Number(p.usage_count) > 0
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
-                            }`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <>
+            {/* Mobile Card List: Tương phản màu xen kẽ cao */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {slicePage(categories.partners).map((p, idx) => (
+                <div
+                  key={p.id}
+                  className={`p-3 space-y-2 border-l-4 ${
+                    p.is_active ? 'border-l-emerald-500' : 'border-l-slate-300'
+                  } ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="font-mono text-xs font-bold text-[#C5299B]">
+                        {p.code}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                        {p.name}
+                      </h4>
+                    </div>
+                    {p.is_active ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        Đang dùng
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">
+                        Ngưng dùng
+                      </span>
+                    )}
+                  </div>
 
-        {/* 2. LOẠI CHẾ PHẨM MÁU: Mã loại - Tên - Thể tích - Đơn vị tính - Trạng thái */}
-        {subTab === 'PRODUCTS' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
-                  <th className="py-3 px-4 text-left">Mã loại</th>
-                  <th className="py-3 px-4 text-left">Tên loại chế phẩm máu</th>
-                  <th className="py-3 px-4 text-center">Thể tích</th>
-                  <th className="py-3 px-4 text-left">Đơn vị tính</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {categories.bloodProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400">
-                      Chưa có loại chế phẩm máu nào. Hãy bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
-                    </td>
+                  <div className="space-y-1 text-xs text-slate-600 pt-0.5">
+                    {p.phone && (
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                        <a href={`tel:${p.phone}`} className="text-[#190072] font-semibold underline">
+                          {p.phone}
+                        </a>
+                        {p.contact_person && (
+                          <span className="text-slate-400 text-[11px]">({p.contact_person})</span>
+                        )}
+                      </div>
+                    )}
+                    {p.address && (
+                      <div className="text-[11px] text-slate-500 line-clamp-1">
+                        {p.address}
+                      </div>
+                    )}
+                    {p.note && (
+                      <div className="text-[11px] text-slate-400 italic line-clamp-1">
+                        Ghi chú: {p.note}
+                      </div>
+                    )}
+                  </div>
+
+                  {canManage && (
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/60">
+                      <button
+                        onClick={() => openEditModal(p)}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1 transition"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Sửa</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p)}
+                        disabled={Number(p.usage_count) > 0}
+                        title={
+                          Number(p.usage_count) > 0
+                            ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                            : 'Xóa'
+                        }
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition ${
+                          Number(p.usage_count) > 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                        }`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Xóa</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <th className="py-3 px-4 text-left">Mã đơn vị</th>
+                    <th className="py-3 px-4 text-left">Tên đơn vị</th>
+                    <th className="py-3 px-4 text-left">SĐT</th>
+                    <th className="py-3 px-4 text-left">Người liên hệ</th>
+                    <th className="py-3 px-4 text-left">Địa chỉ</th>
+                    <th className="py-3 px-4 text-left">Ghi chú</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
                   </tr>
-                ) : (
-                  slicePage(categories.bloodProducts).map((bp) => (
-                    <tr key={bp.id} className="hover:bg-slate-50">
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {slicePage(categories.partners).map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50">
                       <td className="py-3 px-4 font-mono text-slate-700">
-                        {bp.code}
+                        {p.code}
                       </td>
                       <td className="py-3 px-4 text-slate-900 font-medium">
-                        {bp.name}
-                      </td>
-                      <td className="py-3 px-4 text-center text-[#C5299B] font-semibold">
-                        {bp.volume_ml || 250} ml
+                        {p.name}
                       </td>
                       <td className="py-3 px-4 text-slate-700">
-                        {bp.unit_name || '---'}
+                        {p.phone || '---'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-700">
+                        {p.contact_person || '---'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {p.address || '---'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500">
+                        {p.note || '---'}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        {bp.is_active ? (
+                        {p.is_active ? (
                           <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
                             Đang sử dụng
                           </span>
@@ -512,20 +554,20 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
                         {canManage && (
                           <div className="inline-flex gap-1.5">
                             <button
-                              onClick={() => openEditModal(bp)}
+                              onClick={() => openEditModal(p)}
                               className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(bp)}
+                              onClick={() => handleDelete(p)}
                               title={
-                                Number(bp.usage_count) > 0
+                                Number(p.usage_count) > 0
                                   ? 'Đang có dữ liệu ràng buộc, không thể xóa'
                                   : 'Xóa'
                               }
                               className={`p-1.5 rounded-lg ${
-                                Number(bp.usage_count) > 0
+                                Number(p.usage_count) > 0
                                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                   : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                               }`}
@@ -536,105 +578,264 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* 2. LOẠI CHẾ PHẨM MÁU */}
+        {subTab === 'PRODUCTS' && (
+          <>
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {categories.bloodProducts.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs px-4">
+                  Chưa có loại chế phẩm máu nào. Bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
+                </div>
+              ) : (
+                slicePage(categories.bloodProducts).map((bp, idx) => (
+                  <div
+                    key={bp.id}
+                    className={`p-3 space-y-2 border-l-4 border-l-[#C5299B] ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono text-xs font-bold text-[#C5299B]">
+                          {bp.code}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                          {bp.name}
+                        </h4>
+                      </div>
+                      {bp.is_active ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                          Đang dùng
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">
+                          Ngưng dùng
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="px-2 py-0.5 rounded-md bg-[#fdf2fa] text-[#190072] font-semibold border border-[#f5c6e8]">
+                        {bp.volume_ml || 250} ml
+                      </span>
+                      <span className="text-slate-500">
+                        ĐVT: <strong className="text-slate-800">{bp.unit_name || '---'}</strong>
+                      </span>
+                    </div>
+
+                    {canManage && (
+                      <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/60">
+                        <button
+                          onClick={() => openEditModal(bp)}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1 transition"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Sửa</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(bp)}
+                          disabled={Number(bp.usage_count) > 0}
+                          title={
+                            Number(bp.usage_count) > 0
+                              ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                              : 'Xóa'
+                          }
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition ${
+                            Number(bp.usage_count) > 0
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                          }`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Xóa</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <th className="py-3 px-4 text-left">Mã loại</th>
+                    <th className="py-3 px-4 text-left">Tên loại chế phẩm máu</th>
+                    <th className="py-3 px-4 text-center">Thể tích</th>
+                    <th className="py-3 px-4 text-left">Đơn vị tính</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {categories.bloodProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-slate-400">
+                        Chưa có loại chế phẩm máu nào. Hãy bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
+                      </td>
+                    </tr>
+                  ) : (
+                    slicePage(categories.bloodProducts).map((bp) => (
+                      <tr key={bp.id} className="hover:bg-slate-50">
+                        <td className="py-3 px-4 font-mono text-slate-700">
+                          {bp.code}
+                        </td>
+                        <td className="py-3 px-4 text-slate-900 font-medium">
+                          {bp.name}
+                        </td>
+                        <td className="py-3 px-4 text-center text-[#C5299B] font-semibold">
+                          {bp.volume_ml || 250} ml
+                        </td>
+                        <td className="py-3 px-4 text-slate-700">
+                          {bp.unit_name || '---'}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {bp.is_active ? (
+                            <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Đang sử dụng
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-xs bg-slate-100 text-slate-500 border border-slate-200">
+                              Ngưng sử dụng
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {canManage && (
+                            <div className="inline-flex gap-1.5">
+                              <button
+                                onClick={() => openEditModal(bp)}
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(bp)}
+                                title={
+                                  Number(bp.usage_count) > 0
+                                    ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                                    : 'Xóa'
+                                }
+                                className={`p-1.5 rounded-lg ${
+                                  Number(bp.usage_count) > 0
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                                }`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* 4. ĐƠN VỊ TÍNH */}
         {subTab === 'UNITS' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
-                  <th className="py-3 px-4 text-left">Mã ĐVT</th>
-                  <th className="py-3 px-4 text-left">Tên đơn vị tính</th>
-                  <th className="py-3 px-4 text-left">Ghi chú</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {slicePage(categories.units).map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50">
-                    <td className="py-3 px-4 font-mono">{u.code}</td>
-                    <td className="py-3 px-4 text-slate-900">{u.name}</td>
-                    <td className="py-3 px-4 text-slate-500">{u.note}</td>
-                    <td className="py-3 px-4 text-center">
-                      {u.is_active ? (
-                        <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Đang sử dụng
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-xs bg-slate-100 text-slate-500 border border-slate-200">
-                          Ngưng sử dụng
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {canManage && (
-                        <div className="inline-flex gap-1.5">
-                          <button
-                            onClick={() => openEditModal(u)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(u)}
-                            title={
-                              Number(u.usage_count) > 0
-                                ? 'Đang có dữ liệu ràng buộc, không thể xóa'
-                                : 'Xóa'
-                            }
-                            className={`p-1.5 rounded-lg ${
-                              Number(u.usage_count) > 0
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
-                            }`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <>
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {slicePage(categories.units).map((u, idx) => (
+                <div
+                  key={u.id}
+                  className={`p-3 space-y-2 border-l-4 border-l-indigo-500 ${
+                    idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-mono text-xs font-bold text-indigo-700">
+                        {u.code}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                        {u.name}
+                      </h4>
+                    </div>
+                    {u.is_active ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        Đang dùng
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">
+                        Ngưng dùng
+                      </span>
+                    )}
+                  </div>
 
-        {/* 5. KHOA / PHÒNG */}
-        {subTab === 'DEPARTMENTS' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
-                  <th className="py-3 px-4 text-left">Mã khoa/phòng</th>
-                  <th className="py-3 px-4 text-left">Tên khoa/phòng</th>
-                  <th className="py-3 px-4 text-left">Ghi chú</th>
-                  <th className="py-3 px-4 text-center">Trạng thái</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {(categories.departments || []).length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400">
-                      Chưa có Khoa/Phòng nào. Hãy bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
-                    </td>
+                  {u.note && (
+                    <p className="text-[11px] text-slate-500 italic">
+                      Ghi chú: {u.note}
+                    </p>
+                  )}
+
+                  {canManage && (
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/60">
+                      <button
+                        onClick={() => openEditModal(u)}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1 transition"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Sửa</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(u)}
+                        disabled={Number(u.usage_count) > 0}
+                        title={
+                          Number(u.usage_count) > 0
+                            ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                            : 'Xóa'
+                        }
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition ${
+                          Number(u.usage_count) > 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                        }`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Xóa</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <th className="py-3 px-4 text-left">Mã ĐVT</th>
+                    <th className="py-3 px-4 text-left">Tên đơn vị tính</th>
+                    <th className="py-3 px-4 text-left">Ghi chú</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
                   </tr>
-                ) : (
-                  slicePage(categories.departments || []).map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-mono text-slate-700">{d.code}</td>
-                      <td className="py-3 px-4 text-slate-900">{d.name}</td>
-                      <td className="py-3 px-4 text-slate-500">{d.note || '---'}</td>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {slicePage(categories.units).map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-mono">{u.code}</td>
+                      <td className="py-3 px-4 text-slate-900 font-medium">{u.name}</td>
+                      <td className="py-3 px-4 text-slate-500">{u.note || '---'}</td>
                       <td className="py-3 px-4 text-center">
-                        {d.is_active ? (
+                        {u.is_active ? (
                           <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
                             Đang sử dụng
                           </span>
@@ -648,20 +849,20 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
                         {canManage && (
                           <div className="inline-flex gap-1.5">
                             <button
-                              onClick={() => openEditModal(d)}
+                              onClick={() => openEditModal(u)}
                               className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(d)}
+                              onClick={() => handleDelete(u)}
                               title={
-                                Number(d.usage_count) > 0
+                                Number(u.usage_count) > 0
                                   ? 'Đang có dữ liệu ràng buộc, không thể xóa'
                                   : 'Xóa'
                               }
                               className={`p-1.5 rounded-lg ${
-                                Number(d.usage_count) > 0
+                                Number(u.usage_count) > 0
                                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                   : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                               }`}
@@ -672,17 +873,302 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* 5. KHOA / PHÒNG */}
+        {subTab === 'DEPARTMENTS' && (
+          <>
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {(categories.departments || []).length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs px-4">
+                  Chưa có Khoa/Phòng nào. Bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
+                </div>
+              ) : (
+                slicePage(categories.departments || []).map((d, idx) => (
+                  <div
+                    key={d.id}
+                    className={`p-3 space-y-2 border-l-4 border-l-teal-500 ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-teal-700">
+                          {d.code}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                          {d.name}
+                        </h4>
+                      </div>
+                      {d.is_active ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                          Đang dùng
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">
+                          Ngưng dùng
+                        </span>
+                      )}
+                    </div>
+
+                    {d.note && (
+                      <p className="text-[11px] text-slate-500 italic">
+                        Ghi chú: {d.note}
+                      </p>
+                    )}
+
+                    {canManage && (
+                      <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/60">
+                        <button
+                          onClick={() => openEditModal(d)}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1 transition"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Sửa</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(d)}
+                          disabled={Number(d.usage_count) > 0}
+                          title={
+                            Number(d.usage_count) > 0
+                              ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                              : 'Xóa'
+                          }
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition ${
+                            Number(d.usage_count) > 0
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                          }`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Xóa</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <th className="py-3 px-4 text-left">Mã khoa/phòng</th>
+                    <th className="py-3 px-4 text-left">Tên khoa/phòng</th>
+                    <th className="py-3 px-4 text-left">Ghi chú</th>
+                    <th className="py-3 px-4 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(categories.departments || []).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-slate-400">
+                        Chưa có Khoa/Phòng nào. Hãy bấm &ldquo;+ Thêm mới&rdquo; để khởi tạo.
+                      </td>
+                    </tr>
+                  ) : (
+                    slicePage(categories.departments || []).map((d) => (
+                      <tr key={d.id} className="hover:bg-slate-50">
+                        <td className="py-3 px-4 font-mono text-slate-700">{d.code}</td>
+                        <td className="py-3 px-4 text-slate-900 font-medium">{d.name}</td>
+                        <td className="py-3 px-4 text-slate-500">{d.note || '---'}</td>
+                        <td className="py-3 px-4 text-center">
+                          {d.is_active ? (
+                            <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Đang sử dụng
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-xs bg-slate-100 text-slate-500 border border-slate-200">
+                              Ngưng sử dụng
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {canManage && (
+                            <div className="inline-flex gap-1.5">
+                              <button
+                                onClick={() => openEditModal(d)}
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(d)}
+                                title={
+                                  Number(d.usage_count) > 0
+                                    ? 'Đang có dữ liệu ràng buộc, không thể xóa'
+                                    : 'Xóa'
+                                }
+                                className={`p-1.5 rounded-lg ${
+                                  Number(d.usage_count) > 0
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                                }`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* CẤU HÌNH CẢNH BÁO HẠN SỬ DỤNG (HSD) & MÀU SẮC */}
         {subTab === 'ALERTS' && (
-          <div className="p-4 sm:p-6 space-y-4">
-            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+          <div className="p-3 sm:p-6 space-y-4">
+            {/* Mobile Card List: Mỗi mốc là một Card hoàn chỉnh */}
+            <div className="md:hidden divide-y-2 divide-slate-200 border border-slate-200 rounded-xl overflow-hidden">
+              {milestones.map((m, idx) => (
+                <div
+                  key={m.id || idx}
+                  className={`p-3 space-y-2.5 border-l-4 ${
+                    idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'
+                  }`}
+                  style={{ borderLeftColor: m.textColor || '#C5299B' }}
+                >
+                  {/* Hàng 1: Điều kiện mốc ngày + Nút xóa */}
+                  <div className="flex items-center justify-between gap-2">
+                    {m.isExpired ? (
+                      <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                        Quá hạn (&lt; 0 ngày)
+                      </span>
+                    ) : m.isSafe ? (
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                        Còn hạn an toàn (Mặc định)
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-xs text-slate-700">
+                        <span className="font-semibold">Còn &le;</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={365}
+                          value={m.days}
+                          onChange={(e) =>
+                            handleUpdateMilestone(idx, 'days', parseInt(e.target.value, 10) || 1)
+                          }
+                          className="w-16 px-2 py-1 rounded-lg border border-slate-300 text-center text-xs font-bold bg-white outline-none"
+                        />
+                        <span>ngày</span>
+                      </div>
+                    )}
+
+                    {!m.isExpired && !m.isSafe && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMilestone(idx)}
+                        title="Xóa mốc này"
+                        className="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Hàng 2: Tên nhãn */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      Tên nhãn cảnh báo:
+                    </label>
+                    <input
+                      type="text"
+                      value={m.label || ''}
+                      onChange={(e) => handleUpdateMilestone(idx, 'label', e.target.value)}
+                      placeholder="Nhập tên nhãn..."
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white outline-none"
+                    />
+                  </div>
+
+                  {/* Hàng 3: Chọn màu nhanh & Tùy biến mã màu */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-slate-500">Màu:</span>
+                      <div className="flex items-center gap-1">
+                        {COLOR_PRESETS.map((p) => {
+                          const isActive = m.textColor === p.textColor && m.bgColor === p.bgColor;
+                          return (
+                            <button
+                              key={p.name}
+                              type="button"
+                              onClick={() => handleApplyPresetColor(idx, p)}
+                              title={p.name}
+                              style={{ backgroundColor: p.textColor }}
+                              className={`w-4 h-4 rounded-full transition transform hover:scale-110 shrink-0 ${
+                                isActive ? 'ring-2 ring-offset-1 ring-slate-700 scale-110' : 'opacity-85'
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-1 text-[11px] text-slate-500 cursor-pointer">
+                        <span>Chữ</span>
+                        <input
+                          type="color"
+                          value={m.textColor || '#000000'}
+                          onChange={(e) => handleUpdateMilestone(idx, 'textColor', e.target.value)}
+                          className="w-5 h-5 rounded cursor-pointer border border-slate-300 p-0"
+                        />
+                      </label>
+                      <label className="flex items-center gap-1 text-[11px] text-slate-500 cursor-pointer">
+                        <span>Nền</span>
+                        <input
+                          type="color"
+                          value={m.bgColor || '#ffffff'}
+                          onChange={(e) => {
+                            handleUpdateMilestone(idx, 'bgColor', e.target.value);
+                            handleUpdateMilestone(idx, 'borderColor', e.target.value);
+                          }}
+                          className="w-5 h-5 rounded cursor-pointer border border-slate-300 p-0"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Hàng 4: Xem trước nhãn */}
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-slate-500">Xem trước:</span>
+                    <span
+                      style={{
+                        backgroundColor: m.bgColor,
+                        color: m.textColor,
+                        borderColor: m.borderColor || m.bgColor,
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-2xs"
+                    >
+                      {m.isExpired ? (
+                        <AlertTriangle className="w-3 h-3 shrink-0" />
+                      ) : m.isSafe ? (
+                        <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      ) : (
+                        <Clock className="w-3 h-3 shrink-0" />
+                      )}
+                      <span>{m.isExpired ? 'Quá hạn 1 ngày' : `Còn ${m.days === 99999 ? 45 : m.days} ngày`}</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block border border-slate-200 rounded-xl overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] table-fixed text-sm">
                   <thead>
@@ -841,10 +1327,10 @@ export default function CategoriesView({ activeSubTab = 'PARTNERS' }) {
 
       {/* Add/Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[620px] p-6 sm:p-7">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3.5 mb-4">
-              <h3 className="modal-title text-lg font-bold text-[#190072]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[620px] max-h-[92vh] overflow-y-auto p-4 sm:p-7">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-3.5">
+              <h3 className="modal-title text-base sm:text-lg font-bold text-[#190072]">
                 {editingItem
                   ? `Cập nhật ${headerInfo.categoryLabel}`
                   : `Thêm mới ${headerInfo.categoryLabel}`}
