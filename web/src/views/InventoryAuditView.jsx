@@ -772,98 +772,98 @@ export default function InventoryAuditView() {
       {viewMode === 'LIST' && (
         <>
           {/* Header & Tiêu đề */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center shadow-xs">
-                  <ClipboardCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-black text-[#190072]">
-                    Kiểm Kê Kho Chế Phẩm Máu
-                  </h1>
-                  <p className="text-xs text-slate-500">
-                    Tạo kỳ kiểm kê định kỳ, kiểm đếm thực tế bằng quét mã túi máu và xuất biên bản
-                  </p>
-                </div>
+          <div className="flex items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center shrink-0 shadow-xs">
+                <ClipboardCheck className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold text-[#190072] tracking-tight truncate">
+                  Kiểm Kê Kho Chế Phẩm
+                </h1>
+                <p className="text-xs text-slate-500 hidden sm:block truncate">
+                  Tạo kỳ kiểm kê định kỳ, kiểm đếm thực tế bằng quét mã túi máu và xuất biên bản
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button
                 type="button"
                 onClick={fetchAudits}
                 disabled={loading}
-                className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition shadow-xs"
+                className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition shadow-xs flex items-center gap-1.5 text-xs font-medium"
                 title="Tải lại danh sách"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Làm mới</span>
               </button>
 
               {hasPermission('audit.create') && (
                 <button
                   type="button"
                   onClick={openCreateDrawer}
-                  className="px-4 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-md shadow-[#C5299B]/20 transition flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-md shadow-[#C5299B]/20 transition shrink-0"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Tạo kỳ kiểm kê mới</span>
+                  <span className="hidden sm:inline">Tạo kỳ kiểm kê mới</span>
+                  <span className="sm:hidden">Tạo kỳ mới</span>
                 </button>
               )}
             </div>
           </div>
 
           {/* KPI Thống kê các kỳ kiểm kê */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
-              <div className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5 mb-1">
-                <Layers className="w-3.5 h-3.5 text-indigo-600" />
-                Tổng kỳ kiểm kê
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 flex items-center gap-1.5 mb-1 truncate">
+                <Layers className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span>Tổng kỳ kiểm kê</span>
               </div>
-              <div className="text-2xl font-black text-slate-800">
+              <div className="text-xl sm:text-2xl font-black text-slate-800">
                 {listKPIs.totalAudits}
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Tất cả các đợt kiểm kê</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate hidden sm:block">Tất cả các đợt kiểm kê</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-amber-200/80 shadow-xs bg-gradient-to-br from-amber-50/40 to-transparent">
-              <div className="text-[11px] font-semibold text-amber-700 flex items-center gap-1.5 mb-1">
-                <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
-                Đang kiểm đếm
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-amber-200/80 shadow-xs bg-gradient-to-br from-amber-50/40 to-transparent">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-amber-700 flex items-center gap-1.5 mb-1 truncate">
+                <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse shrink-0" />
+                <span>Đang kiểm đếm</span>
               </div>
-              <div className="text-2xl font-black text-amber-900">
+              <div className="text-xl sm:text-2xl font-black text-amber-900">
                 {listKPIs.inProgress}
               </div>
-              <div className="text-[11px] text-amber-600/80 mt-0.5">Kỳ chưa chốt sổ</div>
+              <div className="text-[10px] sm:text-[11px] text-amber-600/80 mt-0.5 truncate hidden sm:block">Kỳ chưa chốt sổ</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-emerald-200/80 shadow-xs bg-gradient-to-br from-emerald-50/40 to-transparent">
-              <div className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5 mb-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Đã chốt hoàn tất
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-emerald-200/80 shadow-xs bg-gradient-to-br from-emerald-50/40 to-transparent">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5 mb-1 truncate">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Đã chốt hoàn tất</span>
               </div>
-              <div className="text-2xl font-black text-emerald-900">
+              <div className="text-xl sm:text-2xl font-black text-emerald-900">
                 {listKPIs.completed}
               </div>
-              <div className="text-[11px] text-emerald-600/80 mt-0.5">Đã cân bằng / lưu hồ sơ</div>
+              <div className="text-[10px] sm:text-[11px] text-emerald-600/80 mt-0.5 truncate hidden sm:block">Đã cân bằng / lưu hồ sơ</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-rose-200/80 shadow-xs bg-gradient-to-br from-rose-50/40 to-transparent">
-              <div className="text-[11px] font-semibold text-rose-700 flex items-center gap-1.5 mb-1">
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                Chênh lệch phát hiện
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-rose-200/80 shadow-xs bg-gradient-to-br from-rose-50/40 to-transparent">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-rose-700 flex items-center gap-1.5 mb-1 truncate">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span>Chênh lệch</span>
               </div>
-              <div className="text-2xl font-black text-rose-900">
+              <div className="text-xl sm:text-2xl font-black text-rose-900">
                 {listKPIs.totalDiffBags} <span className="text-xs font-normal text-rose-600">túi</span>
               </div>
-              <div className="text-[11px] text-rose-600/80 mt-0.5">Tổng số túi lệch thừa / thiếu</div>
+              <div className="text-[10px] sm:text-[11px] text-rose-600/80 mt-0.5 truncate hidden sm:block">Tổng túi sai lệch</div>
             </div>
           </div>
 
           {/* Bộ lọc danh sách kỳ kiểm kê */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex-1 flex flex-wrap items-center gap-2.5">
-              <div className="relative flex-1 min-w-[220px]">
+          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            <div className="flex-1 flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-[180px]">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
@@ -872,20 +872,20 @@ export default function InventoryAuditView() {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Tìm theo mã kỳ, tên kỳ hoặc người lập..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-indigo-600 outline-none transition"
+                  placeholder="Tìm mã kỳ, tên kỳ..."
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:border-indigo-600 outline-none transition"
                 />
               </div>
 
               {/* Lọc trạng thái */}
-              <div className="w-36">
+              <div className="w-32 sm:w-36">
                 <select
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:border-indigo-600 outline-none font-medium"
+                  className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white focus:border-indigo-600 outline-none font-medium"
                 >
                   <option value="ALL">Tất cả trạng thái</option>
                   <option value="IN_PROGRESS">Đang kiểm kê</option>
@@ -895,24 +895,24 @@ export default function InventoryAuditView() {
               </div>
 
               {/* Lọc ngày kiểm kê */}
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="shrink-0 text-slate-400">Từ:</span>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <span className="shrink-0 text-slate-400 text-[11px]">Từ:</span>
                 <DateInput
                   value={fromDate}
                   onChange={(e) => {
                     setFromDate(e.target.value);
                     setPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs w-32"
+                  className="px-2 py-1 rounded-xl border border-slate-200 text-xs w-28 sm:w-32"
                 />
-                <span className="shrink-0 text-slate-400">Đến:</span>
+                <span className="shrink-0 text-slate-400 text-[11px]">Đến:</span>
                 <DateInput
                   value={toDate}
                   onChange={(e) => {
                     setToDate(e.target.value);
                     setPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs w-32"
+                  className="px-2 py-1 rounded-xl border border-slate-200 text-xs w-28 sm:w-32"
                 />
               </div>
             </div>
@@ -920,7 +920,142 @@ export default function InventoryAuditView() {
 
           {/* Bảng danh sách các kỳ kiểm kê */}
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
+            {/* --- MOBILE AUDITS CARD LIST (md:hidden) --- */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {loading ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-500" />
+                  Đang tải danh sách kỳ kiểm kê...
+                </div>
+              ) : paginatedAudits.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  <ClipboardCheck className="w-8 h-8 mx-auto mb-2 opacity-30 text-slate-400" />
+                  Không tìm thấy kỳ kiểm kê nào phù hợp.
+                </div>
+              ) : (
+                paginatedAudits.map((audit, idx) => {
+                  const diff = Number(audit.total_diff_qty) || 0;
+                  const isOdd = idx % 2 === 1;
+                  const isProgress = audit.status === 'IN_PROGRESS';
+
+                  let cardBg = isOdd ? 'bg-slate-100/90 border-l-4 border-l-slate-400' : 'bg-white border-l-4 border-l-[#190072]';
+                  if (isProgress) {
+                    cardBg = isOdd ? 'bg-indigo-50/70 border-l-4 border-l-indigo-600' : 'bg-white border-l-4 border-l-indigo-600';
+                  }
+
+                  return (
+                    <div
+                      key={audit.id}
+                      onClick={() => openAuditDetail(audit.id)}
+                      className={`p-3 space-y-2 transition active:scale-[0.99] cursor-pointer ${cardBg}`}
+                    >
+                      {/* Dòng 1: Mã kỳ + Trạng thái */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-xs font-bold text-[#C5299B]">
+                          {audit.code}
+                        </span>
+
+                        {isProgress ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1 animate-pulse">
+                            <Clock className="w-3 h-3" />
+                            Đang kiểm kê
+                          </span>
+                        ) : audit.status === 'COMPLETED' ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Đã hoàn tất
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-300">
+                            Đã hủy
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Dòng 2: Tên kỳ + Badge cân bằng */}
+                      <div>
+                        <div className="font-semibold text-xs text-[#190072] flex items-center gap-1.5 flex-wrap">
+                          <span>{audit.name}</span>
+                          {audit.is_balanced === 1 && (
+                            <span className="text-[9px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.2 rounded border border-emerald-300">
+                              Đã cân bằng
+                            </span>
+                          )}
+                        </div>
+                        {audit.note && (
+                          <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1 italic">
+                            "{audit.note}"
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dòng 3: Ngày kiểm kê + Người lập */}
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 bg-white/70 p-1.5 rounded-lg border border-slate-200/80">
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>{formatDate(audit.audit_date)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-500 truncate">
+                          <User className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{audit.creator_full_name || audit.creator_name || 'Admin'}</span>
+                        </div>
+                      </div>
+
+                      {/* Dòng 4: Số lượng Sổ sách / Thực tế / Chênh lệch */}
+                      <div className="grid grid-cols-3 gap-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Sổ sách</span>
+                          <span className="font-bold text-slate-800">{audit.total_system_qty}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Thực tế</span>
+                          <span className="font-bold text-slate-900">{audit.total_actual_qty}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Chênh lệch</span>
+                          {diff === 0 ? (
+                            <span className="font-bold text-emerald-700 text-[11px]">Khớp (0)</span>
+                          ) : diff > 0 ? (
+                            <span className="font-bold text-amber-700 text-[11px]">+{diff} (Thừa)</span>
+                          ) : (
+                            <span className="font-bold text-rose-700 text-[11px]">{diff} (Thiếu)</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Dòng 5: Thao tác */}
+                      <div
+                        className="flex items-center justify-between pt-1 border-t border-slate-200"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => openAuditDetail(audit.id)}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1"
+                        >
+                          <span>{isProgress ? 'Vào kiểm kê' : 'Xem chi tiết'}</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+
+                        {hasPermission('audit.delete') && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteAudit(audit.id, e)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
+                            title="Xóa kỳ kiểm kê"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* --- DESKTOP TABLE (hidden md:block) --- */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-700 uppercase font-bold text-[11px]">
@@ -1075,122 +1210,154 @@ export default function InventoryAuditView() {
       {/* 2. MÀN HÌNH CHI TIẾT & THỰC HIỆN KIỂM KÊ (VIEW_MODE = 'DETAIL')           */}
       {/* ========================================================================= */}
       {viewMode === 'DETAIL' && auditDetail && (
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           {/* Top Bar Detail */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={backToList}
-                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 shrink-0"
-                title="Quay lại danh sách"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
+          <div className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+            <div className="flex items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={backToList}
+                  className="p-1.5 sm:p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-slate-200 shrink-0"
+                  title="Quay lại danh sách"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
 
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono font-bold text-sm text-[#C5299B]">
-                    {auditDetail.code}
-                  </span>
-                  <span className="text-slate-300">•</span>
-                  <h2 className="text-base font-bold text-[#190072]">
-                    {auditDetail.name}
-                  </h2>
-                  {auditDetail.status === 'IN_PROGRESS' ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 animate-pulse">
-                      Đang kiểm kê
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-xs sm:text-sm text-[#C5299B]">
+                      {auditDetail.code}
                     </span>
-                  ) : auditDetail.status === 'COMPLETED' ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      Đã hoàn tất
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
-                      Đã hủy
-                    </span>
-                  )}
-                  {auditDetail.is_balanced === 1 && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
-                      Đã cân bằng kho
-                    </span>
-                  )}
+                    <span className="text-slate-300">•</span>
+                    <h2 className="text-sm sm:text-base font-bold text-[#190072] truncate">
+                      {auditDetail.name}
+                    </h2>
+                    {auditDetail.status === 'IN_PROGRESS' ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 animate-pulse">
+                        Đang kiểm kê
+                      </span>
+                    ) : auditDetail.status === 'COMPLETED' ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        Đã hoàn tất
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                        Đã hủy
+                      </span>
+                    )}
+                    {auditDetail.is_balanced === 1 && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" />
+                        Đã cân bằng
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-500 flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
+                    <span>Ngày: <strong>{formatDate(auditDetail.audit_date)}</strong></span>
+                    <span>•</span>
+                    <span>Lập bởi: <strong>{auditDetail.creator_name || auditDetail.creator_full_name || 'Admin'}</strong></span>
+                    {auditDetail.completed_at && (
+                      <>
+                        <span>•</span>
+                        <span>Chốt: <strong>{formatDateTime(auditDetail.completed_at)}</strong></span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500 flex items-center gap-3 mt-1 flex-wrap">
-                  <span>Ngày kiểm kê: <strong>{formatDate(auditDetail.audit_date)}</strong></span>
-                  <span>•</span>
-                  <span>Người tạo: <strong>{auditDetail.creator_name || auditDetail.creator_full_name || 'Admin'}</strong></span>
-                  {auditDetail.completed_at && (
-                    <>
-                      <span>•</span>
-                      <span>Chốt lúc: <strong>{formatDateTime(auditDetail.completed_at)}</strong> (bởi {auditDetail.completer_name || 'Admin'})</span>
-                    </>
-                  )}
-                </div>
+              </div>
+
+              {/* Action buttons on desktop */}
+              <div className="hidden sm:flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPrintModalOpen(true)}
+                  className="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
+                >
+                  <Printer className="w-4 h-4 text-indigo-600" />
+                  <span>In Biên bản</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Xuất Excel</span>
+                </button>
+
+                {auditDetail.status === 'IN_PROGRESS' && hasPermission('audit.close') && (
+                  <button
+                    type="button"
+                    onClick={() => setCompleteModalOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-[#190072] hover:bg-[#120055] text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-[#190072]/20"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Chốt kiểm kê</span>
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Action buttons on mobile */}
+            <div className="flex sm:hidden items-center gap-1.5 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setPrintModalOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
-                title="In Biên bản kiểm kê"
+                className="flex-1 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium text-xs transition flex items-center justify-center gap-1 shadow-xs"
               >
-                <Printer className="w-4 h-4 text-indigo-600" />
-                <span>In Biên bản</span>
+                <Printer className="w-3.5 h-3.5 text-indigo-600" />
+                <span>In</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleExportExcel}
-                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
-                title="Xuất file Excel"
+                className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition flex items-center justify-center gap-1 shadow-xs"
               >
-                <FileSpreadsheet className="w-4 h-4" />
-                <span>Xuất Excel</span>
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Excel</span>
               </button>
 
               {auditDetail.status === 'IN_PROGRESS' && hasPermission('audit.close') && (
                 <button
                   type="button"
                   onClick={() => setCompleteModalOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-[#190072] hover:bg-[#120055] text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-[#190072]/20"
+                  className="flex-1 py-1.5 rounded-lg bg-[#190072] hover:bg-[#120055] text-white font-semibold text-xs transition flex items-center justify-center gap-1 shadow-xs"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Chốt kiểm kê</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Chốt</span>
                 </button>
               )}
             </div>
           </div>
 
           {/* Real-time KPI Stats of this Audit */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <div className="text-[11px] font-semibold text-slate-500">Sổ sách hệ thống</div>
-              <div className="text-xl font-black text-slate-800 mt-0.5">
-                {detailKPIs.totalSys} <span className="text-xs font-normal text-slate-400">túi</span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate">Sổ sách</div>
+              <div className="text-lg sm:text-xl font-black text-slate-800 mt-0.5">
+                {detailKPIs.totalSys} <span className="text-[10px] sm:text-xs font-normal text-slate-400">túi</span>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-              <div className="text-[11px] font-semibold text-slate-500">Thực tế đếm được</div>
-              <div className="text-xl font-black text-slate-900 mt-0.5">
-                {detailKPIs.totalAct} <span className="text-xs font-normal text-slate-400">túi</span>
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 truncate">Thực tế</div>
+              <div className="text-lg sm:text-xl font-black text-slate-900 mt-0.5">
+                {detailKPIs.totalAct} <span className="text-[10px] sm:text-xs font-normal text-slate-400">túi</span>
               </div>
             </div>
 
-            <div className={`p-3.5 rounded-2xl border shadow-xs ${
+            <div className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border shadow-xs ${
               detailKPIs.totalDiff === 0
                 ? 'bg-emerald-50/50 border-emerald-200'
                 : detailKPIs.totalDiff > 0
                 ? 'bg-amber-50/50 border-amber-200'
                 : 'bg-rose-50/50 border-rose-200'
             }`}>
-              <div className="text-[11px] font-semibold text-slate-700">Chênh lệch tổng</div>
-              <div className={`text-xl font-black mt-0.5 ${
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 truncate">Chênh lệch</div>
+              <div className={`text-lg sm:text-xl font-black mt-0.5 ${
                 detailKPIs.totalDiff === 0
                   ? 'text-emerald-700'
                   : detailKPIs.totalDiff > 0
@@ -1201,62 +1368,59 @@ export default function InventoryAuditView() {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white border border-emerald-200 shadow-xs">
-              <div className="text-[11px] font-semibold text-emerald-700">Mục khớp 100%</div>
-              <div className="text-xl font-black text-emerald-800 mt-0.5">
-                {detailKPIs.matched} <span className="text-xs font-normal text-emerald-600">mục</span>
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-emerald-200 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 truncate">Khớp 100%</div>
+              <div className="text-lg sm:text-xl font-black text-emerald-800 mt-0.5">
+                {detailKPIs.matched} <span className="text-[10px] sm:text-xs font-normal text-emerald-600">mục</span>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white border border-rose-200 shadow-xs">
-              <div className="text-[11px] font-semibold text-rose-700">Mục chênh lệch</div>
-              <div className="text-xl font-black text-rose-800 mt-0.5">
-                {detailKPIs.excess + detailKPIs.deficit} <span className="text-xs font-normal text-rose-600">mục</span>
-              </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
-                Thừa: {detailKPIs.excess} • Thiếu: {detailKPIs.deficit}
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-rose-200 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-rose-700 truncate">Lệch thừa/thiếu</div>
+              <div className="text-lg sm:text-xl font-black text-rose-800 mt-0.5">
+                {detailKPIs.excess + detailKPIs.deficit} <span className="text-[10px] sm:text-xs font-normal text-rose-600">mục</span>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white border border-indigo-200 shadow-xs">
-              <div className="text-[11px] font-semibold text-indigo-700 flex items-center justify-between">
-                <span>Tiến độ kiểm đếm</span>
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white border border-indigo-200 shadow-xs">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-indigo-700 flex items-center justify-between">
+                <span>Tiến độ</span>
                 <span>{detailKPIs.pct}%</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 mt-2 overflow-hidden border border-slate-200">
+              <div className="w-full bg-slate-100 rounded-full h-2 mt-1.5 overflow-hidden border border-slate-200">
                 <div
-                  className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                  className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${detailKPIs.pct}%` }}
                 />
               </div>
-              <div className="text-[10px] text-slate-500 mt-1">
-                Chưa đếm: {detailKPIs.uncounted} mục
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                Chưa đếm: {detailKPIs.uncounted}
               </div>
             </div>
           </div>
 
           {/* Thanh Nhập / Quét mã túi máu thời gian thực (KHI KỲ ĐANG MỞ) */}
           {auditDetail.status === 'IN_PROGRESS' && hasPermission('audit.execute') && (
-            <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 shadow-xs space-y-3">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-indigo-50/60 border border-indigo-200 shadow-xs space-y-2.5">
               <div className="flex items-center justify-between text-xs font-bold text-indigo-950">
-                <span className="flex items-center gap-1.5">
-                  <Barcode className="w-4 h-4 text-indigo-600" />
-                  Quét hoặc Nhập mã túi máu để ghi nhận kiểm đếm thực tế
+                <span className="flex items-center gap-1.5 truncate">
+                  <Barcode className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>Quét/Nhập mã túi máu để kiểm đếm</span>
                 </span>
-                <span className="text-[11px] font-normal text-slate-500">
-                  Nhập mã túi máu rồi bấm <strong>Enter</strong> để tăng số lượng thực tế +1
+                <span className="text-[11px] font-normal text-slate-500 hidden sm:inline">
+                  Bấm <strong>Enter</strong> để tăng SL thực tế +1
                 </span>
               </div>
 
-              <form onSubmit={handleScanSubmit} className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                <div className="flex-1 relative min-w-[200px]">
+              <form onSubmit={handleScanSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex-1 relative">
                   <input
                     ref={scanInputRef}
                     type="text"
                     value={scanCode}
                     onChange={(e) => setScanCode(e.target.value.toUpperCase())}
                     placeholder="Nhập hoặc quét mã túi máu..."
-                    className="w-full pl-3 pr-8 py-2.5 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-bold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
+                    className="w-full pl-3 pr-8 py-2 sm:py-2.5 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-bold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs placeholder:normal-case placeholder:font-normal placeholder:font-sans placeholder:text-slate-400"
                   />
                   {scanCode && (
                     <button
@@ -1269,43 +1433,45 @@ export default function InventoryAuditView() {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setScannerOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-xs transition flex items-center gap-1.5 whitespace-nowrap shrink-0 active:scale-95"
-                  title="Mở Camera quét mã túi máu liên tục"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>Quét Camera</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setScannerOpen(true)}
+                    className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95"
+                    title="Mở Camera quét mã túi máu liên tục"
+                  >
+                    <Camera className="w-4 h-4" />
+                    <span>Camera</span>
+                  </button>
 
-                <button
-                  type="submit"
-                  disabled={!scanCode.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50 shrink-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Đếm túi này (Enter)</span>
-                </button>
+                  <button
+                    type="submit"
+                    disabled={!scanCode.trim()}
+                    className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-1.5 whitespace-nowrap disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Đếm túi (+1)</span>
+                  </button>
+                </div>
 
                 {/* Nút thao tác nhanh hàng loạt */}
-                <div className="flex items-center gap-1.5 shrink-0 pl-2 border-l border-indigo-200">
+                <div className="flex items-center gap-1.5 pt-1 sm:pt-0 sm:pl-2 sm:border-l sm:border-indigo-200">
                   <button
                     type="button"
                     onClick={() => handleBulkAction('MATCH_ALL_REMAINING')}
-                    className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 text-xs font-semibold shadow-xs transition"
+                    className="flex-1 sm:flex-initial px-2.5 py-1.5 sm:py-2 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 text-[11px] sm:text-xs font-semibold shadow-xs transition text-center"
                     title="Đặt tất cả mục chưa kiểm = số lượng sổ sách"
                   >
-                    Khớp các mục còn lại
+                    Khớp mục còn lại
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleBulkAction('SET_UNCOUNTED_TO_ZERO')}
-                    className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-rose-700 border border-rose-200 text-xs font-semibold shadow-xs transition"
+                    className="flex-1 sm:flex-initial px-2.5 py-1.5 sm:py-2 rounded-xl bg-white hover:bg-slate-50 text-rose-700 border border-rose-200 text-[11px] sm:text-xs font-semibold shadow-xs transition text-center"
                     title="Đặt tất cả mục chưa kiểm = 0 (coi như thiếu)"
                   >
-                    Chốt thiếu mục chưa đếm
+                    Chốt thiếu mục còn lại
                   </button>
                 </div>
               </form>
@@ -1313,7 +1479,7 @@ export default function InventoryAuditView() {
               {/* Thông báo quét */}
               {scanMessage && (
                 <div
-                  className={`p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between animate-in fade-in duration-150 ${
+                  className={`p-2 rounded-xl text-xs font-semibold flex items-center justify-between animate-in fade-in duration-150 ${
                     scanMessage.type === 'error'
                       ? 'bg-rose-100/80 text-rose-800 border border-rose-300'
                       : 'bg-emerald-100/80 text-emerald-800 border border-emerald-300'
@@ -1333,15 +1499,15 @@ export default function InventoryAuditView() {
           )}
 
           {/* Bảng chi tiết danh mục túi máu của kỳ kiểm kê */}
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs space-y-3 p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs space-y-3 p-3 sm:p-4">
             {/* Filter Tabs & Search trong chi tiết */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
               {/* Filter Tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('ALL')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition shrink-0 ${
                     itemStatusFilter === 'ALL'
                       ? 'bg-[#190072] text-white shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1353,57 +1519,57 @@ export default function InventoryAuditView() {
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('MATCHED')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1 ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-1 shrink-0 ${
                     itemStatusFilter === 'MATCHED'
                       ? 'bg-emerald-700 text-white shadow-xs'
                       : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                   }`}
                 >
                   <Check className="w-3 h-3" />
-                  Khớp ({detailKPIs.matched})
+                  <span>Khớp ({detailKPIs.matched})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('DIFF')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1 ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-1 shrink-0 ${
                     itemStatusFilter === 'DIFF'
                       ? 'bg-rose-700 text-white shadow-xs'
                       : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
                   }`}
                 >
                   <AlertTriangle className="w-3 h-3" />
-                  Lệch ({detailKPIs.excess + detailKPIs.deficit})
+                  <span>Lệch ({detailKPIs.excess + detailKPIs.deficit})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('EXCESS')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-1 shrink-0 ${
                     itemStatusFilter === 'EXCESS'
                       ? 'bg-amber-600 text-white shadow-xs'
                       : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
                   }`}
                 >
-                  Thừa ({detailKPIs.excess})
+                  <span>Thừa ({detailKPIs.excess})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('DEFICIT')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition flex items-center gap-1 shrink-0 ${
                     itemStatusFilter === 'DEFICIT'
                       ? 'bg-rose-600 text-white shadow-xs'
                       : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
                   }`}
                 >
-                  Thiếu ({detailKPIs.deficit})
+                  <span>Thiếu ({detailKPIs.deficit})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setItemStatusFilter('UNCOUNTED')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition shrink-0 ${
                     itemStatusFilter === 'UNCOUNTED'
                       ? 'bg-slate-700 text-white shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1418,7 +1584,7 @@ export default function InventoryAuditView() {
                 <select
                   value={itemBloodGroupFilter}
                   onChange={(e) => setItemBloodGroupFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-medium outline-none"
+                  className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-medium outline-none shrink-0"
                 >
                   <option value="ALL">Tất cả nhóm</option>
                   <option value="O">Nhóm O</option>
@@ -1427,7 +1593,7 @@ export default function InventoryAuditView() {
                   <option value="AB">Nhóm AB</option>
                 </select>
 
-                <div className="relative w-48 sm:w-56">
+                <div className="relative flex-1 sm:w-52">
                   <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
@@ -1440,8 +1606,146 @@ export default function InventoryAuditView() {
               </div>
             </div>
 
-            {/* Bảng chi tiết */}
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+            {/* --- MOBILE AUDIT ITEMS CARD LIST (md:hidden) --- */}
+            <div className="md:hidden divide-y-2 divide-slate-200">
+              {loadingDetail ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-500" />
+                  Đang tải danh sách túi máu...
+                </div>
+              ) : filteredItems.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs italic">
+                  Không tìm thấy túi máu nào theo bộ lọc này.
+                </div>
+              ) : (
+                filteredItems.map((item, idx) => {
+                  const diff = Number(item.diff_qty) || 0;
+                  const isUncounted = item.status === 'UNCOUNTED';
+                  const isOdd = idx % 2 === 1;
+
+                  let cardBg = isOdd ? 'bg-slate-100/90 border-l-4 border-l-slate-400' : 'bg-white border-l-4 border-l-[#190072]';
+                  if (diff > 0) {
+                    cardBg = isOdd ? 'bg-amber-100/60 border-l-4 border-l-amber-500' : 'bg-amber-50/60 border-l-4 border-l-amber-500';
+                  } else if (diff < 0) {
+                    cardBg = isOdd ? 'bg-rose-100/60 border-l-4 border-l-rose-500' : 'bg-rose-50/60 border-l-4 border-l-rose-500';
+                  } else if (item.status === 'MATCHED') {
+                    cardBg = isOdd ? 'bg-emerald-100/40 border-l-4 border-l-emerald-600' : 'bg-emerald-50/40 border-l-4 border-l-emerald-600';
+                  }
+
+                  return (
+                    <div key={item.id} className={`p-3 space-y-2 ${cardBg}`}>
+                      {/* Dòng 1: Mã túi máu + Nhóm + Tên chế phẩm */}
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-mono font-bold text-xs text-[#C5299B]">
+                            {item.blood_code || '---'}
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-bold text-[10px] shrink-0">
+                            {item.blood_group}{item.rh_factor}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-800 truncate">
+                            {item.product_name}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 shrink-0">
+                          ({item.volume_name})
+                        </span>
+                      </div>
+
+                      {/* Dòng 2: HSD + Sổ sách vs Thực tế */}
+                      <div className="flex items-center justify-between gap-2 text-xs bg-white/80 p-2 rounded-xl border border-slate-200/80">
+                        <div className="text-[11px] text-slate-500">
+                          <span>HSD: </span>
+                          <span className="font-medium text-slate-700">{formatDate(item.expiry_date)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <span className="text-[10px] text-slate-400 block leading-tight">Sổ sách</span>
+                            <span className="font-bold text-blue-950 text-xs leading-tight">{item.system_qty}</span>
+                          </div>
+
+                          <div className="text-center">
+                            <span className="text-[10px] text-slate-400 block leading-tight">Thực tế</span>
+                            {auditDetail.status === 'IN_PROGRESS' && hasPermission('audit.execute') ? (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateItemQty(item.id, item.actual_qty, -1)}
+                                  className="w-5 h-5 rounded bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs"
+                                >
+                                  -
+                                </button>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  value={item.actual_qty}
+                                  onChange={(e) => handleSetItemQtyExact(item.id, e.target.value)}
+                                  className="w-10 py-0.5 text-center font-bold text-emerald-950 rounded border border-emerald-300 bg-white text-xs"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateItemQty(item.id, item.actual_qty, 1)}
+                                  className="w-5 h-5 rounded bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="font-bold text-emerald-950 text-xs leading-tight">
+                                {item.actual_qty}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dòng 3: Chênh lệch & Ghi chú */}
+                      <div className="flex items-center justify-between gap-2 pt-0.5">
+                        <div className="shrink-0">
+                          {isUncounted ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                              Chưa kiểm
+                            </span>
+                          ) : diff === 0 ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Khớp (0)
+                            </span>
+                          ) : diff > 0 ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              Thừa +{diff}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                              Thiếu {diff}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          {auditDetail.status === 'IN_PROGRESS' && hasPermission('audit.execute') ? (
+                            <input
+                              type="text"
+                              defaultValue={item.note || ''}
+                              onBlur={(e) => handleUpdateItemNote(item.id, e.target.value)}
+                              placeholder="Ghi chú hiện trạng..."
+                              className="w-full px-2 py-1 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 placeholder:text-slate-400"
+                            />
+                          ) : (
+                            <span className="text-slate-500 text-xs italic truncate block text-right">
+                              {item.note || '---'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* --- DESKTOP TABLE (hidden md:block) --- */}
+            <div className="hidden md:block overflow-x-auto border border-slate-200 rounded-xl">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 uppercase font-bold text-[11px]">
@@ -1612,22 +1916,21 @@ export default function InventoryAuditView() {
       {/* ========================================================================= */}
       {createDrawerOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop - KHÔNG TỰ ĐÓNG KHI BẤM RA NGOÀI VÙNG */}
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-300" />
 
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
             <div className="w-screen max-w-2xl sm:max-w-3xl xl:max-w-4xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
               {/* Header Drawer */}
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center shrink-0">
-                    <ClipboardCheck className="w-5 h-5" />
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] flex items-center justify-center shrink-0">
+                    <ClipboardCheck className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#190072]">
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-[#190072] truncate">
                       Tạo Kỳ Kiểm Kê Kho Chế Phẩm Máu
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 hidden sm:block truncate">
                       Chụp ảnh các túi máu đang còn tồn kho (số lượng &gt; 0) để đối chiếu thực tế
                     </p>
                   </div>
@@ -1635,7 +1938,7 @@ export default function InventoryAuditView() {
                 <button
                   type="button"
                   onClick={() => setCreateDrawerOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
+                  className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
                   title="Đóng"
                 >
                   <X className="w-5 h-5" />
@@ -1644,7 +1947,7 @@ export default function InventoryAuditView() {
 
               {/* Form Content */}
               <form onSubmit={handleCreateAudit} className="flex-1 overflow-y-auto flex flex-col justify-between">
-                <div className="p-6 space-y-5">
+                <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
                   {createError && (
                     <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0" />
@@ -1652,7 +1955,7 @@ export default function InventoryAuditView() {
                     </div>
                   )}
 
-                  {/* 1. Tên kỳ kiểm kê: Mặc định hiển thị tháng/năm hiện tại, cho phép chỉnh sửa */}
+                  {/* 1. Tên kỳ kiểm kê */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Tên kỳ kiểm kê <span className="text-rose-500 font-bold">*</span>
@@ -1683,182 +1986,6 @@ export default function InventoryAuditView() {
                       className="px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs w-full bg-white"
                     />
                   </div>
-
-                  {/* 3. TẠM THỜI ẨN MỤC THÀNH PHẦN BAN KIỂM KÊ THEO YÊU CẦU */}
-                  {false && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Thành phần Ban kiểm kê</span>
-                        <span className="text-rose-500 font-bold">*</span>
-                      </label>
-                      <div className="flex items-center gap-2">
-                        {loadingUsers && (
-                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                            <RefreshCw className="w-3 h-3 animate-spin text-indigo-600" />
-                            Đang tải...
-                          </span>
-                        )}
-                        <span className="text-[11px] text-indigo-700 font-medium bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
-                          Đã chọn {selectedCommitteeUsers.length} thành viên
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Danh sách thành viên đã chọn với vai trò trong ban */}
-                    {selectedCommitteeUsers.length > 0 && (
-                      <div className="space-y-1.5 max-h-52 overflow-y-auto p-2 bg-slate-50/80 rounded-xl border border-slate-200">
-                        {selectedCommitteeUsers.map((member) => (
-                          <div
-                            key={member.id}
-                            className="flex items-center justify-between gap-2 p-2 rounded-lg bg-white border border-slate-200 text-xs shadow-2xs hover:border-slate-300 transition"
-                          >
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <select
-                                value={member.roleTitle}
-                                onChange={(e) => handleChangeCommitteeRole(member.id, e.target.value)}
-                                className="px-2 py-1 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-900 font-bold text-[11px] outline-none cursor-pointer focus:ring-1 focus:ring-indigo-500"
-                              >
-                                <option value="Trưởng ban">Trưởng ban</option>
-                                <option value="Thư ký">Thư ký</option>
-                                <option value="Thủ kho">Thủ kho</option>
-                                <option value="Ủy viên">Ủy viên</option>
-                              </select>
-
-                              <span className="font-semibold text-slate-800 truncate">
-                                {member.name}
-                              </span>
-
-                              {member.roleName && (
-                                <span className="text-[10px] text-slate-400 font-normal truncate">
-                                  ({member.roleName})
-                                </span>
-                              )}
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveUserFromCommittee(member.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
-                              title="Bỏ chọn thành viên này"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Khung chọn thêm thành viên từ Danh mục người dùng */}
-                    <div className="p-3 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/30 space-y-2.5">
-                      <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-950">
-                        <span>Thêm thành viên từ Danh mục người dùng:</span>
-                        {availableUsers.length === 0 && !loadingUsers && (
-                          <button
-                            type="button"
-                            onClick={fetchAvailableUsers}
-                            className="text-[11px] text-indigo-600 hover:underline flex items-center gap-1 font-normal"
-                          >
-                            <RefreshCw className="w-3 h-3" />
-                            Tải lại
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Dropdown SearchableSelect để tìm và chọn nhanh bất kỳ ai */}
-                      <div>
-                        <SearchableSelect
-                          value=""
-                          onChange={(userId) => {
-                            const found = availableUsers.find((u) => String(u.id) === String(userId));
-                            if (found) handleAddUserToCommittee(found);
-                          }}
-                          options={availableUsers
-                            .filter((u) => !selectedCommitteeUsers.some((mem) => mem.id === u.id))
-                            .map((u) => ({
-                              value: u.id,
-                              label: u.full_name,
-                              subLabel: u.role_name || u.username,
-                            }))}
-                          placeholder={
-                            loadingUsers
-                              ? 'Đang tải danh mục người dùng...'
-                              : availableUsers.length === 0
-                              ? 'Không có người dùng nào để chọn'
-                              : '-- Bấm vào đây để tìm hoặc chọn nhân viên --'
-                          }
-                          disabled={loadingUsers || availableUsers.length === 0}
-                          className="w-full text-xs"
-                        />
-                      </div>
-
-                      {/* Danh sách người dùng dưới dạng huy hiệu (chips) để click nhanh */}
-                      {availableUsers.length > 0 && (
-                        <div className="pt-1">
-                          <div className="text-[10px] text-slate-500 mb-1.5 font-medium">
-                            Hoặc bấm nhanh từ danh sách nhân viên:
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
-                            {availableUsers
-                              .filter((u) => !selectedCommitteeUsers.some((mem) => mem.id === u.id))
-                              .map((u) => (
-                                <button
-                                  key={u.id}
-                                  type="button"
-                                  onClick={() => handleAddUserToCommittee(u)}
-                                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-50 text-indigo-900 border border-slate-200 hover:border-indigo-300 text-[11px] font-medium transition flex items-center gap-1 shadow-2xs"
-                                  title="Bấm để thêm vào Ban kiểm kê"
-                                >
-                                  <Plus className="w-3 h-3 text-indigo-600" />
-                                  <span>{u.full_name}</span>
-                                  {u.role_name && (
-                                    <span className="text-[10px] text-slate-400">({u.role_name})</span>
-                                  )}
-                                </button>
-                              ))}
-
-                            {availableUsers.every((u) =>
-                              selectedCommitteeUsers.some((mem) => mem.id === u.id)
-                            ) && (
-                              <span className="text-xs text-slate-400 italic py-1">
-                                Đã chọn tất cả nhân viên trong danh mục.
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Nếu chưa tải được */}
-                      {availableUsers.length === 0 && !loadingUsers && (
-                        <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 flex items-center justify-between">
-                          <span>Chưa tải được danh sách người dùng.</span>
-                          <button
-                            type="button"
-                            onClick={fetchAvailableUsers}
-                            className="px-2 py-1 rounded bg-white text-indigo-600 font-semibold border border-indigo-200 hover:bg-indigo-50 transition"
-                          >
-                            Tải lại
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Ô ghi chú thêm thành viên ngoài hệ thống (nếu có) */}
-                    <div>
-                      <input
-                        type="text"
-                        value={newAuditCommittee}
-                        onChange={(e) => setNewAuditCommittee(e.target.value)}
-                        placeholder="Thêm thành viên khác ngoài hệ thống (nếu có, VD: Thanh tra Bệnh viện, Đại diện Ban Giám đốc...)"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none focus:border-indigo-600 placeholder:text-slate-400 bg-white"
-                      />
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        Có thể bổ sung thêm các thành viên ngoài danh mục nhân viên vào ô trên.
-                      </p>
-                    </div>
-                  </div>
-                  )}
 
                   {/* 4. Chế độ khởi tạo số lượng thực tế */}
                   <div>
@@ -1927,19 +2054,19 @@ export default function InventoryAuditView() {
                   </div>
                 </div>
 
-                {/* Footer Drawer: Hủy bỏ nằm kế bên Bắt đầu kiểm kê */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+                {/* Footer Drawer */}
+                <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
                   <button
                     type="button"
                     onClick={() => setCreateDrawerOpen(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                    className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
                   >
                     Hủy bỏ
                   </button>
                   <button
                     type="submit"
                     disabled={creating}
-                    className="px-6 py-2.5 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-md shadow-[#C5299B]/20 flex items-center gap-2 transition disabled:opacity-50"
+                    className="px-5 sm:px-6 py-2 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-md shadow-[#C5299B]/20 flex items-center gap-2 transition disabled:opacity-50"
                   >
                     <Check className="w-4 h-4" />
                     <span>{creating ? 'Đang khởi tạo...' : 'Bắt đầu kiểm kê'}</span>

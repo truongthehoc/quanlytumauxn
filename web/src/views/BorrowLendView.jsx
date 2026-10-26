@@ -662,29 +662,29 @@ export default function BorrowLendView() {
   return (
     <div className="space-y-6">
       {/* 1. Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#fdf2fa] text-[#C5299B] flex items-center justify-center shrink-0">
             <Repeat className="w-5 h-5" />
           </div>
-          <div>
-            <h2 className="section-title text-base font-bold text-[#190072]">
-              Quản lý Mượn & Cho mượn
+          <div className="min-w-0">
+            <h2 className="section-title text-base sm:text-xl font-bold text-[#190072] tracking-tight truncate">
+              Mượn & Cho mượn
             </h2>
-            <p className="text-xs text-slate-500">
-              Theo dõi xuất cho mượn, nhập mượn và tiến độ hoàn trả chế phẩm máu ({transactions.length} phiếu)
+            <p className="text-xs text-slate-500 hidden sm:block truncate">
+              Theo dõi xuất cho mượn, nhập mượn và tiến độ hoàn trả ({transactions.length} phiếu)
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
             onClick={fetchData}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition"
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium transition"
             title="Làm mới dữ liệu"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Làm mới</span>
           </button>
 
@@ -698,7 +698,7 @@ export default function BorrowLendView() {
                   setMessage('');
                   setError('');
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-xs bg-indigo-600 hover:bg-indigo-700 text-white shrink-0"
               >
                 <ArrowUpRight className="w-4 h-4" />
                 <span>Cho mượn</span>
@@ -712,10 +712,11 @@ export default function BorrowLendView() {
                   setMessage('');
                   setError('');
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-xs bg-[#C5299B] hover:bg-[#a82083] text-white"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-xs bg-[#C5299B] hover:bg-[#a82083] text-white shrink-0"
               >
                 <ArrowDownLeft className="w-4 h-4" />
-                <span>Mượn máu</span>
+                <span className="hidden sm:inline">Mượn máu</span>
+                <span className="sm:hidden">Mượn</span>
               </button>
             </>
           )}
@@ -737,7 +738,7 @@ export default function BorrowLendView() {
       )}
 
       {/* 2. Hàng Thẻ Thống Kê Chỉ Số */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
         {/* Card 1: Tổng giao dịch */}
         <div
           onClick={() => {
@@ -745,38 +746,38 @@ export default function BorrowLendView() {
             setStatusFilter('ALL');
             setCurrentPage(1);
           }}
-          className={`group relative overflow-hidden p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#f8f6fc] via-[#f3eefb] to-[#ede7f8] ${
+          className={`group relative overflow-hidden p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#f8f6fc] via-[#f3eefb] to-[#ede7f8] ${
             typeFilter === 'ALL' && statusFilter === 'ALL'
               ? 'border-[#190072] ring-2 ring-[#190072]/20 shadow-md scale-[1.01]'
               : 'border-indigo-100/90 hover:border-indigo-300 hover:shadow-xs'
           }`}
         >
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-indigo-200/30 blur-xl pointer-events-none" />
-          <FileText className="absolute -right-3 -bottom-3 w-20 h-20 text-[#190072] opacity-[0.05] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
+          <FileText className="absolute -right-3 -bottom-3 w-16 h-16 sm:w-20 sm:h-20 text-[#190072] opacity-[0.05] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
 
-          <div className="relative z-10 flex items-center justify-between gap-2.5">
+          <div className="relative z-10 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <span className="text-[11px] font-bold text-[#190072]/70 uppercase tracking-wider block">
+              <span className="text-[10px] sm:text-[11px] font-bold text-[#190072]/70 uppercase tracking-wider block truncate">
                 Tổng giao dịch
               </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-[#190072] tracking-tight">
+              <div className="flex items-baseline gap-1 mt-0.5 sm:mt-1">
+                <span className="text-xl sm:text-3xl font-black text-[#190072] tracking-tight">
                   {counts.total}
                 </span>
-                <span className="text-xs font-medium text-[#190072]/60">phiếu</span>
+                <span className="text-[10px] sm:text-xs font-medium text-[#190072]/60">phiếu</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">
                 Mọi đợt mượn & cho mượn
               </p>
             </div>
             <div
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
+              className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
                 typeFilter === 'ALL' && statusFilter === 'ALL'
                   ? 'bg-[#190072] text-white shadow-xs'
                   : 'bg-white/80 text-[#190072] border border-[#190072]/15'
               }`}
             >
-              <Repeat className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Repeat className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
           </div>
         </div>
@@ -788,43 +789,38 @@ export default function BorrowLendView() {
             setStatusFilter('PENDING_OR_PARTIAL');
             setCurrentPage(1);
           }}
-          className={`group relative overflow-hidden p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#eff6ff] via-[#e0f2fe] to-[#dbeafe] ${
+          className={`group relative overflow-hidden p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#eff6ff] via-[#e0f2fe] to-[#dbeafe] ${
             typeFilter === 'LEND' && statusFilter === 'PENDING_OR_PARTIAL'
               ? 'border-indigo-600 ring-2 ring-indigo-600/20 shadow-md scale-[1.01]'
               : 'border-indigo-100 hover:border-indigo-300 hover:shadow-xs'
           }`}
         >
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-indigo-200/40 blur-xl pointer-events-none" />
-          <ArrowUpRight className="absolute -right-3 -bottom-3 w-20 h-20 text-indigo-600 opacity-[0.06] pointer-events-none transform rotate-6 transition-transform duration-300 group-hover:scale-110" />
+          <ArrowUpRight className="absolute -right-3 -bottom-3 w-16 h-16 sm:w-20 sm:h-20 text-indigo-600 opacity-[0.06] pointer-events-none transform rotate-6 transition-transform duration-300 group-hover:scale-110" />
 
-          <div className="relative z-10 flex items-center justify-between gap-2.5">
+          <div className="relative z-10 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider block">
+              <span className="text-[10px] sm:text-[11px] font-bold text-indigo-900 uppercase tracking-wider block truncate">
                 Đang cho mượn
               </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-indigo-700 tracking-tight">
+              <div className="flex items-baseline gap-1 mt-0.5 sm:mt-1">
+                <span className="text-xl sm:text-3xl font-black text-indigo-700 tracking-tight">
                   {counts.lendPending}
                 </span>
-                <span className="text-xs text-indigo-700/70 font-medium">phiếu</span>
-                {counts.lendPending > 0 && (
-                  <span className="text-[10px] font-bold text-indigo-800 bg-indigo-200/90 px-1.5 py-0.5 rounded-full ml-1">
-                    Chờ trả
-                  </span>
-                )}
+                <span className="text-[10px] sm:text-xs text-indigo-700/70 font-medium">phiếu</span>
               </div>
-              <p className="text-[11px] text-indigo-700/70 mt-0.5 truncate">
-                Xuất kho, chờ đơn vị bạn hoàn trả
+              <p className="text-[10px] sm:text-[11px] text-indigo-700/70 mt-0.5 truncate hidden sm:block">
+                Chờ đơn vị bạn hoàn trả
               </p>
             </div>
             <div
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
+              className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
                 typeFilter === 'LEND' && statusFilter === 'PENDING_OR_PARTIAL'
                   ? 'bg-indigo-600 text-white shadow-xs'
                   : 'bg-white/80 text-indigo-700 border border-indigo-200'
               }`}
             >
-              <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ArrowUpRight className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
           </div>
         </div>
@@ -836,43 +832,38 @@ export default function BorrowLendView() {
             setStatusFilter('PENDING_OR_PARTIAL');
             setCurrentPage(1);
           }}
-          className={`group relative overflow-hidden p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#fffbeb] via-[#fef3c7]/60 to-[#fef0bc]/70 ${
+          className={`group relative overflow-hidden p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#fffbeb] via-[#fef3c7]/60 to-[#fef0bc]/70 ${
             typeFilter === 'BORROW' && statusFilter === 'PENDING_OR_PARTIAL'
               ? 'border-amber-500 ring-2 ring-amber-500/25 shadow-md scale-[1.01]'
               : 'border-amber-200 hover:border-amber-300 hover:shadow-xs'
           }`}
         >
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-amber-300/30 blur-xl pointer-events-none" />
-          <ArrowDownLeft className="absolute -right-3 -bottom-3 w-20 h-20 text-amber-600 opacity-[0.07] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
+          <ArrowDownLeft className="absolute -right-3 -bottom-3 w-16 h-16 sm:w-20 sm:h-20 text-amber-600 opacity-[0.07] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
 
-          <div className="relative z-10 flex items-center justify-between gap-2.5">
+          <div className="relative z-10 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">
+              <span className="text-[10px] sm:text-[11px] font-bold text-amber-900 uppercase tracking-wider block truncate">
                 Đang đi mượn
               </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-amber-700 tracking-tight">
+              <div className="flex items-baseline gap-1 mt-0.5 sm:mt-1">
+                <span className="text-xl sm:text-3xl font-black text-amber-700 tracking-tight">
                   {counts.borrowPending}
                 </span>
-                <span className="text-xs text-amber-700/70 font-medium">phiếu</span>
-                {counts.borrowPending > 0 && (
-                  <span className="text-[10px] font-bold text-amber-800 bg-amber-200/90 px-1.5 py-0.5 rounded-full ml-1">
-                    Cần trả
-                  </span>
-                )}
+                <span className="text-[10px] sm:text-xs text-amber-700/70 font-medium">phiếu</span>
               </div>
-              <p className="text-[11px] text-amber-800/70 mt-0.5 truncate">
-                Mượn về kho, cần trả lại đối tác
+              <p className="text-[10px] sm:text-[11px] text-amber-800/70 mt-0.5 truncate hidden sm:block">
+                Cần trả lại đối tác
               </p>
             </div>
             <div
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
+              className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
                 typeFilter === 'BORROW' && statusFilter === 'PENDING_OR_PARTIAL'
                   ? 'bg-amber-500 text-white shadow-xs'
                   : 'bg-white/80 text-amber-700 border border-amber-200'
               }`}
             >
-              <ArrowDownLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ArrowDownLeft className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
           </div>
         </div>
@@ -884,38 +875,38 @@ export default function BorrowLendView() {
             setStatusFilter('COMPLETED');
             setCurrentPage(1);
           }}
-          className={`group relative overflow-hidden p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#ecfdf5] via-[#d1fae5]/60 to-[#a7f3d0]/40 ${
+          className={`group relative overflow-hidden p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer bg-gradient-to-br from-[#ecfdf5] via-[#d1fae5]/60 to-[#a7f3d0]/40 ${
             statusFilter === 'COMPLETED'
               ? 'border-emerald-600 ring-2 ring-emerald-600/20 shadow-md scale-[1.01]'
               : 'border-emerald-200 hover:border-emerald-300 hover:shadow-xs'
           }`}
         >
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-emerald-200/40 blur-xl pointer-events-none" />
-          <CheckCircle2 className="absolute -right-3 -bottom-3 w-20 h-20 text-emerald-600 opacity-[0.06] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
+          <CheckCircle2 className="absolute -right-3 -bottom-3 w-16 h-16 sm:w-20 sm:h-20 text-emerald-600 opacity-[0.06] pointer-events-none transform -rotate-12 transition-transform duration-300 group-hover:scale-110" />
 
-          <div className="relative z-10 flex items-center justify-between gap-2.5">
+          <div className="relative z-10 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block">
+              <span className="text-[10px] sm:text-[11px] font-bold text-emerald-900 uppercase tracking-wider block truncate">
                 Đã trả đủ
               </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">
+              <div className="flex items-baseline gap-1 mt-0.5 sm:mt-1">
+                <span className="text-xl sm:text-3xl font-black text-emerald-700 tracking-tight">
                   {counts.completed}
                 </span>
-                <span className="text-xs text-emerald-700/70 font-medium">phiếu</span>
+                <span className="text-[10px] sm:text-xs text-emerald-700/70 font-medium">phiếu</span>
               </div>
-              <p className="text-[11px] text-emerald-700/70 mt-0.5 truncate">
-                Đã tất toán toàn bộ lượng máu
+              <p className="text-[10px] sm:text-[11px] text-emerald-700/70 mt-0.5 truncate hidden sm:block">
+                Đã tất toán toàn bộ
               </p>
             </div>
             <div
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
+              className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${
                 statusFilter === 'COMPLETED'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-white/80 text-emerald-700 border border-emerald-200'
               }`}
             >
-              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+              <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
           </div>
         </div>
@@ -924,7 +915,7 @@ export default function BorrowLendView() {
       {/* 3. Bảng Danh Sách Phiếu & Bộ Lọc */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Thanh Tab trạng thái & Tìm kiếm */}
-        <div className="px-6 py-4 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="p-3 sm:px-6 sm:py-4 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 lg:pb-0">
             <button
               type="button"
@@ -932,7 +923,7 @@ export default function BorrowLendView() {
                 setStatusFilter('ALL');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition whitespace-nowrap shrink-0 ${
                 statusFilter === 'ALL'
                   ? 'bg-[#190072] text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -946,14 +937,15 @@ export default function BorrowLendView() {
                 setStatusFilter('PENDING');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 statusFilter === 'PENDING'
                   ? 'bg-amber-500 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>Chưa trả ({counts.pending})</span>
+              <span>Chưa trả</span>
+              <span className="font-bold">({counts.pending})</span>
             </button>
             <button
               type="button"
@@ -961,14 +953,15 @@ export default function BorrowLendView() {
                 setStatusFilter('PARTIAL');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 statusFilter === 'PARTIAL'
                   ? 'bg-sky-600 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Trả một phần ({counts.partial})</span>
+              <span>Một phần</span>
+              <span className="font-bold">({counts.partial})</span>
             </button>
             <button
               type="button"
@@ -976,27 +969,28 @@ export default function BorrowLendView() {
                 setStatusFilter('COMPLETED');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 statusFilter === 'COMPLETED'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Đã trả đủ ({counts.completed})</span>
+              <span>Đã trả đủ</span>
+              <span className="font-bold">({counts.completed})</span>
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             {/* Lọc theo loại phiếu */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   setTypeFilter('ALL');
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-medium transition text-center ${
                   typeFilter === 'ALL'
                     ? 'bg-white text-slate-800 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -1010,7 +1004,7 @@ export default function BorrowLendView() {
                   setTypeFilter('LEND');
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-medium transition text-center ${
                   typeFilter === 'LEND'
                     ? 'bg-white text-indigo-700 shadow-xs font-semibold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -1024,7 +1018,7 @@ export default function BorrowLendView() {
                   setTypeFilter('BORROW');
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-medium transition text-center ${
                   typeFilter === 'BORROW'
                     ? 'bg-white text-[#C5299B] shadow-xs font-semibold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -1035,7 +1029,7 @@ export default function BorrowLendView() {
             </div>
 
             {/* Ô tìm kiếm */}
-            <div className="w-full sm:w-64 relative">
+            <div className="w-full sm:w-60 relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
@@ -1051,8 +1045,175 @@ export default function BorrowLendView() {
           </div>
         </div>
 
-        {/* Bảng Danh Sách */}
-        <div className="overflow-x-auto">
+        {/* --- MOBILE CARDS LIST (md:hidden) --- */}
+        <div className="md:hidden divide-y-2 divide-slate-200">
+          {filteredTxs.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-xs">
+              <Repeat className="w-7 h-7 mx-auto text-slate-300 mb-2" />
+              Không có phiếu Mượn / Cho mượn nào khớp với bộ lọc hiện tại.
+            </div>
+          ) : (
+            filteredTxs
+              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              .map((tx, idx) => {
+                const badge = STATUS_BADGES[tx.return_status] || STATUS_BADGES.PENDING;
+                const isLend = tx.tx_type === 'LEND';
+                const overdue = isOverdue(tx.due_date, tx.return_status);
+                const isOdd = idx % 2 === 1;
+
+                let cardBg = isOdd ? 'bg-slate-100/90 border-l-4 border-l-slate-400' : 'bg-white border-l-4 border-l-[#190072]';
+                if (overdue) {
+                  cardBg = isOdd ? 'bg-rose-100/70 border-l-4 border-l-rose-500' : 'bg-rose-50/70 border-l-4 border-l-rose-500';
+                } else if (tx.return_status === 'COMPLETED') {
+                  cardBg = isOdd ? 'bg-emerald-100/40 border-l-4 border-l-emerald-600' : 'bg-emerald-50/40 border-l-4 border-l-emerald-600';
+                }
+
+                return (
+                  <div
+                    key={tx.id}
+                    onClick={() => setPrintTx(tx)}
+                    className={`p-3 space-y-2.5 transition active:scale-[0.99] cursor-pointer ${cardBg}`}
+                  >
+                    {/* Dòng 1: Mã phiếu + Loại + Trạng thái */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-mono text-xs font-bold text-[#190072]">
+                          {tx.code}
+                        </span>
+                        {isLend ? (
+                          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                            <ArrowUpRight className="w-3 h-3" />
+                            Cho mượn
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8] shrink-0">
+                            <ArrowDownLeft className="w-3 h-3" />
+                            Đi mượn
+                          </span>
+                        )}
+                      </div>
+
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${badge.badgeCls}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dotCls}`} />
+                        {badge.label}
+                      </span>
+                    </div>
+
+                    {/* Dòng 2: Đối tác + Người giao dịch + Ngày */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 bg-white/70 p-2 rounded-lg border border-slate-200/80">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 text-slate-400">
+                          <Building2 className="w-3 h-3 shrink-0" />
+                          <span className="truncate">Đơn vị:</span>
+                        </div>
+                        <div className="font-semibold text-slate-800 truncate mt-0.5">
+                          {tx.partner_name || '---'}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 text-slate-400">
+                          <User className="w-3 h-3 shrink-0" />
+                          <span className="truncate">Người nhận/mượn:</span>
+                        </div>
+                        <div className="font-medium text-slate-700 truncate mt-0.5">
+                          {tx.person_name || '---'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dòng 3: Chi tiết chế phẩm & Thanh tiến độ hoàn trả */}
+                    <div className="bg-slate-50/90 rounded-xl p-2 border border-slate-200 text-xs space-y-1.5">
+                      {(tx.items || []).map((it, itemIdx) => {
+                        const pct = it.quantity > 0 ? Math.min(100, Math.round((it.returned_quantity / it.quantity) * 100)) : 0;
+                        return (
+                          <div
+                            key={it.id || itemIdx}
+                            className={`p-1.5 rounded ${itemIdx % 2 === 0 ? 'bg-white' : 'bg-slate-100/90'}`}
+                          >
+                            <div className="flex items-center justify-between gap-1">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="px-1.5 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[10px]">
+                                  {it.blood_group}{it.rh_factor}
+                                </span>
+                                <span className="truncate font-medium text-slate-700">
+                                  {it.product_name}
+                                </span>
+                                <span className="text-slate-400 text-[10px] shrink-0">
+                                  ({it.volume_name || '250ml'})
+                                </span>
+                              </div>
+                              <span className="font-bold text-xs text-slate-700 shrink-0">
+                                {it.returned_quantity}/{it.quantity}
+                              </span>
+                            </div>
+
+                            {/* Thanh tiến độ */}
+                            <div className="w-full bg-slate-200/80 rounded-full h-1 mt-1 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-300 ${
+                                  pct >= 100 ? 'bg-emerald-500' : pct > 0 ? 'bg-sky-500' : 'bg-slate-300'
+                                }`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dòng 4: Hạn trả + Tiến độ tổng + Nút thao tác */}
+                    <div
+                      className="flex items-center justify-between pt-1 border-t border-slate-200"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-1.5 text-xs">
+                        {tx.due_date ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-slate-400 text-[11px]">Hạn:</span>
+                            <span className={`font-semibold text-xs ${overdue ? 'text-rose-600 font-bold' : 'text-slate-700'}`}>
+                              {formatDate(tx.due_date)}
+                            </span>
+                            {overdue && (
+                              <span className="text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1 py-0.2 rounded">
+                                Quá hạn
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">Không hẹn ngày</span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPrintTx(tx)}
+                          className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center gap-1 shadow-xs"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Chi tiết</span>
+                        </button>
+
+                        {tx.return_status !== 'COMPLETED' && hasPermission('borrow_lend.return') && (
+                          <button
+                            type="button"
+                            onClick={() => openReturnModal(tx)}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 shadow-xs"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Hoàn trả</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </div>
+
+        {/* --- DESKTOP TABLE (hidden md:block) --- */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
@@ -1274,31 +1435,31 @@ export default function BorrowLendView() {
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"
           />
 
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
             <div className="w-screen max-w-5xl sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1450px] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
               {/* Header Drawer */}
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 ${
                       drawerMode === 'LEND'
                         ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                         : 'bg-[#fdf2fa] text-[#C5299B] border border-[#f5c6e8]'
                     }`}
                   >
                     {drawerMode === 'LEND' ? (
-                      <ArrowUpRight className="w-5 h-5" />
+                      <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
                     ) : (
-                      <ArrowDownLeft className="w-5 h-5" />
+                      <ArrowDownLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     )}
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#190072]">
+                  <div className="min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-[#190072] truncate">
                       {drawerMode === 'LEND'
                         ? 'Tạo phiếu Cho mượn Chế phẩm máu'
                         : 'Tạo phiếu Mượn Chế phẩm máu'}
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 hidden sm:block truncate">
                       {drawerMode === 'LEND'
                         ? 'Xuất chế phẩm máu trong kho cho đơn vị bạn mượn (trừ tồn kho)'
                         : 'Mượn chế phẩm máu từ đơn vị khác về kho lưu trữ (cộng tồn kho)'}
@@ -1308,7 +1469,7 @@ export default function BorrowLendView() {
                 <button
                   type="button"
                   onClick={() => setDrawerMode(null)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
+                  className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
                   title="Đóng"
                 >
                   <X className="w-5 h-5" />
@@ -1318,7 +1479,7 @@ export default function BorrowLendView() {
               {/* Form Content: FORM CHO MƯỢN (LEND) */}
               {drawerMode === 'LEND' && (
                 <form onSubmit={handleSubmitLend} className="flex-1 overflow-y-auto flex flex-col justify-between">
-                  <div className="p-6 space-y-5">
+                  <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
                     {formError && (
                       <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
                         <AlertCircle className="w-5 h-5 shrink-0" />
@@ -1326,8 +1487,8 @@ export default function BorrowLendView() {
                       </div>
                     )}
 
-                    {/* Thông tin đối tác & người nhận (KHÔNG BẮT BUỘC) */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    {/* Thông tin đối tác & người nhận */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 bg-slate-50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
@@ -1402,22 +1563,166 @@ export default function BorrowLendView() {
                       </div>
                     </div>
 
-                    {/* THANH NHẬP NHANH CHẾ PHẨM CHO MƯỢN (BẮT BUỘC NHẬP MÃ TÚI MÁU -> TỰ ĐỘNG LOAD THÔNG TIN) */}
-                    <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
+                    {/* THANH NHẬP NHANH CHẾ PHẨM CHO MƯỢN */}
+                    <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
                       <div className="text-xs font-bold text-indigo-950 flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
                           <Droplet className="w-4 h-4 text-indigo-600" />
-                          Nhập hoặc quét Mã túi máu trong kho để xuất cho mượn
+                          Nhập hoặc quét Mã túi máu trong kho
                         </span>
                         {selectedLendLot && (
-                          <span className="text-[11px] font-normal text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-lg border border-emerald-300">
-                            Đã tải: <strong>{selectedLendLot.product_name}</strong> [{selectedLendLot.blood_group}{selectedLendLot.rh_factor}] (Tồn khả dụng: {lendRemainingStock} {selectedLendLot.unit_name})
+                          <span className="hidden sm:inline-block text-[11px] font-normal text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-lg border border-emerald-300">
+                            Đã tải: <strong>{selectedLendLot.product_name}</strong> [{selectedLendLot.blood_group}{selectedLendLot.rh_factor}] (Tồn: {lendRemainingStock})
                           </span>
                         )}
                       </div>
 
-                      <div className="flex items-end gap-2 flex-nowrap">
-                        {/* 1. Mã túi máu (BẮT BUỘC, TỰ ĐỘNG GỢI Ý & LỌC REALTIME) */}
+                      {/* --- MOBILE QUICK ENTRY FOR LEND (md:hidden) --- */}
+                      <div className="md:hidden space-y-2.5">
+                        <div className="relative" ref={lendSuggestionsRef}>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                              <span>Mã túi máu <span className="text-rose-500 font-bold">*</span></span>
+                              {matchingLendLots.length > 0 && lendDraftBloodCode.trim() && (
+                                <span className="text-[10px] text-indigo-700 font-normal">
+                                  {matchingLendLots.length} khớp
+                                </span>
+                              )}
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScannerTarget('lend');
+                                setScannerOpen(true);
+                              }}
+                              className="text-[11px] text-[#C5299B] font-semibold flex items-center gap-1 hover:underline"
+                            >
+                              <Camera className="w-3 h-3" />
+                              <span>Camera</span>
+                            </button>
+                          </div>
+                          <div className="relative">
+                            <input
+                              ref={lendBloodCodeInputRef}
+                              type="text"
+                              value={lendDraftBloodCode}
+                              onFocus={() => {
+                                if (lendDraftBloodCode.trim()) setLendSuggestionsOpen(true);
+                              }}
+                              onChange={(e) => handleLendBloodCodeChange(e.target.value)}
+                              onKeyDown={handleLendBloodCodeKeyDown}
+                              placeholder="Nhập/quét mã túi máu"
+                              className="w-full pl-3 pr-14 py-2.5 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 shadow-xs"
+                            />
+                            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScannerTarget('lend');
+                                  setScannerOpen(true);
+                                }}
+                                className="p-1 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                              >
+                                <Camera className="w-4 h-4" />
+                              </button>
+                              {lendDraftBloodCode && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLendDraftBloodCode('');
+                                    setLendDraftLotId('');
+                                    setLendSuggestionsOpen(false);
+                                  }}
+                                  className="text-slate-400 hover:text-slate-600 p-0.5"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Mobile suggestion dropdown */}
+                          {lendSuggestionsOpen && lendDraftBloodCode.trim() && (
+                            <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-xl border border-indigo-200 shadow-xl z-50 overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-100">
+                              {matchingLendLots.map((lot) => {
+                                const inList = lendList.find((it) => Number(it.lot_id) === Number(lot.id))?.quantity || 0;
+                                const available = Math.max(0, Number(lot.quantity) - inList);
+                                return (
+                                  <button
+                                    key={lot.id}
+                                    type="button"
+                                    onClick={() => selectLendLotSuggestion(lot)}
+                                    className="w-full text-left p-2.5 hover:bg-indigo-50 text-xs flex items-center justify-between gap-2"
+                                  >
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="font-mono font-bold text-[#C5299B]">{lot.blood_code}</span>
+                                        <span className="px-1 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-bold text-[10px]">
+                                          {lot.blood_group}{lot.rh_factor}
+                                        </span>
+                                      </div>
+                                      <div className="text-slate-700 font-medium text-[11px] mt-0.5">
+                                        {lot.product_name} ({lot.volume_name})
+                                      </div>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                      <div className="text-emerald-700 font-bold text-xs">Tồn: {available}</div>
+                                      <div className="text-[10px] text-slate-400">HSD: {formatDate(lot.expiry_date)}</div>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {selectedLendLot && (
+                          <div className="p-2.5 rounded-xl bg-white border border-indigo-200 text-xs space-y-1">
+                            <div className="flex items-center justify-between font-semibold text-slate-800">
+                              <span>{selectedLendLot.product_name}</span>
+                              <span className="px-1.5 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-bold text-[10px]">
+                                Nhóm {selectedLendLot.blood_group} ({selectedLendLot.rh_factor})
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[11px] text-slate-500">
+                              <span>Thể tích: {selectedLendLot.volume_name}</span>
+                              <span>HSD: {formatDate(selectedLendLot.expiry_date)}</span>
+                              <span className="font-bold text-emerald-700">Tồn: {lendRemainingStock}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2">
+                          <div className="w-24 shrink-0">
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Số lượng
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={lendRemainingStock || 999}
+                              value={lendDraftQty}
+                              onChange={(e) => setLendDraftQty(e.target.value)}
+                              className="w-full px-2 py-2 rounded-xl border border-indigo-200 bg-white text-xs font-bold text-center text-slate-800 outline-none focus:border-indigo-600"
+                            />
+                          </div>
+
+                          <div className="flex-1 pt-4">
+                            <button
+                              type="button"
+                              onClick={handleAddLendClick}
+                              className="w-full h-[38px] px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-1.5"
+                            >
+                              <Plus className="w-4 h-4" />
+                              <span>Thêm vào danh sách</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* --- DESKTOP QUICK ENTRY FOR LEND (hidden md:flex) --- */}
+                      <div className="hidden md:flex items-end gap-2 flex-nowrap">
+                        {/* 1. Mã túi máu */}
                         <div className="w-[220px] shrink-0 relative z-30" ref={lendSuggestionsRef}>
                           <div className="flex items-center justify-between mb-1">
                             <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
@@ -1444,7 +1749,6 @@ export default function BorrowLendView() {
                             <input
                               ref={lendBloodCodeInputRef}
                               type="text"
-                              autoFocus
                               value={lendDraftBloodCode}
                               onFocus={() => {
                                 if (lendDraftBloodCode.trim()) setLendSuggestionsOpen(true);
@@ -1484,7 +1788,7 @@ export default function BorrowLendView() {
                             </div>
                           </div>
 
-                          {/* DROPDOWN GỢI Ý TÚI MÁU KHỚP MÃ REALTIME - CÁC CỘT THẲNG HÀNG DỄ SO SÁNH */}
+                          {/* DROPDOWN GỢI Ý TÚI MÁU KHỚP MÃ REALTIME */}
                           {lendSuggestionsOpen && lendDraftBloodCode.trim() && (
                             <div className="absolute left-0 top-full mt-1.5 w-[760px] max-w-[calc(100vw-3rem)] bg-white rounded-2xl border border-indigo-200 shadow-2xl z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                               <div className="px-3.5 py-2 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
@@ -1496,7 +1800,6 @@ export default function BorrowLendView() {
                                 </span>
                               </div>
 
-                              {/* Tiêu đề cột để so sánh thẳng hàng */}
                               <div className="px-3.5 py-1.5 bg-slate-50 border-b border-slate-200/80 grid grid-cols-[115px_42px_1fr_65px_100px_120px_70px] gap-2.5 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
                                 <span>Mã túi</span>
                                 <span className="text-center">Nhóm</span>
@@ -1565,7 +1868,7 @@ export default function BorrowLendView() {
                           )}
                         </div>
 
-                        {/* 2. Loại chế phẩm máu trong kho (TỰ ĐỘNG TẢI, KHÔNG CHO CHỌN) */}
+                        {/* 2. Loại chế phẩm máu trong kho */}
                         <div className="flex-1 min-w-[180px]">
                           <label className="block text-xs font-semibold text-slate-700 mb-1">
                             Loại chế phẩm máu
@@ -1580,7 +1883,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 3. Nhóm ABO (tự load) */}
+                        {/* 3. Nhóm ABO */}
                         <div className="w-[75px] shrink-0">
                           <label className="block text-xs text-slate-600 mb-1 text-center">
                             Nhóm ABO
@@ -1595,7 +1898,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 4. Hệ Rh (tự load) */}
+                        {/* 4. Hệ Rh */}
                         <div className="w-[65px] shrink-0">
                           <label className="block text-xs text-slate-600 mb-1 text-center">
                             Hệ Rh
@@ -1610,7 +1913,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 5. Thể tích (tự load) */}
+                        {/* 5. Thể tích */}
                         <div className="w-[80px] shrink-0">
                           <label className="block text-xs text-slate-600 mb-1 text-center">
                             Thể tích
@@ -1625,7 +1928,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 6. Hạn sử dụng (tự load) */}
+                        {/* 6. Hạn sử dụng */}
                         <div className="w-[95px] shrink-0">
                           <label className="block text-xs text-slate-600 mb-1 text-center">
                             Hạn dùng
@@ -1662,7 +1965,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 8. Nút Thêm vào danh sách (+) - Đặt sang phải cùng dòng */}
+                        {/* 8. Nút Thêm vào danh sách */}
                         <div className="shrink-0">
                           <button
                             type="button"
@@ -1678,65 +1981,54 @@ export default function BorrowLendView() {
                     </div>
 
                     {/* BẢNG DANH SÁCH CHẾ PHẨM CHO MƯỢN ĐÃ THÊM */}
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                      <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                    <div className="border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden shadow-xs">
+                      <div className="bg-slate-100 p-2.5 sm:px-4 sm:py-3 border-b border-slate-200 flex items-center justify-between">
                         <span className="text-xs font-bold text-[#190072] uppercase tracking-wide">
-                          Danh sách chế phẩm xuất cho mượn ({lendList.length} mục)
+                          Danh sách xuất ({lendList.length})
                         </span>
                         <span className="text-xs font-bold text-indigo-700">
-                          Tổng số lượng: {lendList.reduce((sum, it) => sum + Number(it.quantity || 0), 0)} túi/bịch
+                          Tổng: {lendList.reduce((sum, it) => sum + Number(it.quantity || 0), 0)} túi/bịch
                         </span>
                       </div>
 
                       {lendList.length === 0 ? (
-                        <div className="py-10 text-center text-slate-400 text-xs">
-                          Chưa có chế phẩm nào. Hãy nhập Mã túi máu hoặc chọn Chế phẩm ở trên rồi bấm <strong>+ Thêm</strong> hoặc <strong>Enter</strong>!
+                        <div className="py-8 text-center text-slate-400 text-xs">
+                          Chưa có chế phẩm nào được thêm vào danh sách.
                         </div>
                       ) : (
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
-                              <th className="py-2.5 px-3 text-center w-12">STT</th>
-                              <th className="py-2.5 px-3 text-left">Mã túi máu</th>
-                              <th className="py-2.5 px-3 text-left">Tên chế phẩm máu</th>
-                              <th className="py-2.5 px-3 text-center">ABO / Rh</th>
-                              <th className="py-2.5 px-3 text-center">Thể tích</th>
-                              <th className="py-2.5 px-3 text-center">Hạn dùng</th>
-                              <th className="py-2.5 px-3 text-center w-24">Số lượng</th>
-                              <th className="py-2.5 px-3 text-left">Ghi chú</th>
-                              <th className="py-2.5 px-3 text-right w-16">Xóa</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
+                        <>
+                          {/* Mobile card list inside LEND drawer */}
+                          <div className="md:hidden divide-y-2 divide-slate-200">
                             {lendList.map((it, idx) => (
-                              <tr key={it.lot_id} className="hover:bg-slate-50">
-                                <td className="py-2.5 px-3 text-center font-semibold text-slate-500">
-                                  {idx + 1}
-                                </td>
-                                <td className="py-2.5 px-3 font-mono font-semibold text-[#C5299B]">
-                                  {it.blood_code || '---'}
-                                </td>
-                                <td className="py-2.5 px-3 font-medium text-slate-900">
-                                  {it.product_name}
-                                </td>
-                                <td className="py-2.5 px-3 text-center">
-                                  <span className="px-2 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[11px]">
-                                    {it.blood_group} ({it.rh_factor})
+                              <div
+                                key={it.lot_id}
+                                className={`p-2.5 flex items-center justify-between gap-2 ${
+                                  idx % 2 === 1 ? 'bg-slate-100/90' : 'bg-white'
+                                }`}
+                              >
+                                <div className="min-w-0 space-y-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-mono text-xs font-bold text-[#C5299B]">
+                                      {it.blood_code}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[10px]">
+                                      {it.blood_group} ({it.rh_factor})
+                                    </span>
+                                    <span className="text-xs font-semibold text-slate-800">
+                                      {it.product_name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">
+                                      ({it.volume_name})
+                                    </span>
+                                  </div>
+                                  <div className="text-[11px] text-slate-500">
+                                    HSD: {formatDate(it.expiry_date)} {it.note ? `• ${it.note}` : ''}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-sm font-black text-indigo-700">
+                                    x{it.quantity}
                                   </span>
-                                </td>
-                                <td className="py-2.5 px-3 text-center text-slate-700">
-                                  {it.volume_name}
-                                </td>
-                                <td className="py-2.5 px-3 text-center text-slate-700">
-                                  {formatDate(it.expiry_date)}
-                                </td>
-                                <td className="py-2.5 px-3 text-center font-bold text-base text-indigo-700">
-                                  {it.quantity}
-                                </td>
-                                <td className="py-2.5 px-3 text-slate-600">
-                                  {it.note || '---'}
-                                </td>
-                                <td className="py-2.5 px-3 text-right">
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -1744,33 +2036,97 @@ export default function BorrowLendView() {
                                         prev.filter((item) => item.lot_id !== it.lot_id)
                                       )
                                     }
-                                    className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                                    title="Xóa khỏi danh sách"
+                                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             ))}
-                          </tbody>
-                        </table>
+                          </div>
+
+                          {/* Desktop table */}
+                          <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                  <th className="py-2.5 px-3 text-center w-12">STT</th>
+                                  <th className="py-2.5 px-3 text-left">Mã túi máu</th>
+                                  <th className="py-2.5 px-3 text-left">Tên chế phẩm máu</th>
+                                  <th className="py-2.5 px-3 text-center">ABO / Rh</th>
+                                  <th className="py-2.5 px-3 text-center">Thể tích</th>
+                                  <th className="py-2.5 px-3 text-center">Hạn dùng</th>
+                                  <th className="py-2.5 px-3 text-center w-24">Số lượng</th>
+                                  <th className="py-2.5 px-3 text-left">Ghi chú</th>
+                                  <th className="py-2.5 px-3 text-right w-16">Xóa</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {lendList.map((it, idx) => (
+                                  <tr key={it.lot_id} className="hover:bg-slate-50">
+                                    <td className="py-2.5 px-3 text-center font-semibold text-slate-500">
+                                      {idx + 1}
+                                    </td>
+                                    <td className="py-2.5 px-3 font-mono font-semibold text-[#C5299B]">
+                                      {it.blood_code || '---'}
+                                    </td>
+                                    <td className="py-2.5 px-3 font-medium text-slate-900">
+                                      {it.product_name}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center">
+                                      <span className="px-2 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[11px]">
+                                        {it.blood_group} ({it.rh_factor})
+                                      </span>
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center text-slate-700">
+                                      {it.volume_name}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center text-slate-700">
+                                      {formatDate(it.expiry_date)}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center font-bold text-base text-indigo-700">
+                                      {it.quantity}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-slate-600">
+                                      {it.note || '---'}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setLendList((prev) =>
+                                            prev.filter((item) => item.lot_id !== it.lot_id)
+                                          )
+                                        }
+                                        className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
+                                        title="Xóa khỏi danh sách"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
 
                   {/* Footer Drawer Cho mượn */}
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+                  <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
                     <button
                       type="button"
                       onClick={() => setDrawerMode(null)}
-                      className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                      className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
                     >
                       Hủy bỏ
                     </button>
                     <button
                       type="submit"
                       disabled={submitting || lendList.length === 0}
-                      className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 flex items-center gap-2 transition disabled:opacity-50"
+                      className="px-5 sm:px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 flex items-center gap-2 transition disabled:opacity-50"
                     >
                       <Check className="w-4 h-4" />
                       <span>{submitting ? 'Đang xử lý...' : 'Hoàn tất'}</span>
@@ -1782,7 +2138,7 @@ export default function BorrowLendView() {
               {/* Form Content: FORM MƯỢN MÁU (BORROW) */}
               {drawerMode === 'BORROW' && (
                 <form onSubmit={handleSubmitBorrow} className="flex-1 overflow-y-auto flex flex-col justify-between">
-                  <div className="p-6 space-y-5">
+                  <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
                     {formError && (
                       <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
                         <AlertCircle className="w-5 h-5 shrink-0" />
@@ -1790,8 +2146,8 @@ export default function BorrowLendView() {
                       </div>
                     )}
 
-                    {/* Thông tin đối tác & người nhận (KHÔNG BẮT BUỘC) */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    {/* Thông tin đối tác & người nhận */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 bg-slate-50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
@@ -1866,16 +2222,150 @@ export default function BorrowLendView() {
                       </div>
                     </div>
 
-                    {/* THANH NHẬP NHANH CHẾ PHẨM MƯỢN VỀ KHO (NHẬP MÃ / TÊN -> ENTER / +) */}
-                    <div className="p-4 rounded-2xl bg-[#fdf2fa] border border-[#f5c6e8] space-y-3">
+                    {/* THANH NHẬP NHANH CHẾ PHẨM MƯỢN VỀ KHO */}
+                    <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fdf2fa] border border-[#f5c6e8] space-y-3">
                       <div className="text-xs font-bold text-[#190072] flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
                           <Droplet className="w-4 h-4 text-[#C5299B]" />
-                          Nhập thông tin chế phẩm mượn về kho (Nhập/quét Mã hoặc chọn Tên chế phẩm)
+                          Nhập thông tin chế phẩm mượn về kho
                         </span>
                       </div>
 
-                      <div className="flex items-end gap-2">
+                      {/* Mobile entry for Borrow (md:hidden) */}
+                      <div className="md:hidden space-y-2.5">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1">
+                            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                              Mã túi máu
+                            </label>
+                            <div className="relative">
+                              <input
+                                ref={borrowBloodCodeInputRef}
+                                type="text"
+                                value={borrowDraftBloodCode}
+                                onChange={(e) => setBorrowDraftBloodCode(e.target.value.toUpperCase())}
+                                placeholder="Nhập/quét mã túi"
+                                className="w-full pl-3 pr-8 py-2 rounded-xl border border-amber-300 bg-yellow-50 text-xs font-mono font-semibold text-[#C5299B] uppercase outline-none focus:border-amber-500 shadow-xs"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScannerTarget('borrow');
+                                  setScannerOpen(true);
+                                }}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[#C5299B] hover:bg-[#C5299B]/10 rounded-lg active:scale-95 transition"
+                              >
+                                <Camera className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                            Loại chế phẩm máu
+                          </label>
+                          <SearchableSelect
+                            value={borrowDraftProductId}
+                            onChange={(val) => handleBorrowProductChange(val)}
+                            options={categories.bloodProducts.map((bp) => ({
+                              value: bp.id,
+                              label: bp.name,
+                              subLabel: bp.code,
+                            }))}
+                            placeholder="-- Chọn loại chế phẩm --"
+                            className="px-3 py-2 rounded-xl border border-[#f5c6e8] text-xs bg-white"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-600 mb-1 text-center">
+                              Nhóm ABO
+                            </label>
+                            <SearchableSelect
+                              value={borrowDraftGroup}
+                              onChange={(val) => setBorrowDraftGroup(val)}
+                              options={[
+                                { value: 'O', label: 'Nhóm O' },
+                                { value: 'A', label: 'Nhóm A' },
+                                { value: 'B', label: 'Nhóm B' },
+                                { value: 'AB', label: 'Nhóm AB' },
+                              ]}
+                              className="px-1 py-1.5 rounded-xl border border-[#f5c6e8] text-xs bg-white text-center"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-600 mb-1 text-center">
+                              Hệ Rh
+                            </label>
+                            <SearchableSelect
+                              value={borrowDraftRh}
+                              onChange={(val) => setBorrowDraftRh(val)}
+                              options={[
+                                { value: '+', label: 'Rh+' },
+                                { value: '-', label: 'Rh-' },
+                              ]}
+                              className="px-1 py-1.5 rounded-xl border border-[#f5c6e8] text-xs bg-white text-center"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-600 mb-1 text-center">
+                              Thể tích
+                            </label>
+                            <SearchableSelect
+                              value={borrowDraftVolumeId}
+                              onChange={(val) => setBorrowDraftVolumeId(val)}
+                              options={categories.volumes.map((v) => ({
+                                value: v.id,
+                                label: v.name,
+                              }))}
+                              placeholder="Thể tích"
+                              className="px-1 py-1.5 rounded-xl border border-[#f5c6e8] text-xs bg-white text-center"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 items-end">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-600 mb-1">
+                              Hạn dùng
+                            </label>
+                            <DateInput
+                              value={borrowDraftExpiry}
+                              onChange={(e) => setBorrowDraftExpiry(e.target.value)}
+                              className="px-2 py-2 rounded-xl border border-[#f5c6e8] text-xs bg-white text-center text-[11px]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-600 mb-1 text-center">
+                              Số lượng
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={borrowDraftQty}
+                              onChange={(e) => setBorrowDraftQty(e.target.value)}
+                              className="w-full px-2 py-2 rounded-xl border border-[#f5c6e8] bg-white text-xs font-bold text-center text-slate-800 outline-none focus:border-[#C5299B]"
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleAddBorrowClick}
+                          className="w-full h-[38px] px-4 rounded-xl bg-[#C5299B] hover:bg-[#a82083] text-white font-semibold text-xs shadow-xs transition flex items-center justify-center gap-1.5"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Thêm vào danh sách mượn</span>
+                        </button>
+                      </div>
+
+                      {/* Desktop entry for Borrow (hidden md:flex) */}
+                      <div className="hidden md:flex items-end gap-2">
                         {/* 1. Mã túi máu */}
                         <div className="w-[180px] shrink-0">
                           <div className="flex items-center justify-between mb-1">
@@ -2025,7 +2515,7 @@ export default function BorrowLendView() {
                           />
                         </div>
 
-                        {/* 8. Nút Thêm vào danh sách (+) - Cùng dòng bên phải */}
+                        {/* 8. Nút Thêm vào danh sách (+) */}
                         <div className="shrink-0">
                           <button
                             type="button"
@@ -2041,86 +2531,137 @@ export default function BorrowLendView() {
                     </div>
 
                     {/* BẢNG DANH SÁCH CHẾ PHẨM MƯỢN VỀ KHO ĐÃ THÊM */}
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                      <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                    <div className="border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden shadow-xs">
+                      <div className="bg-slate-100 p-2.5 sm:px-4 sm:py-3 border-b border-slate-200 flex items-center justify-between">
                         <span className="text-xs font-bold text-[#190072] uppercase tracking-wide">
-                          Danh sách chế phẩm mượn về kho ({borrowList.length} mục)
+                          Danh sách mượn ({borrowList.length})
                         </span>
                         <span className="text-xs font-bold text-[#C5299B]">
-                          Tổng số lượng: {borrowList.reduce((sum, it) => sum + Number(it.quantity || 0), 0)} túi/bịch
+                          Tổng: {borrowList.reduce((sum, it) => sum + Number(it.quantity || 0), 0)} túi/bịch
                         </span>
                       </div>
 
                       {borrowList.length === 0 ? (
-                        <div className="py-10 text-center text-slate-400 text-xs">
-                          Chưa có chế phẩm nào. Hãy nhập thông tin chế phẩm ở trên rồi bấm <strong>+ Thêm</strong> hoặc <strong>Enter</strong>!
+                        <div className="py-8 text-center text-slate-400 text-xs">
+                          Chưa có chế phẩm nào được thêm vào danh sách.
                         </div>
                       ) : (
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
-                              <th className="py-2.5 px-3 text-center w-12">STT</th>
-                              <th className="py-2.5 px-3 text-left">Mã túi máu</th>
-                              <th className="py-2.5 px-3 text-left">Tên chế phẩm máu</th>
-                              <th className="py-2.5 px-3 text-center">ABO / Rh</th>
-                              <th className="py-2.5 px-3 text-center">Thể tích</th>
-                              <th className="py-2.5 px-3 text-center">Hạn dùng</th>
-                              <th className="py-2.5 px-3 text-center w-24">Số lượng</th>
-                              <th className="py-2.5 px-3 text-left">Ghi chú</th>
-                              <th className="py-2.5 px-3 text-right w-16">Xóa</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
+                        <>
+                          {/* Mobile card list inside BORROW drawer */}
+                          <div className="md:hidden divide-y-2 divide-slate-200">
                             {borrowList.map((it, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50">
-                                <td className="py-2.5 px-3 text-center font-semibold text-slate-500">
-                                  {idx + 1}
-                                </td>
-                                <td className="py-2.5 px-3 font-mono font-semibold text-[#C5299B]">
-                                  {it.blood_code || '---'}
-                                </td>
-                                <td className="py-2.5 px-3 font-medium text-slate-900">
-                                  {it.product_name}
-                                </td>
-                                <td className="py-2.5 px-3 text-center">
-                                  <span className="px-2 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[11px]">
-                                    {it.blood_group} ({it.rh_factor})
+                              <div
+                                key={idx}
+                                className={`p-2.5 flex items-center justify-between gap-2 ${
+                                  idx % 2 === 1 ? 'bg-slate-100/90' : 'bg-white'
+                                }`}
+                              >
+                                <div className="min-w-0 space-y-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-mono text-xs font-bold text-[#C5299B]">
+                                      {it.blood_code || '---'}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[10px]">
+                                      {it.blood_group} ({it.rh_factor})
+                                    </span>
+                                    <span className="text-xs font-semibold text-slate-800">
+                                      {it.product_name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">
+                                      ({it.volume_name})
+                                    </span>
+                                  </div>
+                                  <div className="text-[11px] text-slate-500">
+                                    HSD: {formatDate(it.expiry_date)} {it.note ? `• ${it.note}` : ''}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-sm font-black text-[#C5299B]">
+                                    x{it.quantity}
                                   </span>
-                                </td>
-                                <td className="py-2.5 px-3 text-center text-slate-700">
-                                  {it.volume_name}
-                                </td>
-                                <td className="py-2.5 px-3 text-center text-slate-700">
-                                  {formatDate(it.expiry_date)}
-                                </td>
-                                <td className="py-2.5 px-3 text-center font-bold text-base text-[#C5299B]">
-                                  {it.quantity}
-                                </td>
-                                <td className="py-2.5 px-3 text-slate-600">
-                                  {it.note || '---'}
-                                </td>
-                                <td className="py-2.5 px-3 text-right">
                                   <button
                                     type="button"
                                     onClick={() =>
                                       setBorrowList((prev) => prev.filter((_, i) => i !== idx))
                                     }
-                                    className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                                    title="Xóa khỏi danh sách"
+                                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             ))}
-                          </tbody>
-                        </table>
+                          </div>
+
+                          {/* Desktop table */}
+                          <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                  <th className="py-2.5 px-3 text-center w-12">STT</th>
+                                  <th className="py-2.5 px-3 text-left">Mã túi máu</th>
+                                  <th className="py-2.5 px-3 text-left">Tên chế phẩm máu</th>
+                                  <th className="py-2.5 px-3 text-center">ABO / Rh</th>
+                                  <th className="py-2.5 px-3 text-center">Thể tích</th>
+                                  <th className="py-2.5 px-3 text-center">Hạn dùng</th>
+                                  <th className="py-2.5 px-3 text-center w-24">Số lượng</th>
+                                  <th className="py-2.5 px-3 text-left">Ghi chú</th>
+                                  <th className="py-2.5 px-3 text-right w-16">Xóa</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {borrowList.map((it, idx) => (
+                                  <tr key={idx} className="hover:bg-slate-50">
+                                    <td className="py-2.5 px-3 text-center font-semibold text-slate-500">
+                                      {idx + 1}
+                                    </td>
+                                    <td className="py-2.5 px-3 font-mono font-semibold text-[#C5299B]">
+                                      {it.blood_code || '---'}
+                                    </td>
+                                    <td className="py-2.5 px-3 font-medium text-slate-900">
+                                      {it.product_name}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center">
+                                      <span className="px-2 py-0.5 rounded bg-[#fce7f6] text-[#190072] font-semibold text-[11px]">
+                                        {it.blood_group} ({it.rh_factor})
+                                      </span>
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center text-slate-700">
+                                      {it.volume_name}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center text-slate-700">
+                                      {formatDate(it.expiry_date)}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center font-bold text-base text-[#C5299B]">
+                                      {it.quantity}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-slate-600">
+                                      {it.note || '---'}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setBorrowList((prev) => prev.filter((_, i) => i !== idx))
+                                        }
+                                        className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
+                                        title="Xóa khỏi danh sách"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
 
                   {/* Footer Drawer Mượn */}
-                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+                  <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
                     <button
                       type="button"
                       onClick={() => setDrawerMode(null)}
@@ -2149,19 +2690,19 @@ export default function BorrowLendView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <RotateCcw className="w-5 h-5" />
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h3 className="modal-title text-base font-bold text-[#190072]">
-                    Ghi nhận Hoàn trả — Phiếu {returnModalTx.code}
+                <div className="min-w-0">
+                  <h3 className="modal-title text-sm sm:text-base font-bold text-[#190072] truncate">
+                    Ghi nhận Hoàn trả — {returnModalTx.code}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5 hidden sm:block truncate">
                     {returnModalTx.tx_type === 'LEND'
-                      ? `Nhận lại chế phẩm máu từ đối tác: ${returnModalTx.partner_name || 'Đơn vị bạn'} (Cộng lại vào kho)`
-                      : `Xuất trả chế phẩm máu cho đối tác: ${returnModalTx.partner_name || 'Đơn vị cho mượn'} (Trừ tồn kho)`}
+                      ? `Nhận lại từ đối tác: ${returnModalTx.partner_name || 'Đơn vị bạn'} (Cộng lại kho)`
+                      : `Xuất trả cho đối tác: ${returnModalTx.partner_name || 'Đơn vị cho mượn'} (Trừ tồn kho)`}
                   </p>
                 </div>
               </div>
@@ -2176,8 +2717,8 @@ export default function BorrowLendView() {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleConfirmReturn} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleConfirmReturn} className="p-3.5 sm:p-6 space-y-3.5 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Người giao / nhận hoàn trả
@@ -2204,8 +2745,8 @@ export default function BorrowLendView() {
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-                <table className="w-full text-sm">
+              <div className="border border-slate-200 rounded-xl overflow-x-auto shadow-xs">
+                <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
                       <th className="py-2.5 px-3 text-left">Chế phẩm máu</th>
