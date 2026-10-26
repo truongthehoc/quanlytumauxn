@@ -1211,7 +1211,7 @@ export default function ExportView({ onNavigate }) {
         </div>
 
         {/* 1. Giao diện Thẻ dành riêng cho Màn hình Di động (md:hidden) */}
-        <div className="md:hidden divide-y divide-slate-100">
+        <div className="md:hidden divide-y-2 divide-slate-200">
           {loading ? (
             <div className="py-8 text-center text-slate-400 text-xs">
               Đang tải danh sách phiếu xuất máu...
@@ -1223,166 +1223,178 @@ export default function ExportView({ onNavigate }) {
           ) : (
             filteredHistory
               .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-              .map((tx) => (
-                <div
-                  key={tx.id}
-                  onClick={() => setPrintTx(tx)}
-                  className={`p-3.5 transition active:bg-slate-50 cursor-pointer ${
-                    tx.status === 'CANCELLED'
-                      ? 'bg-rose-50/20 opacity-80'
-                      : tx.status === 'PENDING_CANCEL'
-                      ? 'bg-amber-50/25'
-                      : 'hover:bg-[#fdf2fa]/40'
-                  }`}
-                >
-                  {/* Dòng 1: Mã phiếu + Thời gian + Trạng thái */}
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`font-mono text-xs font-bold ${
-                          tx.status === 'CANCELLED' ? 'line-through text-slate-400' : 'text-[#C5299B]'
-                        }`}>
-                          {tx.code}
-                        </span>
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-400 shrink-0" />
-                          {new Date(tx.tx_date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}{' '}
-                          {new Date(tx.tx_date).toLocaleDateString('vi-VN')}
-                        </span>
+              .map((tx, rowIdx) => {
+                const isEven = rowIdx % 2 === 0;
+                return (
+                  <div
+                    key={tx.id}
+                    onClick={() => setPrintTx(tx)}
+                    className={`p-3.5 transition active:bg-slate-200/70 cursor-pointer ${
+                      tx.status === 'CANCELLED'
+                        ? 'bg-rose-50/70 border-l-4 border-l-rose-500'
+                        : tx.status === 'PENDING_CANCEL'
+                        ? 'bg-amber-50/70 border-l-4 border-l-amber-500'
+                        : isEven
+                        ? 'bg-white border-l-4 border-l-[#C5299B]'
+                        : 'bg-slate-100/90 border-l-4 border-l-purple-400'
+                    }`}
+                  >
+                    {/* Dòng 1: Mã phiếu + Thời gian + Trạng thái */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`font-mono text-xs font-bold ${
+                            tx.status === 'CANCELLED' ? 'line-through text-slate-400' : 'text-[#C5299B]'
+                          }`}>
+                            {tx.code}
+                          </span>
+                          <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                            <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                            {new Date(tx.tx_date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}{' '}
+                            {new Date(tx.tx_date).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
                       </div>
+
+                      {/* Badge trạng thái ngắn gọn có icon */}
+                      {tx.status === 'PENDING_CANCEL' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                          <AlertTriangle className="w-3 h-3" />
+                          Chờ duyệt
+                        </span>
+                      ) : tx.status === 'CANCELLED' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-300 shrink-0">
+                          <XCircle className="w-3 h-3" />
+                          Đã hủy
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Hoàn thành
+                        </span>
+                      )}
                     </div>
 
-                    {/* Badge trạng thái ngắn gọn có icon */}
-                    {tx.status === 'PENDING_CANCEL' ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
-                        <AlertTriangle className="w-3 h-3" />
-                        Chờ duyệt
-                      </span>
-                    ) : tx.status === 'CANCELLED' ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-200 shrink-0">
-                        <XCircle className="w-3 h-3" />
-                        Đã hủy
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Hoàn thành
-                      </span>
+                    {/* Dòng 2: Khoa/Phòng nhận & Người nhận / BN */}
+                    {(tx.department_info || tx.person_name) && (
+                      <div className="flex items-center gap-3 text-xs text-slate-600 mb-2.5 flex-wrap">
+                        {tx.department_info && (
+                          <div className="flex items-center gap-1 text-slate-800 font-semibold">
+                            <Building2 className="w-3.5 h-3.5 text-[#C5299B] shrink-0" />
+                            <span className="truncate">{tx.department_info}</span>
+                          </div>
+                        )}
+                        {tx.person_name && (
+                          <div className="flex items-center gap-1 text-slate-600">
+                            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{tx.person_name}</span>
+                          </div>
+                        )}
+                      </div>
                     )}
-                  </div>
 
-                  {/* Dòng 2: Khoa/Phòng nhận & Người nhận / BN */}
-                  {(tx.department_info || tx.person_name) && (
-                    <div className="flex items-center gap-3 text-xs text-slate-600 mb-2.5 flex-wrap">
-                      {tx.department_info && (
-                        <div className="flex items-center gap-1 text-slate-800 font-medium">
-                          <Building2 className="w-3.5 h-3.5 text-[#C5299B] shrink-0" />
-                          <span className="truncate">{tx.department_info}</span>
-                        </div>
-                      )}
-                      {tx.person_name && (
-                        <div className="flex items-center gap-1 text-slate-600">
-                          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{tx.person_name}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Dòng 3: Chi tiết các túi máu xuất */}
-                  <div className="space-y-1.5 bg-slate-50/90 rounded-xl p-2.5 border border-slate-100 text-xs">
-                    {(tx.items || []).slice(0, 3).map((it, idx) => (
-                      <div key={it.id || idx} className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                          {it.blood_code && (
-                            <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-mono text-[11px] font-medium border border-blue-200 shrink-0">
-                              Mã: {it.blood_code}
+                    {/* Dòng 3: Chi tiết các túi máu xuất */}
+                    <div className="space-y-1.5 bg-slate-50/90 rounded-xl p-2 border border-slate-200 text-xs shadow-2xs">
+                      {(tx.items || []).slice(0, 3).map((it, idx) => (
+                        <div
+                          key={it.id || idx}
+                          className={`flex items-center justify-between gap-2 p-1.5 rounded-lg border ${
+                            idx % 2 === 0
+                              ? 'bg-white border-slate-200/80'
+                              : 'bg-slate-100/90 border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                            {it.blood_code && (
+                              <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-mono text-[11px] font-semibold border border-blue-200 shrink-0">
+                                Mã: {it.blood_code}
+                              </span>
+                            )}
+                            <span className="px-1.5 py-0.2 rounded bg-[#fce7f6] text-[#190072] font-bold text-[11px] shrink-0">
+                              {it.blood_group}{it.rh_factor}
                             </span>
-                          )}
-                          <span className="px-1.5 py-0.2 rounded bg-[#fce7f6] text-[#190072] font-bold text-[11px] shrink-0">
-                            {it.blood_group}{it.rh_factor}
-                          </span>
-                          <span className="text-slate-800 font-medium truncate">
-                            {it.product_name}
-                          </span>
-                          <span className="text-slate-400 text-[11px] shrink-0">
-                            ({it.volume_name})
-                          </span>
-                          <span className="text-slate-400 text-[10px] shrink-0">
-                            — HSD: {formatDate(it.expiry_date)}
-                          </span>
+                            <span className="text-slate-800 font-medium truncate">
+                              {it.product_name}
+                            </span>
+                            <span className="text-slate-400 text-[11px] shrink-0">
+                              ({it.volume_name})
+                            </span>
+                            <span className="text-slate-500 text-[10px] shrink-0">
+                              — HSD: {formatDate(it.expiry_date)}
+                            </span>
+                          </div>
+                          <div className="flex items-center shrink-0">
+                            <span className="text-[#C5299B] font-bold text-xs">x{it.quantity}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center shrink-0">
-                          <span className="text-[#C5299B] font-bold text-xs">x{it.quantity}</span>
+                      ))}
+
+                      {(tx.items || []).length > 3 && (
+                        <div className="text-[11px] text-slate-500 font-medium text-right pt-0.5">
+                          +{(tx.items || []).length - 3} chế phẩm khác (chạm để xem hết)...
                         </div>
-                      </div>
-                    ))}
-
-                    {(tx.items || []).length > 3 && (
-                      <div className="text-[11px] text-slate-500 font-medium text-right pt-0.5">
-                        +{(tx.items || []).length - 3} chế phẩm khác (chạm để xem hết)...
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Dòng 4: Tổng SL, Người lập & Nút thao tác */}
-                  <div className="flex items-center justify-between mt-2.5 pt-1 text-xs">
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <Droplet className="w-3.5 h-3.5 text-[#C5299B]" />
-                        <span>Tổng: <strong className="text-[#C5299B]">{tx.total_quantity}</strong> túi</span>
-                      </span>
-                      {tx.creator_name && (
-                        <span className="text-[11px] text-slate-400 truncate">• {tx.creator_name}</span>
                       )}
                     </div>
 
-                    {/* Các nút thao tác nhanh */}
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={() => setPrintTx(tx)}
-                        title="In phiếu / Xem chi tiết"
-                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-                      >
-                        <Printer className="w-4 h-4" />
-                      </button>
+                    {/* Dòng 4: Tổng SL, Người lập & Nút thao tác */}
+                    <div className="flex items-center justify-between mt-2.5 pt-1 text-xs">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <span className="flex items-center gap-1 font-medium">
+                          <Droplet className="w-3.5 h-3.5 text-[#C5299B]" />
+                          <span>Tổng: <strong className="text-[#C5299B] font-bold">{tx.total_quantity}</strong> túi</span>
+                        </span>
+                        {tx.creator_name && (
+                          <span className="text-[11px] text-slate-400 truncate">• {tx.creator_name}</span>
+                        )}
+                      </div>
 
-                      {tx.status === 'PENDING_CANCEL' && canApproveCancel && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setCancelApproveTarget(tx)}
-                            title="Duyệt hủy phiếu"
-                            className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setCancelRejectTarget(tx)}
-                            title="Từ chối hủy"
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 transition"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-
-                      {(!tx.status || tx.status === 'COMPLETED') && canCancelRequest && (
+                      {/* Các nút thao tác nhanh */}
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
-                          onClick={() => setCancelRequestTarget(tx)}
-                          title="Yêu cầu hủy phiếu"
-                          className="p-1.5 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                          onClick={() => setPrintTx(tx)}
+                          title="In phiếu / Xem chi tiết"
+                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 shadow-2xs transition"
                         >
-                          <RotateCcw className="w-4 h-4" />
+                          <Printer className="w-4 h-4" />
                         </button>
-                      )}
+
+                        {tx.status === 'PENDING_CANCEL' && canApproveCancel && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setCancelApproveTarget(tx)}
+                              title="Duyệt hủy phiếu"
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCancelRejectTarget(tx)}
+                              title="Từ chối hủy"
+                              className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 transition"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+
+                        {(!tx.status || tx.status === 'COMPLETED') && canCancelRequest && (
+                          <button
+                            type="button"
+                            onClick={() => setCancelRequestTarget(tx)}
+                            title="Yêu cầu hủy phiếu"
+                            className="p-1.5 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
           )}
         </div>
 
